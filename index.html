@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>My Personal Diary</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,275 +36,133 @@
         </div>
 
         <form id="diaryForm">
-            <!-- TAB: Basic & Environment -->
-            <div id="tab-basic" class="tab-panel active">
-                <div class="tab-panel-content">
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-info-circle icon-legend"></i> Basic Info</legend>
-                            <div>
-                                <label for="date">Date:</label>
-                                <div class="date-control-wrapper">
-                                    <input type="date" id="date" name="date" required>
-                                    <button type="button" id="dateDecrement" class="date-control-btn" aria-label="Previous day"><i class="fas fa-chevron-left"></i></button>
-                                    <button type="button" id="dateIncrement" class="date-control-btn" aria-label="Next day"><i class="fas fa-chevron-right"></i></button>
-                                </div>
+            <div id="tabViewPort">
+                <div id="tabPanelsSlider">
+                    <!-- TAB: Basic & Environment -->
+                    <div id="tab-basic" class="tab-panel active">
+                        <div class="tab-panel-content">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-info-circle icon-legend"></i> Basic Info</legend>
+                                    <div>
+                                        <label for="date">Date:</label>
+                                        <div class="date-control-wrapper">
+                                            <input type="date" id="date" name="date" required>
+                                            <button type="button" id="dateDecrement" class="date-control-btn" aria-label="Previous day"><i class="fas fa-chevron-left"></i></button>
+                                            <button type="button" id="dateIncrement" class="date-control-btn" aria-label="Next day"><i class="fas fa-chevron-right"></i></button>
+                                        </div>
+                                    </div>
+                                </fieldset>
                             </div>
-                        </fieldset>
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-cloud-sun icon-legend"></i> Environment</legend>
+                                    <div> <label for="temperatureC">Temperature Range (°C):</label> <input type="text" id="temperatureC" name="temperatureC" placeholder="e.g., 23-35"> </div>
+                                    <div> <label for="airQualityIndex">Air Quality Index:</label> <input type="number" id="airQualityIndex" name="airQualityIndex"> </div>
+                                    <div> <label for="humidityPercent">Humidity (%):</label> <input type="number" id="humidityPercent" name="humidityPercent" min="0" max="100"> </div>
+                                    <div> <label for="uvIndex">UV Index:</label> <input type="number" id="uvIndex" name="uvIndex" min="0"> </div>
+                                    <div> <label for="weatherCondition">Weather Condition:</label> <input type="text" id="weatherCondition" name="weatherCondition" list="weatherConditionsList" placeholder="e.g., Sunny, Cloudy"> <datalist id="weatherConditionsList"> <option value="Sunny"></option> <option value="Partly Sunny"></option> <option value="Rainy"></option> <option value="Drizzle"></option> <option value="Cloudy"></option> <option value="Foggy"></option> <option value="Cold"></option> <option value="Hot"></option> <option value="Windy"></option> <option value="Snowy"></option> </datalist> </div>
+                                </fieldset>
+                            </div>
+                        </div>
                     </div>
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-cloud-sun icon-legend"></i> Environment</legend>
-                            <div>
-                                <label for="temperatureC">Temperature Range (°C):</label>
-                                <input type="text" id="temperatureC" name="temperatureC" placeholder="e.g., 23-35">
-                            </div>
-                            <div>
-                                <label for="airQualityIndex">Air Quality Index:</label>
-                                <input type="number" id="airQualityIndex" name="airQualityIndex">
-                            </div>
-                            <div>
-                                <label for="humidityPercent">Humidity (%):</label>
-                                <input type="number" id="humidityPercent" name="humidityPercent" min="0" max="100">
-                            </div>
-                            <div>
-                                <label for="uvIndex">UV Index:</label>
-                                <input type="number" id="uvIndex" name="uvIndex" min="0">
-                            </div>
-                            <div>
-                                <label for="weatherCondition">Weather Condition:</label>
-                                <input type="text" id="weatherCondition" name="weatherCondition" list="weatherConditionsList" placeholder="e.g., Sunny, Cloudy">
-                                <datalist id="weatherConditionsList">
-                                    <option value="Sunny"></option>
-                                    <option value="Partly Sunny"></option>
-                                    <option value="Rainy"></option>
-                                    <option value="Drizzle"></option>
-                                    <option value="Cloudy"></option>
-                                    <option value="Foggy"></option>
-                                    <option value="Cold"></option>
-                                    <option value="Hot"></option>
-                                    <option value="Windy"></option>
-                                    <option value="Snowy"></option>
-                                </datalist>
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-            </div>
 
-            <!-- TAB: Body & Health -->
-            <div id="tab-body" class="tab-panel">
-                <div class="tab-panel-content">
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-ruler-combined icon-legend"></i> Body Measurements</legend>
-                            <div>
-                                <label for="weightKg">Weight (kg):</label>
-                                <input type="number" id="weightKg" name="weightKg" step="0.1">
+                    <!-- TAB: Body & Health -->
+                    <div id="tab-body" class="tab-panel">
+                        <div class="tab-panel-content">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-ruler-combined icon-legend"></i> Body Measurements</legend>
+                                    <div> <label for="weightKg">Weight (kg):</label> <input type="number" id="weightKg" name="weightKg" step="0.1"> </div>
+                                    <div> <label for="heightCm">Height (cm):</label> <input type="number" id="heightCm" name="heightCm"> </div>
+                                    <div> <label for="chest">Chest (cm):</label> <input type="number" id="chest" name="chest"> </div>
+                                    <div> <label for="belly">Belly (cm):</label> <input type="number" id="belly" name="belly"> </div>
+                                </fieldset>
                             </div>
-                            <div>
-                                <label for="heightCm">Height (cm):</label>
-                                <input type="number" id="heightCm" name="heightCm">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-dumbbell icon-legend"></i> Health & Fitness</legend>
+                                    <div> <label for="sleepHours">Sleep (hours):</label> <input type="number" id="sleepHours" name="sleepHours" step="0.1" placeholder="e.g., 7.5"> </div>
+                                    <div> <label for="stepsCount">Steps Count:</label> <input type="number" id="stepsCount" name="stepsCount" placeholder="e.g., 8500"> </div>
+                                    <div> <label for="stepsDistanceKm">Steps Distance (km):</label> <input type="number" id="stepsDistanceKm" name="stepsDistanceKm" step="0.1" placeholder="e.g., 6.8"> </div>
+                                    <div> <label for="kilocalorie">Kilocalories Burned:</label> <input type="number" id="kilocalorie" name="kilocalorie" placeholder="e.g., 2200"> </div>
+                                    <div> <label for="waterIntakeLiters">Water Intake (liters):</label> <input type="number" id="waterIntakeLiters" name="waterIntakeLiters" step="0.1" placeholder="e.g., 2.5"> </div>
+                                    <div> <label for="medicationsTaken">Medications Taken:</label> <input type="text" id="medicationsTaken" name="medicationsTaken" placeholder="e.g., Vitamin D, Omega 3"> </div>
+                                    <div> <label for="physicalSymptoms">Physical Symptoms:</label> <input type="text" id="physicalSymptoms" name="physicalSymptoms" placeholder="e.g., Headache, None"> </div>
+                                    <div class="slider-container"> <label for="energyLevel">Energy Level: <span id="energyLevelValue">5</span></label> <input type="range" id="energyLevel" name="energyLevel" min="1" max="10" value="5" step="1"> </div>
+                                    <div class="slider-container"> <label for="stressLevel">Stress Level: <span id="stressLevelValue">5</span></label> <input type="range" id="stressLevel" name="stressLevel" min="1" max="10" value="5" step="1"> </div>
+                                </fieldset>
                             </div>
-                            <div>
-                                <label for="chest">Chest (cm):</label>
-                                <input type="number" id="chest" name="chest">
-                            </div>
-                            <div>
-                                <label for="belly">Belly (cm):</label>
-                                <input type="number" id="belly" name="belly">
-                            </div>
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-dumbbell icon-legend"></i> Health & Fitness</legend>
-                            <div>
-                                <label for="sleepHours">Sleep (hours):</label>
-                                <input type="number" id="sleepHours" name="sleepHours" step="0.1" placeholder="e.g., 7.5">
-                            </div>
-                            <div>
-                                <label for="stepsCount">Steps Count:</label>
-                                <input type="number" id="stepsCount" name="stepsCount" placeholder="e.g., 8500">
-                            </div>
-                            <div>
-                                <label for="stepsDistanceKm">Steps Distance (km):</label>
-                                <input type="number" id="stepsDistanceKm" name="stepsDistanceKm" step="0.1" placeholder="e.g., 6.8">
-                            </div>
-                            <div>
-                                <label for="kilocalorie">Kilocalories Burned:</label>
-                                <input type="number" id="kilocalorie" name="kilocalorie" placeholder="e.g., 2200">
-                            </div>
-                            <div>
-                                <label for="waterIntakeLiters">Water Intake (liters):</label>
-                                <input type="number" id="waterIntakeLiters" name="waterIntakeLiters" step="0.1" placeholder="e.g., 2.5">
-                            </div>
-                            <div>
-                                <label for="medicationsTaken">Medications Taken:</label>
-                                <input type="text" id="medicationsTaken" name="medicationsTaken" placeholder="e.g., Vitamin D, Omega 3">
-                            </div>
-                            <div>
-                                <label for="physicalSymptoms">Physical Symptoms:</label>
-                                <input type="text" id="physicalSymptoms" name="physicalSymptoms" placeholder="e.g., Headache, None">
-                            </div>
-                            <div class="slider-container">
-                                <label for="energyLevel">Energy Level: <span id="energyLevelValue">5</span></label>
-                                <input type="range" id="energyLevel" name="energyLevel" min="1" max="10" value="5" step="1">
-                            </div>
-                            <div class="slider-container">
-                                <label for="stressLevel">Stress Level: <span id="stressLevelValue">5</span></label>
-                                <input type="range" id="stressLevel" name="stressLevel" min="1" max="10" value="5" step="1">
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-            </div>
 
-            <!-- TAB: Mental & Personal Care -->
-            <div id="tab-mental" class="tab-panel">
-                <div class="tab-panel-content">
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-brain icon-legend"></i> Mental & Emotional Health</legend>
-                            <div>
-                                <label for="mentalState">Mental State (comma-separated):</label>
-                                <input type="text" id="mentalState" name="mentalState" list="mentalStateSuggestions" placeholder="e.g., Focused, Anxious">
-                                <datalist id="mentalStateSuggestions">
-                                    <option value="Happy"></option>
-                                    <option value="Sad"></option>
-                                    <option value="Anxious"></option>
-                                    <option value="Angry"></option>
-                                    <option value="Frustrated"></option>
-                                    <option value="Excited"></option>
-                                    <option value="Tired"></option>
-                                    <option value="Focused"></option>
-                                    <option value="Peaceful"></option>
-                                    <option value="Lonely"></option>
-                                    <option value="Bored"></option>
-                                    <option value="Nervous"></option>
-                                    <option value="Motivated"></option>
-                                    <option value="Stressed"></option>
-                                </datalist>
+                    <!-- TAB: Mental & Personal Care -->
+                    <div id="tab-mental" class="tab-panel">
+                        <div class="tab-panel-content">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-brain icon-legend"></i> Mental & Emotional Health</legend>
+                                    <div> <label for="mentalState">Mental State (comma-separated):</label> <input type="text" id="mentalState" name="mentalState" list="mentalStateSuggestions" placeholder="e.g., Focused, Anxious"> <datalist id="mentalStateSuggestions"> <option value="Happy"></option> <option value="Sad"></option> <option value="Anxious"></option> <option value="Angry"></option> <option value="Frustrated"></option> <option value="Excited"></option> <option value="Tired"></option> <option value="Focused"></option> <option value="Peaceful"></option> <option value="Lonely"></option> <option value="Bored"></option> <option value="Nervous"></option> <option value="Motivated"></option> <option value="Stressed"></option> </datalist> </div>
+                                    <div> <label for="meditationStatus">Meditation Status:</label> <input type="text" id="meditationStatus" name="meditationStatus" placeholder="e.g., Completed, Skipped, Na"> </div>
+                                    <div> <label for="meditationDurationMin">Meditation Duration (min):</label> <input type="number" id="meditationDurationMin" name="meditationDurationMin" placeholder="e.g., 15"> </div>
+                                    <div> <label for="otherThoughtsDetailedEntry">Other Thoughts / Detailed Entry:</label> <textarea id="otherThoughtsDetailedEntry" name="otherThoughtsDetailedEntry" rows="4" placeholder="Your detailed thoughts..."></textarea> </div>
+                                </fieldset>
                             </div>
-                            <div>
-                                <label for="meditationStatus">Meditation Status:</label>
-                                <input type="text" id="meditationStatus" name="meditationStatus" placeholder="e.g., Completed, Skipped, Na">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-spa icon-legend"></i> Personal Care</legend>
+                                    <div> <label for="faceProductName">Face Product Name:</label> <input type="text" id="faceProductName" name="faceProductName" list="faceProductNameSuggestions" placeholder="e.g., Hydra Boost Gel"> <datalist id="faceProductNameSuggestions"></datalist> </div>
+                                    <div> <label for="faceProductBrand">Face Product Brand:</label> <input type="text" id="faceProductBrand" name="faceProductBrand" list="faceProductBrandSuggestions" placeholder="e.g., Neutrogena"> <datalist id="faceProductBrandSuggestions"></datalist> </div>
+                                    <div> <label for="hairProductName">Hair Product Name:</label> <input type="text" id="hairProductName" name="hairProductName" list="hairProductNameSuggestions" placeholder="e.g., Smooth & Silky Shampoo"> <datalist id="hairProductNameSuggestions"></datalist> </div>
+                                    <div> <label for="hairProductBrand">Hair Product Brand:</label> <input type="text" id="hairProductBrand" name="hairProductBrand" list="hairProductBrandSuggestions" placeholder="e.g., Dove"> <datalist id="hairProductBrandSuggestions"></datalist> </div>
+                                    <div> <label for="hairOil">Hair Oil:</label> <input type="text" id="hairOil" name="hairOil" list="hairOilSuggestions" placeholder="e.g., Coconut Oil"> <datalist id="hairOilSuggestions"></datalist> </div>
+                                    <div> <label for="skincareRoutine">Skincare Routine:</label> <input type="text" id="skincareRoutine" name="skincareRoutine" list="skincareRoutineSuggestions" placeholder="e.g., Cleanser → Toner → Serum"> <datalist id="skincareRoutineSuggestions"></datalist> </div>
+                                </fieldset>
                             </div>
-                            <div>
-                                <label for="meditationDurationMin">Meditation Duration (min):</label>
-                                <input type="number" id="meditationDurationMin" name="meditationDurationMin" placeholder="e.g., 15">
-                            </div>
-                            <div>
-                                <label for="otherThoughtsDetailedEntry">Other Thoughts / Detailed Entry:</label>
-                                <textarea id="otherThoughtsDetailedEntry" name="otherThoughtsDetailedEntry" rows="4" placeholder="Your detailed thoughts..."></textarea>
-                            </div>
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-spa icon-legend"></i> Personal Care</legend>
-                            <div>
-                                <label for="faceProductName">Face Product Name:</label>
-                                <input type="text" id="faceProductName" name="faceProductName" list="faceProductNameSuggestions" placeholder="e.g., Hydra Boost Gel">
-                                <datalist id="faceProductNameSuggestions"></datalist>
-                            </div>
-                            <div>
-                                <label for="faceProductBrand">Face Product Brand:</label>
-                                <input type="text" id="faceProductBrand" name="faceProductBrand" list="faceProductBrandSuggestions" placeholder="e.g., Neutrogena">
-                                <datalist id="faceProductBrandSuggestions"></datalist>
-                            </div>
-                            <div>
-                                <label for="hairProductName">Hair Product Name:</label>
-                                <input type="text" id="hairProductName" name="hairProductName" list="hairProductNameSuggestions" placeholder="e.g., Smooth & Silky Shampoo">
-                                <datalist id="hairProductNameSuggestions"></datalist>
-                            </div>
-                            <div>
-                                <label for="hairProductBrand">Hair Product Brand:</label>
-                                <input type="text" id="hairProductBrand" name="hairProductBrand" list="hairProductBrandSuggestions" placeholder="e.g., Dove">
-                                <datalist id="hairProductBrandSuggestions"></datalist>
-                            </div>
-                            <div>
-                                <label for="hairOil">Hair Oil:</label>
-                                <input type="text" id="hairOil" name="hairOil" list="hairOilSuggestions" placeholder="e.g., Coconut Oil">
-                                <datalist id="hairOilSuggestions"></datalist>
-                            </div>
-                            <div>
-                                <label for="skincareRoutine">Skincare Routine:</label>
-                                <input type="text" id="skincareRoutine" name="skincareRoutine" list="skincareRoutineSuggestions" placeholder="e.g., Cleanser → Toner → Serum">
-                                <datalist id="skincareRoutineSuggestions"></datalist>
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-            </div>
 
-            <!-- TAB: Diet & Activities -->
-            <div id="tab-diet" class="tab-panel">
-                <div class="tab-panel-content">
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-utensils icon-legend"></i> Diet & Nutrition</legend>
-                            <div>
-                                <label for="breakfast">Breakfast:</label>
-                                <input type="text" id="breakfast" name="breakfast" list="breakfastSuggestions" placeholder="e.g., Oats with fruit">
-                                <datalist id="breakfastSuggestions"></datalist>
+                    <!-- TAB: Diet & Activities -->
+                    <div id="tab-diet" class="tab-panel">
+                        <div class="tab-panel-content">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-utensils icon-legend"></i> Diet & Nutrition</legend>
+                                    <div> <label for="breakfast">Breakfast:</label> <input type="text" id="breakfast" name="breakfast" list="breakfastSuggestions" placeholder="e.g., Oats with fruit"> <datalist id="breakfastSuggestions"></datalist> </div>
+                                    <div> <label for="lunch">Lunch:</label> <input type="text" id="lunch" name="lunch" list="lunchSuggestions" placeholder="e.g., Grilled chicken salad"> <datalist id="lunchSuggestions"></datalist> </div>
+                                    <div> <label for="dinner">Dinner:</label> <input type="text" id="dinner" name="dinner" list="dinnerSuggestions" placeholder="e.g., Lentil soup"> <datalist id="dinnerSuggestions"></datalist> </div>
+                                </fieldset>
                             </div>
-                            <div>
-                                <label for="lunch">Lunch:</label>
-                                <input type="text" id="lunch" name="lunch" list="lunchSuggestions" placeholder="e.g., Grilled chicken salad">
-                                <datalist id="lunchSuggestions"></datalist>
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-tasks icon-legend"></i> Activities & Productivity</legend>
+                                    <div> <label for="tasksTodayEnglish">Tasks Today (English):</label> <input type="text" id="tasksTodayEnglish" name="tasksTodayEnglish" placeholder="e.g., Wrote blog post, emails"> </div>
+                                    <div> <label for="travelDestination">Travel Destination:</label> <input type="text" id="travelDestination" name="travelDestination" placeholder="e.g., Office, Home"> </div>
+                                    <div> <label for="phoneScreenOnHr">Phone Screen On (hr):</label> <input type="number" id="phoneScreenOnHr" name="phoneScreenOnHr" step="0.1" placeholder="e.g., 3.5"> </div>
+                                </fieldset>
                             </div>
-                            <div>
-                                <label for="dinner">Dinner:</label>
-                                <input type="text" id="dinner" name="dinner" list="dinnerSuggestions" placeholder="e.g., Lentil soup">
-                                <datalist id="dinnerSuggestions"></datalist>
-                            </div>
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-tasks icon-legend"></i> Activities & Productivity</legend>
-                            <div>
-                                <label for="tasksTodayEnglish">Tasks Today (English):</label>
-                                <input type="text" id="tasksTodayEnglish" name="tasksTodayEnglish" placeholder="e.g., Wrote blog post, emails">
-                            </div>
-                            <div>
-                                <label for="travelDestination">Travel Destination:</label>
-                                <input type="text" id="travelDestination" name="travelDestination" placeholder="e.g., Office, Home">
-                            </div>
-                            <div>
-                                <label for="phoneScreenOnHr">Phone Screen On (hr):</label>
-                                <input type="number" id="phoneScreenOnHr" name="phoneScreenOnHr" step="0.1" placeholder="e.g., 3.5">
-                            </div>
-                        </fieldset>
-                    </div>
-                </div>
-            </div>
 
-            <!-- TAB: Notes & Summary -->
-            <div id="tab-summary" class="tab-panel">
-                <div class="tab-panel-content">
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-sticky-note icon-legend"></i> Additional Notes</legend>
-                            <div>
-                                <label for="keyEvents">Key Events:</label>
-                                <input type="text" id="keyEvents" name="keyEvents" placeholder="e.g., Client meeting, Birthday">
+                    <!-- TAB: Notes & Summary -->
+                    <div id="tab-summary" class="tab-panel">
+                        <div class="tab-panel-content">
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-sticky-note icon-legend"></i> Additional Notes</legend>
+                                    <div> <label for="keyEvents">Key Events:</label> <input type="text" id="keyEvents" name="keyEvents" placeholder="e.g., Client meeting, Birthday"> </div>
+                                </fieldset>
                             </div>
-                        </fieldset>
-                    </div>
-                    <div class="tab-panel-column">
-                        <fieldset>
-                            <legend><i class="fas fa-book-open icon-legend"></i> Daily Activity Summary</legend>
-                            <div>
-                                <label for="dailyActivitySummary">Summary:</label>
-                                <textarea id="dailyActivitySummary" name="dailyActivitySummary" rows="5" placeholder="A brief summary of your day..."></textarea>
-                                <div id="summaryCounts">Words: 0, Characters: 0</div>
+                            <div class="tab-panel-column">
+                                <fieldset>
+                                    <legend><i class="fas fa-book-open icon-legend"></i> Daily Activity Summary</legend>
+                                    <div> <label for="dailyActivitySummary">Summary:</label> <textarea id="dailyActivitySummary" name="dailyActivitySummary" rows="5" placeholder="A brief summary of your day..."></textarea> <div id="summaryCounts">Words: 0, Characters: 0</div> </div>
+                                </fieldset>
                             </div>
-                        </fieldset>
+                        </div>
                     </div>
-                </div>
-            </div>
+                </div> <!-- End #tabPanelsSlider -->
+            </div> <!-- End #tabViewPort -->
 
             <div class="form-actions">
                 <button type="submit" title="Generate JSON and Download"><i class="fas fa-file-arrow-down"></i> <span class="btn-text">Download</span></button>
@@ -313,8 +171,9 @@
                 <input type="file" id="jsonFile" accept=".json" style="display:none;">
                 <button type="button" id="clearForm" title="Clear All Form Data"><i class="fas fa-trash-alt"></i> <span class="btn-text">Clear</span></button>
             </div>
-            <div id="toast-container"></div>
-        </form>
-    </div>
-    <script src="script.js"></script></body>
+        </form> <!-- End #diaryForm -->
+        <div id="toast-container"></div>
+    </div> <!-- End .container -->
+    <script src="script.js"></script>
+</body>
 </html>
