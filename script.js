@@ -103,15 +103,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Tab functionality ---
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => panel.classList.remove('active'));
-            button.classList.add('active');
-            const targetTabId = button.getAttribute('data-tab');
-            document.getElementById(targetTabId).classList.add('active');
+tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        tabButtons.forEach(btn => {
+            btn.classList.remove('active');
+            btn.setAttribute('aria-selected', 'false');
         });
+        tabPanels.forEach(panel => panel.classList.remove('active'));
+        button.classList.add('active');
+        button.setAttribute('aria-selected', 'true');
+        const targetTabId = button.getAttribute('data-tab');
+        document.getElementById(targetTabId).classList.add('active');
     });
+});
 
     // --- Get/Set Form Values ---
     function getValue(elementId, type = 'text') {
