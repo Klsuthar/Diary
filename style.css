@@ -1,11 +1,11 @@
 /* --- Base & Variables --- */
 :root {
     --primary-bg: #0f172a;
-    --secondary-bg: #1e293b; /* Used for active tab background to "lift" it */
+    --secondary-bg: #1e293b; 
     --tertiary-bg: #334155;
     --accent-color: #dabe24;
     --accent-hover: #a8a62f;
-    --text-primary: #e2e8f0; /* Used for active tab border */
+    --text-primary: #e2e8f0; 
     --text-secondary: #94a3b8;
     --danger-color: #f43f5e;
     --danger-hover: #e11d48;
@@ -20,8 +20,7 @@
     --input-padding-x: 16px;
     --button-padding-y: 12px;
     --button-padding-x: 18px;
-    --active-tab-border-thickness: 2px; /* For active tab border */
-    --active-tab-bottom-thickness: 3px; /* For active tab bottom part */
+    --column-gap: 20px; 
 }
 
 *, *::before, *::after {
@@ -49,16 +48,7 @@ body {
     box-shadow: var(--box-shadow-lg);
     width: 100%;
     max-width: 950px;
-}
-
-h1 {
-    text-align: center;
-    color: var(--accent-color);
-    margin-top: 0;
-    margin-bottom: 25px;
-    font-weight: 500;
-    font-size: 1.75rem;
-    letter-spacing: 0.5px;
+    margin-top: 15px; 
 }
 
 /* --- Tabs Styling --- */
@@ -68,51 +58,53 @@ h1 {
     margin-bottom: 20px;
     border-bottom: 2px solid var(--tertiary-bg);
     position: relative;
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-    background-color: var(--secondary-bg);
-    z-index: 10;
+    overflow-x: auto; 
+    background-color: var(--secondary-bg); 
+    z-index: 10; 
 }
 
 .tab-button {
-    flex: 1;
-    min-width: 50px; /* Ensure tabs fit on small screens */
+    flex: 1 0 auto; 
+    min-width: 50px; 
     padding: 10px 8px;
     cursor: pointer;
     border: none;
     background-color: transparent;
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: 1.1rem; 
     font-weight: 500;
     transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease;
     text-align: center;
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 4px; 
     border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    border-bottom: 3px solid transparent; 
 }
 
 .tab-button:hover:not(.active) {
     color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.05); 
 }
 
 .tab-button.active {
     color: var(--accent-color);
-    background-color: var(--secondary-bg);
+    background-color: var(--secondary-bg); 
     border-bottom: 3px solid var(--accent-color);
 }
 
 .tab-button i {
-    font-size: 1.2rem;
+    font-size: 1.2rem; 
     line-height: 1;
 }
 
 .tab-button span {
-    font-size: 0.85rem;
+    font-size: 0.85rem; 
     line-height: 1.2;
+    display: none; 
 }
 
 .tab-panel {
@@ -124,85 +116,101 @@ h1 {
     display: block;
 }
 
+.tab-panel-content {
+    display: flex;
+    flex-direction: column; 
+    gap: 0; 
+}
+
+.tab-panel-column {
+    min-width: 0; 
+}
+
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Mobile Styles (mimic Facebook mobile app) */
-@media (max-width: 600px) {
+@media (max-width: 599.98px) {
     .tabs {
         position: sticky;
         top: 0;
-        margin-bottom: 15px;
-        padding: 8px 0;
-        border-bottom: none;
+        margin-left: -20px; 
+        margin-right: -20px; 
+        padding-left: 10px; 
+        padding-right: 10px;
+        padding-top: 8px;
+        padding-bottom: 0; 
+        border-bottom: 1px solid var(--tertiary-bg); 
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .tab-button {
-        min-width: 44px; /* Touch-friendly size */
+        min-width: 44px; 
         padding: 8px 6px;
-        font-size: 0;
-        flex-direction: column;
-        border-bottom: 2px solid transparent;
+        border-bottom-width: 2px; 
     }
 
     .tab-button i {
-        font-size: 1.4rem; /* Larger icons for mobile */
-        margin: 0;
+        font-size: 1.4rem; 
+        margin: 0; 
     }
 
     .tab-button span {
-        display: none; /* Hide text labels on mobile */
-    }
-
-    .tab-button.active {
-        border-bottom: 2px solid var(--accent-color);
-        background: none;
-        box-shadow: none;
+        display: none; 
     }
 
     .tab-button:hover:not(.active) {
-        background-color: transparent;
-        color: var(--accent-color);
+        background-color: transparent; 
+        color: var(--accent-color); 
     }
 }
 
-/* Extra small screens */
 @media (max-width: 420px) {
     .tab-button {
         min-width: 40px;
         padding: 6px 4px;
     }
-
     .tab-button i {
-        font-size: 1.2rem;
+        font-size: 1.3rem; 
     }
 }
 
-/* Desktop adjustments (preserve original look) */
 @media (min-width: 600px) {
     .tab-button {
-        padding: 12px 15px;
-        font-size: 1.2rem;
-        flex-direction: row;
-        gap: 8px;
+        padding: 12px 15px; 
+        flex-direction: row; 
+        gap: 8px; 
     }
-
     .tab-button i {
-        font-size: 1rem;
+        font-size: 1rem; 
     }
-
     .tab-button span {
-        font-size: 1rem;
+        display: inline; 
+        font-size: 1rem; 
+    }
+    .container {
+        margin-top: 30px;
     }
 }
-/* --- Form Elements (No changes from here down, but included for completeness) --- */
-form div:not(.form-actions):not(.tabs):not(.slider-container):not(.date-control-wrapper) {
-    margin-bottom: 18px;
+
+@media (min-width: 800px) {
+    .tab-panel-content {
+        flex-direction: row; 
+        gap: var(--column-gap);
+    }
+    .tab-panel-column {
+        flex: 1; 
+    }
 }
-form > div > div:has(> .date-control-wrapper),
+
+
+/* --- Form Elements --- */
+form div:not(.form-actions):not(.tabs):not(.slider-container):not(.date-control-wrapper):not(.tab-panel-content):not(.tab-panel-column) {
+    margin-bottom: 18px; 
+}
+form > div > div:has(> .date-control-wrapper), 
 .slider-container {
     margin-bottom: 18px;
 }
@@ -215,7 +223,6 @@ label {
     font-size: 0.85rem;
 }
 
-/* Date Control Wrapper */
 .date-control-wrapper {
     display: flex;
     align-items: center;
@@ -230,7 +237,8 @@ label {
     cursor: pointer; font-size: 0.85em; line-height: 1;
     transition: background-color 0.2s ease;
     display: flex; align-items: center; justify-content: center;
-    height: calc(var(--input-padding-y) * 2 + 1em + 2px); width: 38px;
+    height: calc(var(--input-padding-y) * 2 + 1em - 2px); 
+    width: 38px;
 }
 .date-control-btn:hover { background-color: var(--accent-color); color: var(--primary-bg); }
 .date-control-btn:active { background-color: var(--accent-hover); }
@@ -244,7 +252,7 @@ input[type="text"], input[type="number"], input[type="date"], textarea {
 }
 input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus {
     outline: none; border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.25);
+    box-shadow: 0 0 0 2px rgba(218, 190, 36, 0.25); 
 }
 input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
 input[type="number"] { -moz-appearance: textfield; }
@@ -255,6 +263,9 @@ fieldset {
     border: 1px solid var(--tertiary-bg); border-radius: var(--border-radius-md);
     padding: 20px; margin-bottom: 25px; background-color: transparent;
 }
+fieldset:last-child { 
+    margin-bottom: 0; 
+}
 legend {
     font-weight: 600; color: var(--accent-color);
     padding: 0 10px; font-size: 1.1em;
@@ -262,8 +273,6 @@ legend {
 }
 .icon-legend { font-size: 0.9em; opacity: 0.8; }
 
-
-/* Sliders */
 .slider-container label {
     display: flex; justify-content: space-between; align-items: center;
     margin-bottom: 8px;
@@ -286,11 +295,23 @@ input[type="range"]::-moz-range-thumb {
     border-radius: 50%; border: 2px solid var(--secondary-bg);
     transition: background-color 0.2s ease;
 }
-input[type="range"]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3); }
-input[type="range"]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3); }
+input[type="range"]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(218, 190, 36, 0.3); } 
+input[type="range"]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(218, 190, 36, 0.3); } 
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(60%) sepia(10%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%);
 }
+datalist { }
+datalist option { }
+
+/* Summary Counts Styling */
+#summaryCounts {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-top: 4px;
+    margin-bottom: 10px; /* Add some space below the counts */
+}
+
 
 /* --- Buttons --- */
 .form-actions {
@@ -312,12 +333,12 @@ button:not(.date-control-btn):hover { transform: translateY(-1px); box-shadow: 0
 button:not(.date-control-btn):active { transform: translateY(0px); box-shadow: inset 0 1px 3px rgba(0,0,0,0.15); }
 button:not(.date-control-btn) i { font-size: 1.1em; }
 
-.btn-text { display: inline; }
+.btn-text { display: inline; } 
 
-@media (max-width: 420px) {
+@media (max-width: 420px) { 
     .btn-text { display: none; }
     button:not(.date-control-btn) {
-        gap: 0;
+        gap: 0; 
         padding: var(--button-padding-y) calc(var(--button-padding-x) / 1.5) ;
     }
     button:not(.date-control-btn) i { margin-right: 0; }
@@ -359,32 +380,37 @@ button#clearForm:hover { background-color: var(--danger-hover); }
 @keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeOutToastGeneral { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
 
-/* --- Desktop and Larger Screen Adjustments --- */
-@media (min-width: 600px) {
+/* --- Desktop and Larger Screen Adjustments (General) --- */
+@media (min-width: 600px) { 
     body { padding: 30px; font-size: 16px; }
     .container { padding: 30px 40px; }
-    h1 { font-size: 2rem; margin-bottom: 30px; }
 
-    .tab-button {
-        font-size: 1.3rem;
-        padding: 14px 15px;
-    }
-
-    .btn-text { display: inline; }
+    .btn-text { display: inline; } 
     button:not(.date-control-btn) {
         gap: 10px;
+         width: auto; 
+         min-width: 170px; 
     }
+    button:not(.date-control-btn) i { margin-right: 0; }
 
-    form div:not(.form-actions):not(.tabs):not(.slider-container):not(.date-control-wrapper),
+
+    form div:not(.form-actions):not(.tabs):not(.slider-container):not(.date-control-wrapper):not(.tab-panel-content):not(.tab-panel-column),
     form > div > div:has(> .date-control-wrapper),
     .slider-container { margin-bottom: 20px; }
     label { font-size: 0.9rem; }
     input[type="text"], input[type="number"], input[type="date"], textarea { font-size: 1rem; }
-    .slider-container label span, input[type="range"] { font-size: 1rem; }
-    fieldset { padding: 25px; margin-bottom: 30px; }
+    .slider-container label span { font-size: 1rem; } 
+    fieldset { padding: 25px; margin-bottom: 30px; } 
+    fieldset:last-child { margin-bottom: 0; }
+
     legend { font-size: 1.15em; }
     .form-actions { flex-direction: row; justify-content: center; gap: 15px; }
-    button:not(.date-control-btn) { width: auto; min-width: 170px; }
-    #toast-container { left: auto; right: 20px; bottom: 20px; align-items: flex-end; max-width: 380px; }
+    
+    #toast-container { left: auto; right: 20px; bottom: 20px; align-items: flex-end; }
     .toast { width: auto; }
+}
+
+@media (min-width: 800px) { 
+    fieldset { margin-bottom: var(--column-gap); } 
+    fieldset:last-child { margin-bottom: 0; }
 }
