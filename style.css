@@ -1,0 +1,311 @@
+/* --- Base & Variables --- */
+:root {
+    --primary-bg: #0f172a;
+    --secondary-bg: #1e293b; /* Used for active tab background to "lift" it */
+    --tertiary-bg: #334155;
+    --accent-color: #dabe24;
+    --accent-hover: #a8a62f;
+    --text-primary: #e2e8f0; /* Used for active tab border */
+    --text-secondary: #94a3b8;
+    --danger-color: #f43f5e;
+    --danger-hover: #e11d48;
+    --success-color: #22c55e;
+    --info-color: #3b82f6;
+    --font-family: 'Poppins', sans-serif;
+    --border-radius-sm: 6px;
+    --border-radius-md: 10px;
+    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --box-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
+    --input-padding-y: 12px;
+    --input-padding-x: 16px;
+    --button-padding-y: 12px;
+    --button-padding-x: 18px;
+    --active-tab-border-thickness: 2px; /* For active tab border */
+    --active-tab-bottom-thickness: 3px; /* For active tab bottom part */
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    margin: 0;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.65;
+}
+
+.container {
+    background-color: var(--secondary-bg);
+    padding: 20px;
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--box-shadow-lg);
+    width: 100%;
+    max-width: 950px;
+}
+
+h1 {
+    text-align: center;
+    color: var(--accent-color);
+    margin-top: 0;
+    margin-bottom: 25px;
+    font-weight: 500;
+    font-size: 1.75rem;
+    letter-spacing: 0.5px;
+}
+
+/* --- Tabs Styling --- */
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--tertiary-bg); /* Continuous line for non-active areas */
+    position: relative; /* For z-index stacking context of tab buttons */
+}
+
+.tab-button {
+    padding: 12px 10px; /* Base padding */
+    cursor: pointer;
+    border: var(--active-tab-border-thickness) solid transparent; /* Reserve space for border to prevent layout shift */
+    border-bottom-width: var(--active-tab-bottom-thickness); /* Consistent bottom border area */
+    background-color: transparent;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+    text-align: center;
+    flex-grow: 1;
+    flex-basis: 0;
+    position: relative;
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0; /* Round top corners */
+    /* Ensure content (icon) inside doesn't shrink padding area due to border */
+    line-height: 1; /* Helps center icon if font-size is main factor */
+}
+
+.tab-button:hover:not(.active) { /* Hover for non-active tabs */
+    color: var(--text-primary);
+    background-color: rgba(255,255,255,0.05); /* Subtle hover background */
+}
+
+.tab-button.active {
+    color: var(--accent-color); /* Icon color */
+    background-color: var(--secondary-bg); /* Match container to "lift" it visually */
+    border-color: var(--text-primary); /* Light border all around */
+    border-bottom-color: var(--accent-color); /* Bottom part of THIS border is accent */
+    /* border-bottom-width is already var(--active-tab-bottom-thickness) */
+    
+    /* Lift it to cover the .tabs continuous border-bottom */
+    margin-bottom: -2px; /* Amount of .tabs border-bottom to cover */
+    z-index: 1; /* To sit on top */
+
+    /* No padding change needed here because all buttons have transparent border reserving space */
+}
+
+
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.4s ease-out;
+}
+.tab-panel.active { display: block; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Form Elements (No changes from here down, but included for completeness) --- */
+form div:not(.form-actions):not(.tabs):not(.slider-container):not(.date-control-wrapper) {
+    margin-bottom: 18px;
+}
+form > div > div:has(> .date-control-wrapper),
+.slider-container {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+/* Date Control Wrapper */
+.date-control-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.date-control-wrapper input[type="date"] {
+    flex-grow: 1; width: auto; margin-bottom: 0; min-width: 120px;
+}
+.date-control-btn {
+    background-color: var(--tertiary-bg); color: var(--text-primary);
+    border: none; padding: 0; border-radius: var(--border-radius-sm);
+    cursor: pointer; font-size: 0.85em; line-height: 1;
+    transition: background-color 0.2s ease;
+    display: flex; align-items: center; justify-content: center;
+    height: calc(var(--input-padding-y) * 2 + 1em + 2px); width: 38px;
+}
+.date-control-btn:hover { background-color: var(--accent-color); color: var(--primary-bg); }
+.date-control-btn:active { background-color: var(--accent-hover); }
+
+input[type="text"], input[type="number"], input[type="date"], textarea {
+    width: 100%; padding: var(--input-padding-y) var(--input-padding-x);
+    border: 1px solid var(--tertiary-bg); border-radius: var(--border-radius-sm);
+    box-sizing: border-box; font-size: 0.95rem; font-family: var(--font-family);
+    background-color: var(--primary-bg); color: var(--text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus {
+    outline: none; border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.25);
+}
+input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
+input[type="number"] { -moz-appearance: textfield; }
+input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+textarea { resize: vertical; min-height: 75px; }
+
+fieldset {
+    border: 1px solid var(--tertiary-bg); border-radius: var(--border-radius-md);
+    padding: 20px; margin-bottom: 25px; background-color: transparent;
+}
+legend {
+    font-weight: 600; color: var(--accent-color);
+    padding: 0 10px; font-size: 1.1em;
+    display: flex; align-items: center; gap: 8px;
+}
+.icon-legend { font-size: 0.9em; opacity: 0.8; }
+
+
+/* Sliders */
+.slider-container label {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+}
+.slider-container label span { font-weight: 500; color: var(--accent-color); font-size: 0.95rem; }
+input[type="range"] {
+    width: 100%; margin-top: 0; -webkit-appearance: none; appearance: none;
+    background: transparent; cursor: pointer; height: 18px;
+}
+input[type="range"]::-webkit-slider-runnable-track { background: var(--tertiary-bg); height: 6px; border-radius: 3px; }
+input[type="range"]::-moz-range-track { background: var(--tertiary-bg); height: 6px; border-radius: 3px; }
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none; margin-top: -6px;
+    background-color: var(--accent-color); height: 18px; width: 18px;
+    border-radius: 50%; border: 2px solid var(--secondary-bg);
+    transition: background-color 0.2s ease;
+}
+input[type="range"]::-moz-range-thumb {
+    background-color: var(--accent-color); height: 16px; width: 16px;
+    border-radius: 50%; border: 2px solid var(--secondary-bg);
+    transition: background-color 0.2s ease;
+}
+input[type="range"]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3); }
+input[type="range"]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3); }
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(60%) sepia(10%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%);
+}
+
+/* --- Buttons --- */
+.form-actions {
+    text-align: center; margin-top: 30px;
+    display: flex; flex-direction: column; gap: 12px;
+}
+button:not(.date-control-btn) {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px;
+    padding: var(--button-padding-y) var(--button-padding-x);
+    border: none; border-radius: var(--border-radius-sm);
+    cursor: pointer; font-size: 0.95rem; font-weight: 500;
+    font-family: var(--font-family);
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    width: 100%; box-shadow: var(--box-shadow);
+    -webkit-tap-highlight-color: transparent;
+}
+button:not(.date-control-btn):hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.25); }
+button:not(.date-control-btn):active { transform: translateY(0px); box-shadow: inset 0 1px 3px rgba(0,0,0,0.15); }
+button:not(.date-control-btn) i { font-size: 1.1em; }
+
+.btn-text { display: inline; }
+
+@media (max-width: 420px) {
+    .btn-text { display: none; }
+    button:not(.date-control-btn) {
+        gap: 0;
+        padding: var(--button-padding-y) calc(var(--button-padding-x) / 1.5) ;
+    }
+    button:not(.date-control-btn) i { margin-right: 0; }
+}
+
+
+button[type="submit"] { background-color: var(--accent-color); color: var(--primary-bg); }
+button[type="submit"]:hover { background-color: var(--accent-hover); }
+button#saveFormButton { background-color: var(--success-color); color: white; }
+button#saveFormButton:hover { background-color: #16a34a; }
+button#importJsonButton { background-color: var(--info-color); color: white; }
+button#importJsonButton:hover { background-color: #2563eb; }
+button#clearForm { background-color: var(--danger-color); color: white; }
+button#clearForm:hover { background-color: var(--danger-hover); }
+
+/* --- Toast Notifications --- */
+#toast-container {
+    position: fixed; bottom: 15px; left: 15px; right: 15px;
+    z-index: 1000; display: flex; flex-direction: column-reverse;
+    align-items: center; gap: 10px;
+}
+.toast {
+    background-color: var(--secondary-bg); color: var(--text-primary);
+    padding: 12px 18px; border-radius: var(--border-radius-sm);
+    box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color);
+    width: 100%; max-width: 380px; opacity: 0;
+    transform: translateY(20px);
+    animation: slideUpToast 0.4s forwards, fadeOutToastGeneral 0.4s 3.6s forwards;
+    display: flex; align-items: center; gap: 12px; font-size: 0.9rem;
+}
+.toast i { font-size: 1.1em; }
+.toast.success { border-left-color: var(--success-color); }
+.toast.success i { color: var(--success-color); }
+.toast.error { border-left-color: var(--danger-color); }
+.toast.error i { color: var(--danger-color); }
+.toast.info { border-left-color: var(--info-color); }
+.toast.info i { color: var(--info-color); }
+
+@keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeOutToastGeneral { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
+
+/* --- Desktop and Larger Screen Adjustments --- */
+@media (min-width: 600px) {
+    body { padding: 30px; font-size: 16px; }
+    .container { padding: 30px 40px; }
+    h1 { font-size: 2rem; margin-bottom: 30px; }
+
+    .tab-button {
+        font-size: 1.3rem;
+        padding: 14px 15px;
+    }
+
+    .btn-text { display: inline; }
+    button:not(.date-control-btn) {
+        gap: 10px;
+    }
+
+    form div:not(.form-actions):not(.tabs):not(.slider-container):not(.date-control-wrapper),
+    form > div > div:has(> .date-control-wrapper),
+    .slider-container { margin-bottom: 20px; }
+    label { font-size: 0.9rem; }
+    input[type="text"], input[type="number"], input[type="date"], textarea { font-size: 1rem; }
+    .slider-container label span, input[type="range"] { font-size: 1rem; }
+    fieldset { padding: 25px; margin-bottom: 30px; }
+    legend { font-size: 1.15em; }
+    .form-actions { flex-direction: row; justify-content: center; gap: 15px; }
+    button:not(.date-control-btn) { width: auto; min-width: 170px; }
+    #toast-container { left: auto; right: 20px; bottom: 20px; align-items: flex-end; max-width: 380px; }
+    .toast { width: auto; }
+}
