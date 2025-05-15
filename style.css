@@ -1,11 +1,11 @@
 /* --- Base & Variables --- */
 :root {
     --primary-bg: #0f172a;
-    --secondary-bg: #1e293b; 
+    --secondary-bg: #1e293b;
     --tertiary-bg: #334155;
     --accent-color: #dabe24;
     --accent-hover: #a8a62f;
-    --text-primary: #e2e8f0; 
+    --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
     --danger-color: #f43f5e;
     --danger-hover: #e11d48;
@@ -15,17 +15,21 @@
     --border-radius-sm: 6px;
     --border-radius-md: 10px;
     --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    --box-shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2);
-    --input-padding-y: 12px;
-    --input-padding-x: 16px;
-    --button-padding-y: 12px;
-    --button-padding-x: 18px;
-    --column-gap: 20px; 
-    --header-height: 60px; 
+    --input-padding-y: 10px; /* Slightly reduced for mobile */
+    --input-padding-x: 14px;
+    --button-padding-y: 10px;
+    --button-padding-x: 16px;
+    --top-bar-height: 56px;
+    --bottom-nav-height: 60px;
 }
 
 *, *::before, *::after {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+}
+
+html {
+    font-size: 16px; /* Base font size for rem units */
 }
 
 body {
@@ -33,229 +37,275 @@ body {
     background-color: var(--primary-bg);
     color: var(--text-primary);
     margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    display: flex; /* For centering container if needed, but container is full width now */
+    /* justify-content: center; align-items: flex-start; */
     min-height: 100vh;
-    font-size: 15px;
-    line-height: 1.65;
-    overflow-x: hidden; 
+    font-size: 0.95rem; /* Default mobile font size */
+    line-height: 1.6;
+    overflow: hidden; /* Prevent body scroll, individual panels will scroll */
+    -webkit-font-smoothing: antialiased; /* Smoother fonts on mobile */
+    -moz-osx-font-smoothing: grayscale;
 }
 
-.container {
-    background-color: var(--secondary-bg);
-    border-radius: var(--border-radius-md); 
-    box-shadow: var(--box-shadow-lg); 
+.app-container {
     width: 100%;
-    max-width: 100%; 
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    height: 100vh; 
+    background-color: var(--primary-bg); /* Match body if container edges are visible */
 }
 
-/* --- Tabs Styling (Sticky Header) --- */
-.tabs {
+/* --- Top Bar --- */
+.top-bar {
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    padding: 0 15px;
+    height: var(--top-bar-height);
     display: flex;
-    flex-wrap: nowrap;
-    border-bottom: 2px solid var(--tertiary-bg);
-    position: sticky;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--box-shadow);
+    position: fixed; /* Fixed at the top */
     top: 0;
     left: 0;
     right: 0;
-    overflow-x: auto; 
-    background-color: var(--secondary-bg); 
-    z-index: 100; 
-    padding: 0 5px; /* Default padding for smaller screens */
-    height: var(--header-height);
-    align-items: center; 
+    z-index: 100;
 }
 
-.tab-button {
-    flex: 1 0 auto; 
-    min-width: 44px; /* Mobile-first: ensure touch target size */
-    padding: 8px 6px; /* Mobile-first padding */
-    height: 100%; 
-    cursor: pointer;
-    border: none;
-    background-color: transparent;
-    color: var(--text-secondary);
-    font-weight: 500;
-    transition: color 0.2s ease, background-color 0.2s ease, border-bottom-color 0.2s ease;
-    text-align: center;
-    position: relative;
+.top-bar .date-controls {
     display: flex;
-    flex-direction: column; 
+    align-items: center;
+    gap: 8px;
+}
+.top-bar #currentDateDisplay {
+    font-size: 0.9rem;
+    font-weight: 500;
+    flex-grow: 1;
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.top-bar .date-control-btn {
+    background-color: var(--tertiary-bg);
+    color: var(--text-primary);
+    border: none;
+    padding: 0;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 1rem; /* Icon size */
+    line-height: 1;
+    transition: background-color 0.2s ease;
+    display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2px; /* Smaller gap for icon-only layout initially */
-    border-radius: 0; 
-    border-bottom: 3px solid transparent; 
+    width: 36px;
+    height: 36px;
 }
-
-.tab-button i {
-    font-size: 1.4rem; /* Mobile-first icon size */
-    line-height: 1;
-    transition: transform 0.2s ease-in-out;
-    margin: 0; /* Ensure no extra margin when icon-only */
+.top-bar .date-control-btn:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-bg);
 }
-.tab-button:hover i {
-    transform: scale(1.05); /* Subtle hover for mobile */
+.top-bar .date-control-btn:active {
+    background-color: var(--accent-hover);
 }
-
-.tab-button span {
-    font-size: 0.8rem; /* Smaller font for tab text when visible */
-    line-height: 1.1;
-    display: none; /* Text hidden by default (mobile-first) */
+.top-bar #date { /* Hide actual date input, use JS to update */
+    display: none;
 }
 
 
-.tab-button:hover:not(.active) {
-    color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.05); 
-}
-/* On very small screens, just color change on hover for icon */
-@media (max-width: 599.98px) {
-    .tab-button:hover:not(.active) {
-        background-color: transparent;
-        color: var(--accent-color);
-    }
-}
-
-
-.tab-button.active {
-    color: var(--accent-color);
-    border-bottom: 3px solid var(--accent-color);
-}
-
-
-/* --- Swipeable Tab Panels --- */
-#diaryForm {
-    flex-grow: 1; 
+/* --- Main Content Area (Swipeable) --- */
+#diaryForm { /* Renamed from .container to .app-container for body structure */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-    padding: 0 15px 15px 15px; 
+    padding-top: var(--top-bar-height); /* Space for fixed top bar */
+    padding-bottom: var(--bottom-nav-height); /* Space for fixed bottom nav */
 }
 
 #tabViewPort {
     width: 100%;
     overflow: hidden;
-    flex-grow: 1; 
-    position: relative; 
+    flex-grow: 1;
+    position: relative;
 }
 
 #tabPanelsSlider {
     display: flex;
-    height: 100%; 
+    height: 100%;
+    /* transition is handled by JS for swipe */
 }
 
 .tab-panel {
     width: 100%;
     flex-shrink: 0;
-    opacity: 1; 
-    overflow-y: auto; 
-    height: 100%; 
-    padding-top: 15px; /* Default padding */
-    padding-bottom: 15px; 
+    overflow-y: auto;
+    height: 100%;
+    padding: 15px; /* Padding inside each panel */
+    background-color: var(--primary-bg); /* Panels have main bg color */
 }
-
+/* Remove two-column layout, all fieldsets stack */
 .tab-panel-content {
-    display: flex;
-    flex-direction: column; 
-    gap: 0; 
+    /* No flex needed, fieldsets will stack by default */
 }
-
 .tab-panel-column {
-    min-width: 0; 
-}
-
-@keyframes pulseEffect {
-    0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); }
+    /* Not used in mobile-only single column */
 }
 
 
-/* Adjustments for larger screens (tablets and desktops) */
-@media (min-width: 600px) {
-    .tabs {
-        padding: 0 20px; /* More padding for larger tab headers */
-    }
-    .tab-button {
-        min-width: 100px; /* Allow more space for text */
-        padding: 10px 15px; /* More padding */
-        flex-direction: row; /* Icon and text side-by-side */
-        gap: 8px; /* Space between icon and text */
-    }
-    .tab-button i {
-        font-size: 1rem; /* Adjust icon size for desktop layout */
-        margin-right: 0; /* Reset mobile-specific margin if any */
-    }
-    .tab-button span {
-        display: inline; /* Show text label */
-        font-size: 1rem; /* Desktop text size */
-    }
-    .tab-button:hover i {
-        transform: scale(1.1); /* Larger scale effect on desktop hover */
-    }
-
-    #diaryForm { padding: 0 20px 20px 20px; }
-    .tab-panel { padding-top: 20px; padding-bottom: 20px; }
+/* --- Bottom Navigation --- */
+.bottom-nav {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: var(--secondary-bg);
+    height: var(--bottom-nav-height);
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    position: fixed; /* Fixed at the bottom */
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
 }
 
-@media (min-width: 800px) { /* Two-column layout for panel content */
-    .tab-panel-content { flex-direction: row; gap: var(--column-gap); }
-    .tab-panel-column { flex: 1; }
+.bottom-nav-button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 0;
+    color: var(--text-secondary);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-align: center;
+}
+.bottom-nav-button i {
+    font-size: 1.5rem; /* Larger icons for bottom nav */
+    margin-bottom: 2px;
+    transition: transform 0.2s ease-out;
+}
+.bottom-nav-button span { /* Text for bottom nav icons */
+    font-size: 0.7rem;
+    display: block; /* Always show text, or hide based on preference/space */
+    /* display: none; To hide text and only show icons */
+}
+.bottom-nav-button.active {
+    color: var(--accent-color);
+}
+.bottom-nav-button.active i {
+    transform: scale(1.1);
+}
+.bottom-nav-button:hover:not(.active) {
+    color: var(--text-primary);
 }
 
-/* --- Form Elements --- */
-form div:not(.form-actions):not(#tabViewPort):not(#tabPanelsSlider):not(.tab-panel):not(.tab-panel-content):not(.tab-panel-column):not(.slider-container):not(.date-control-wrapper) {
-    margin-bottom: 18px; 
+
+/* --- General Form Elements (Mobile Optimized) --- */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
 }
-form > div > div:has(> .date-control-wrapper), 
-.slider-container { margin-bottom: 18px; }
 
-label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-secondary); font-size: 0.85rem; }
-.date-control-wrapper { display: flex; align-items: center; gap: 6px; }
-.date-control-wrapper input[type="date"] { flex-grow: 1; width: auto; margin-bottom: 0; min-width: 120px; }
-.date-control-btn { background-color: var(--tertiary-bg); color: var(--text-primary); border: none; padding: 0; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 0.85em; line-height: 1; transition: background-color 0.2s ease; display: flex; align-items: center; justify-content: center; height: calc(var(--input-padding-y) * 2 + 1em - 2px); width: 38px; }
-.date-control-btn:hover { background-color: var(--accent-color); color: var(--primary-bg); animation: pulseEffect 0.5s ease-in-out; }
-.date-control-btn:active { background-color: var(--accent-hover); }
-
-input[type="text"], input[type="number"], input[type="date"], textarea { width: 100%; padding: var(--input-padding-y) var(--input-padding-x); border: 1px solid var(--tertiary-bg); border-radius: var(--border-radius-sm); box-sizing: border-box; font-size: 0.95rem; font-family: var(--font-family); background-color: var(--primary-bg); color: var(--text-primary); transition: border-color 0.2s ease, box-shadow 0.2s ease; }
-input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, textarea:focus { outline: none; border-color: var(--accent-color); box-shadow: 0 0 0 2px rgba(218, 190, 36, 0.25); }
+input[type="text"],
+input[type="number"],
+input[type="date"], /* Although hidden, keep styles for consistency */
+textarea {
+    width: 100%;
+    padding: var(--input-padding-y) var(--input-padding-x);
+    border: 1px solid var(--tertiary-bg);
+    border-radius: var(--border-radius-sm);
+    box-sizing: border-box;
+    font-size: 0.95rem;
+    font-family: var(--font-family);
+    background-color: var(--primary-bg);
+    color: var(--text-primary);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(218, 190, 36, 0.25);
+}
 input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
 input[type="number"] { -moz-appearance: textfield; }
 input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-textarea { resize: vertical; min-height: 75px; }
+textarea { resize: vertical; min-height: 90px; }
 
-fieldset { border: 1px solid var(--tertiary-bg); border-radius: var(--border-radius-md); padding: 20px; margin-bottom: 25px; background-color: transparent; }
-fieldset:last-child { margin-bottom: 0; }
-legend { font-weight: 600; color: var(--accent-color); padding: 0 10px; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
-.icon-legend { font-size: 0.9em; opacity: 0.8; }
+fieldset {
+    border: 1px solid var(--tertiary-bg);
+    border-radius: var(--border-radius-md);
+    padding: 15px; /* Reduced padding for mobile */
+    margin-bottom: 20px;
+    background-color: transparent;
+}
+fieldset:last-of-type { margin-bottom: 0; } /* Remove margin from last fieldset in a panel */
 
-.slider-container label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.slider-container label span { font-weight: 500; color: var(--accent-color); font-size: 0.95rem; }
+legend {
+    font-weight: 600;
+    color: var(--accent-color);
+    padding: 0 8px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.icon-legend { font-size: 0.85em; opacity: 0.8; }
+
+.slider-container { margin-bottom: 15px; }
+.slider-container label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.slider-container label span { font-weight: 500; color: var(--accent-color); font-size: 0.9rem; }
 input[type="range"] { width: 100%; margin-top: 0; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; height: 18px; }
 input[type="range"]::-webkit-slider-runnable-track { background: var(--tertiary-bg); height: 6px; border-radius: 3px; }
 input[type="range"]::-moz-range-track { background: var(--tertiary-bg); height: 6px; border-radius: 3px; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -6px; background-color: var(--accent-color); height: 18px; width: 18px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
-input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); height: 16px; width: 16px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
-input[type="range"]:focus::-webkit-slider-thumb { box-shadow: 0 0 0 3px rgba(218, 190, 36, 0.3); } 
-input[type="range"]:focus::-moz-range-thumb { box-shadow: 0 0 0 3px rgba(218, 190, 36, 0.3); } 
-input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(60%) sepia(10%) saturate(500%) hue-rotate(100deg) brightness(95%) contrast(90%); }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -6px; background-color: var(--accent-color); height: 20px; width: 20px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
+input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); height: 18px; width: 18px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
+
+#summaryCounts { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 8px; }
 datalist {} datalist option {}
 
-#summaryCounts { font-size: 0.8rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 10px; }
+/* --- Action Buttons (within form, typically at bottom of a panel) --- */
+.form-actions {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px; /* Space above buttons */
+    border-top: 1px solid var(--tertiary-bg); /* Separator line */
+    display: grid; /* Use grid for more flexible button layout */
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive columns */
+    gap: 10px;
+}
 
-/* --- Buttons --- */
-.form-actions { text-align: center; margin-top: 20px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 10px; }
-button:not(.date-control-btn) { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: var(--button-padding-y) var(--button-padding-x); border: none; border-radius: var(--border-radius-sm); cursor: pointer; font-size: 0.95rem; font-weight: 500; font-family: var(--font-family); transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease; width: 100%; box-shadow: var(--box-shadow); -webkit-tap-highlight-color: transparent; }
-button:not(.date-control-btn):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.25); }
-button:not(.date-control-btn):active:not(:disabled) { transform: translateY(0px); box-shadow: inset 0 1px 3px rgba(0,0,0,0.15); }
-button:not(.date-control-btn) i { font-size: 1.1em; transition: none; }
+button:not(.date-control-btn):not(.bottom-nav-button) { /* Exclude date and bottom nav buttons */
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 8px;
+    padding: var(--button-padding-y) var(--button-padding-x);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    /* width: 100%; Removed, grid handles width */
+    box-shadow: var(--box-shadow);
+}
+button:not(.date-control-btn):not(.bottom-nav-button):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+button:not(.date-control-btn):not(.bottom-nav-button):active:not(:disabled) { transform: translateY(0px); box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); }
+button:not(.date-control-btn):not(.bottom-nav-button) i { font-size: 1em; transition: none; }
 button:disabled { cursor: not-allowed; opacity: 0.7; }
 
-.btn-text { display: inline; } 
-@media (max-width: 420px) { .btn-text { display: none; } button:not(.date-control-btn) { gap: 0; padding: var(--button-padding-y) calc(var(--button-padding-x) / 1.5) ; } button:not(.date-control-btn) i { margin-right: 0; } }
+.btn-text { /* Text in main action buttons */
+    /* display: inline; Always show or make it conditional via JS if needed */
+}
 
 button[type="submit"] { background-color: var(--accent-color); color: var(--primary-bg); }
 button[type="submit"]:hover:not(:disabled) { background-color: var(--accent-hover); }
@@ -266,34 +316,19 @@ button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
 button#clearForm { background-color: var(--danger-color); color: white; }
 button#clearForm:hover:not(:disabled) { background-color: var(--danger-hover); }
 
+
 /* --- Toast Notifications --- */
-#toast-container { position: fixed; bottom: 15px; left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
-.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 12px 18px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 380px; opacity: 0; transform: translateY(20px); animation: slideUpToast 0.4s forwards, fadeOutToastGeneral 0.4s 3.6s forwards; display: flex; align-items: center; gap: 12px; font-size: 0.9rem; }
-.toast i { font-size: 1.1em; }
+#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); /* Above bottom nav */ left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
+.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); animation: slideUpToast 0.4s forwards, fadeOutToastGeneral 0.4s 3.6s forwards; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+.toast i { font-size: 1em; }
 .toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
 .toast.error { border-left-color: var(--danger-color); } .toast.error i { color: var(--danger-color); }
 .toast.info { border-left-color: var(--info-color); } .toast.info i { color: var(--info-color); }
 @keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeOutToastGeneral { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
 
-@media (min-width: 600px) { 
-    body { font-size: 16px; }
-    .btn-text { display: inline; } 
-    button:not(.date-control-btn) { gap: 10px; width: auto; min-width: 170px; }
-    form div:not(#tabViewPort):not(#tabPanelsSlider):not(.tab-panel):not(.tab-panel-content):not(.tab-panel-column):not(.form-actions):not(.slider-container):not(.date-control-wrapper),
-    form > div > div:has(> .date-control-wrapper),
-    .slider-container { margin-bottom: 20px; }
-    label { font-size: 0.9rem; }
-    input[type="text"], input[type="number"], input[type="date"], textarea { font-size: 1rem; }
-    .slider-container label span { font-size: 1rem; } 
-    fieldset { padding: 25px; margin-bottom: 30px; } 
-    fieldset:last-child { margin-bottom: 0; }
-    legend { font-size: 1.15em; }
-    .form-actions { flex-direction: row; justify-content: center; gap: 15px; }
-    #toast-container { left: auto; right: 20px; bottom: 20px; align-items: flex-end; }
-    .toast { width: auto; }
-}
-@media (min-width: 800px) { 
-    fieldset { margin-bottom: var(--column-gap); } 
-    fieldset:last-child { margin-bottom: 0; }
+/* Hide desktop-specific column layouts if any were missed */
+@media (max-width: 799.98px) {
+    .tab-panel-content { flex-direction: column; }
+    .tab-panel-column { flex-basis: auto !important; /* Override any desktop flex sizing */ }
 }
