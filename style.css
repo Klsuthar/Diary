@@ -15,7 +15,7 @@
     --border-radius-sm: 6px;
     --border-radius-md: 10px;
     --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    --input-padding-y: 10px; /* Slightly reduced for mobile */
+    --input-padding-y: 10px;
     --input-padding-x: 14px;
     --button-padding-y: 10px;
     --button-padding-x: 16px;
@@ -25,11 +25,11 @@
 
 *, *::before, *::after {
     box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
 }
 
 html {
-    font-size: 16px; /* Base font size for rem units */
+    font-size: 16px;
 }
 
 body {
@@ -37,13 +37,12 @@ body {
     background-color: var(--primary-bg);
     color: var(--text-primary);
     margin: 0;
-    display: flex; /* For centering container if needed, but container is full width now */
-    /* justify-content: center; align-items: flex-start; */
+    display: flex;
     min-height: 100vh;
-    font-size: 0.95rem; /* Default mobile font size */
+    font-size: 0.95rem;
     line-height: 1.6;
-    overflow: hidden; /* Prevent body scroll, individual panels will scroll */
-    -webkit-font-smoothing: antialiased; /* Smoother fonts on mobile */
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
@@ -52,20 +51,20 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: var(--primary-bg); /* Match body if container edges are visible */
+    background-color: var(--primary-bg);
 }
 
 /* --- Top Bar --- */
 .top-bar {
     background-color: var(--secondary-bg);
     color: var(--text-primary);
-    padding: 0 15px;
+    padding: 0 10px; /* Reduced padding for mobile */
     height: var(--top-bar-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-shadow: var(--box-shadow);
-    position: fixed; /* Fixed at the top */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -75,53 +74,63 @@ body {
 .top-bar .date-controls {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px; /* Reduced gap */
+    flex-grow: 1; /* Allow date controls to take available space */
 }
 .top-bar #currentDateDisplay {
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Slightly smaller for mobile */
     font-weight: 500;
     flex-grow: 1;
     text-align: center;
+    margin: 0 5px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
-.top-bar .date-control-btn {
-    background-color: var(--tertiary-bg);
-    color: var(--text-primary);
+.top-bar .date-control-btn,
+.top-bar .top-action-btn { /* Common style for top bar icon buttons */
+    background-color: transparent; /* Cleaner look */
+    color: var(--text-secondary);
     border: none;
     padding: 0;
-    border-radius: var(--border-radius-sm);
+    border-radius: 50%; /* Circular buttons */
     cursor: pointer;
-    font-size: 1rem; /* Icon size */
+    font-size: 1.1rem; /* Icon size */
     line-height: 1;
-    transition: background-color 0.2s ease;
+    transition: color 0.2s ease, background-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 38px;  /* Touch-friendly size */
+    height: 38px;
 }
-.top-bar .date-control-btn:hover {
-    background-color: var(--accent-color);
-    color: var(--primary-bg);
+.top-bar .date-control-btn:hover,
+.top-bar .top-action-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(255,255,255,0.1);
 }
-.top-bar .date-control-btn:active {
-    background-color: var(--accent-hover);
+.top-bar .date-control-btn:active,
+.top-bar .top-action-btn:active {
+    background-color: rgba(255,255,255,0.15);
 }
-.top-bar #date { /* Hide actual date input, use JS to update */
+.top-bar #date {
     display: none;
+}
+.top-bar .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 
 /* --- Main Content Area (Swipeable) --- */
-#diaryForm { /* Renamed from .container to .app-container for body structure */
+#diaryForm {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-    padding-top: var(--top-bar-height); /* Space for fixed top bar */
-    padding-bottom: var(--bottom-nav-height); /* Space for fixed bottom nav */
+    padding-top: var(--top-bar-height);
+    padding-bottom: var(--bottom-nav-height);
 }
 
 #tabViewPort {
@@ -134,7 +143,6 @@ body {
 #tabPanelsSlider {
     display: flex;
     height: 100%;
-    /* transition is handled by JS for swipe */
 }
 
 .tab-panel {
@@ -142,17 +150,9 @@ body {
     flex-shrink: 0;
     overflow-y: auto;
     height: 100%;
-    padding: 15px; /* Padding inside each panel */
-    background-color: var(--primary-bg); /* Panels have main bg color */
+    padding: 15px;
+    background-color: var(--primary-bg);
 }
-/* Remove two-column layout, all fieldsets stack */
-.tab-panel-content {
-    /* No flex needed, fieldsets will stack by default */
-}
-.tab-panel-column {
-    /* Not used in mobile-only single column */
-}
-
 
 /* --- Bottom Navigation --- */
 .bottom-nav {
@@ -162,7 +162,7 @@ body {
     background-color: var(--secondary-bg);
     height: var(--bottom-nav-height);
     box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-    position: fixed; /* Fixed at the bottom */
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -184,14 +184,13 @@ body {
     text-align: center;
 }
 .bottom-nav-button i {
-    font-size: 1.5rem; /* Larger icons for bottom nav */
-    margin-bottom: 2px;
+    font-size: 1.4rem; /* Adjusted for better proportion with text */
+    margin-bottom: 3px;
     transition: transform 0.2s ease-out;
 }
-.bottom-nav-button span { /* Text for bottom nav icons */
-    font-size: 0.7rem;
-    display: block; /* Always show text, or hide based on preference/space */
-    /* display: none; To hide text and only show icons */
+.bottom-nav-button span {
+    font-size: 0.65rem; /* Smaller text for bottom nav */
+    display: block; 
 }
 .bottom-nav-button.active {
     color: var(--accent-color);
@@ -215,7 +214,7 @@ label {
 
 input[type="text"],
 input[type="number"],
-input[type="date"], /* Although hidden, keep styles for consistency */
+input[type="date"], 
 textarea {
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
@@ -244,11 +243,11 @@ textarea { resize: vertical; min-height: 90px; }
 fieldset {
     border: 1px solid var(--tertiary-bg);
     border-radius: var(--border-radius-md);
-    padding: 15px; /* Reduced padding for mobile */
+    padding: 15px;
     margin-bottom: 20px;
     background-color: transparent;
 }
-fieldset:last-of-type { margin-bottom: 0; } /* Remove margin from last fieldset in a panel */
+fieldset:last-of-type { margin-bottom: 0; }
 
 legend {
     font-weight: 600;
@@ -273,18 +272,23 @@ input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); h
 #summaryCounts { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 8px; }
 datalist {} datalist option {}
 
-/* --- Action Buttons (within form, typically at bottom of a panel) --- */
+/* --- Action Buttons (within form) --- */
 .form-actions {
     text-align: center;
     margin-top: 20px;
-    padding-top: 10px; /* Space above buttons */
-    border-top: 1px solid var(--tertiary-bg); /* Separator line */
-    display: grid; /* Use grid for more flexible button layout */
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Responsive columns */
+    padding-top: 10px;
+    border-top: 1px solid var(--tertiary-bg);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Smaller min for more buttons on small screens */
     gap: 10px;
 }
+/* Hide original clear button from .form-actions */
+.form-actions #clearForm {
+    display: none;
+}
 
-button:not(.date-control-btn):not(.bottom-nav-button) { /* Exclude date and bottom nav buttons */
+
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex; align-items: center; justify-content: center;
     gap: 8px;
     padding: var(--button-padding-y) var(--button-padding-x);
@@ -295,16 +299,15 @@ button:not(.date-control-btn):not(.bottom-nav-button) { /* Exclude date and bott
     font-weight: 500;
     font-family: var(--font-family);
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    /* width: 100%; Removed, grid handles width */
     box-shadow: var(--box-shadow);
 }
-button:not(.date-control-btn):not(.bottom-nav-button):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
-button:not(.date-control-btn):not(.bottom-nav-button):active:not(:disabled) { transform: translateY(0px); box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); }
-button:not(.date-control-btn):not(.bottom-nav-button) i { font-size: 1em; transition: none; }
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) { transform: translateY(0px); box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); }
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i { font-size: 1em; transition: none; }
 button:disabled { cursor: not-allowed; opacity: 0.7; }
 
-.btn-text { /* Text in main action buttons */
-    /* display: inline; Always show or make it conditional via JS if needed */
+.btn-text { 
+    /* For mobile, button text might be too long. Consider hiding on very small screens or using shorter text. */
 }
 
 button[type="submit"] { background-color: var(--accent-color); color: var(--primary-bg); }
@@ -313,22 +316,36 @@ button#saveFormButton { background-color: var(--success-color); color: white; }
 button#saveFormButton:hover:not(:disabled) { background-color: #16a34a; }
 button#importJsonButton { background-color: var(--info-color); color: white; }
 button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
-button#clearForm { background-color: var(--danger-color); color: white; }
-button#clearForm:hover:not(:disabled) { background-color: var(--danger-hover); }
+/* button#clearForm is now hidden */
 
 
 /* --- Toast Notifications --- */
-#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); /* Above bottom nav */ left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
-.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); animation: slideUpToast 0.4s forwards, fadeOutToastGeneral 0.4s 3.6s forwards; display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
+.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.2s forwards; /* slideUp 0.1s, visible 0.2s, fadeOut 0.3s = total 0.6s interaction before JS remove */
+    display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
 .toast i { font-size: 1em; }
 .toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
 .toast.error { border-left-color: var(--danger-color); } .toast.error i { color: var(--danger-color); }
 .toast.info { border-left-color: var(--info-color); } .toast.info i { color: var(--info-color); }
 @keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeOutToastGeneral { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(20px); } }
+@keyframes fadeOutToastGeneral { 
+    from { opacity: 1; transform: translateY(0); } 
+    to { opacity: 0; transform: translateY(10px); } /* Less dramatic translate on fade out */
+}
 
-/* Hide desktop-specific column layouts if any were missed */
-@media (max-width: 799.98px) {
-    .tab-panel-content { flex-direction: column; }
-    .tab-panel-column { flex-basis: auto !important; /* Override any desktop flex sizing */ }
+/* Minor adjustments for larger "mobile" screens if needed */
+@media (min-width: 400px) {
+    .top-bar #currentDateDisplay {
+        font-size: 0.9rem;
+    }
+    .bottom-nav-button i {
+        font-size: 1.5rem;
+    }
+    .bottom-nav-button span {
+        font-size: 0.7rem;
+    }
+     .form-actions {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Allow more space for buttons */
+    }
 }
