@@ -1,16 +1,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     const diaryForm = document.getElementById('diaryForm');
-    const clearFormButton = document.getElementById('clearForm');
+    // Clear button from .form-actions is now hidden, new one is in top-bar
+    const clearFormButtonOriginal = document.getElementById('clearForm'); // Keep ref if needed, or remove if fully handled by new btn
     const importJsonButton = document.getElementById('importJsonButton');
     const jsonFileInput = document.getElementById('jsonFile');
     const saveFormButton = document.getElementById('saveFormButton');
     const toastContainer = document.getElementById('toast-container');
     const downloadButton = diaryForm.querySelector('button[type="submit"]');
 
+    // Top Bar Elements
     const dateInput = document.getElementById('date');
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
-    const currentDateDisplay = document.getElementById('currentDateDisplay'); // For top bar
+    const currentDateDisplay = document.getElementById('currentDateDisplay');
+    const pickDateButton = document.getElementById('pickDateButton');
+    const topBarClearButton = document.getElementById('topBarClearButton');
 
     // Tab Navigation (Bottom Bar)
     const bottomNavButtons = document.querySelectorAll('.bottom-nav-button');
@@ -72,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
         toastContainer.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 4000);
+        // Toast visibility time changed to 0.5 seconds
+        setTimeout(() => { toast.remove(); }, 500);
     }
 
     function formatDate(date) {
@@ -81,31 +86,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-     function updateCurrentDateDisplay(dateStr) {
-        if (currentDateDisplay && dateStr) {
-            try {
-                const dateObj = new Date(dateStr);
-                 // Add one day to compensate for timezone issues if date is parsed as UTC midnight
-                dateObj.setDate(dateObj.getDate() + 1);
-                currentDateDisplay.textContent = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            } catch (e) {
+
+    function updateCurrentDateDisplay(dateStr) {
+        if (currentDateDisplay) {
+            if (dateStr) {
+                try {
+                    // Parse date string as local
+                    const [year, month, day] = dateStr.split('-').map(Number);
+                    const dateObj = new Date(year, month - 1, day); // Month is 0-indexed for Date constructor
+                     if (isNaN(dateObj.getTime())) {
+                        currentDateDisplay.textContent = "Invalid Date";
+                    } else {
+                        currentDateDisplay.textContent = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                    }
+                } catch (e) {
+                    currentDateDisplay.textContent = "Select Date";
+                }
+            } else {
                 currentDateDisplay.textContent = "Select Date";
             }
-        } else if (currentDateDisplay) {
-             currentDateDisplay.textContent = "Select Date";
         }
     }
 
-
     function changeDate(days) {
-        const currentDateValue = dateInput.value ? new Date(dateInput.value) : new Date();
-        if (!isNaN(currentDateValue.getTime())) {
-             // For date input, ensure we're using local midnight
-            const localDate = new Date(currentDateValue.getFullYear(), currentDateValue.getMonth(), currentDateValue.getDate());
-            localDate.setDate(localDate.getDate() + days);
-            dateInput.value = formatDate(localDate);
-            updateCurrentDateDisplay(dateInput.value);
+        let currentDateValue;
+        if (dateInput.value) {
+            const [year, month, day] = dateInput.value.split('-').map(Number);
+            currentDateValue = new Date(year, month - 1, day);
         } else {
+            currentDateValue = new Date(); // Default to today if input is empty
+             // Ensure dateInput gets a value if it was empty
+            dateInput.value = formatDate(currentDateValue);
+        }
+
+        if (!isNaN(currentDateValue.getTime())) {
+            currentDateValue.setDate(currentDateValue.getDate() + days);
+            dateInput.value = formatDate(currentDateValue);
+            updateCurrentDateDisplay(dateInput.value);
+        } else { // Fallback if date somehow becomes invalid
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
@@ -114,6 +132,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if(dateInput) {
         dateInput.addEventListener('change', () => updateCurrentDateDisplay(dateInput.value));
+    }
+    if(pickDateButton && dateInput) {
+        pickDateButton.addEventListener('click', () => dateInput.click());
     }
 
 
@@ -171,13 +192,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         if (overallUpdated) loadAllSuggestions();
     }
+    
+    function clearDiaryForm() {
+        if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
+            diaryForm.reset(); 
+            localStorage.removeItem(LOCAL_STORAGE_KEY); 
+            initializeForm(); // This will set defaults and load persistent suggestions
+            showToast("Form cleared and local save removed.", "info");
+            slideToPanel(0); // Reset to first tab
+        }
+    }
+
+    if (topBarClearButton) {
+        topBarClearButton.addEventListener('click', clearDiaryForm);
+    }
+    // If you decide to keep the original clear button in HTML (even if hidden)
+    // and want it to also work, its event listener needs to be set up.
+    // However, since it's hidden and replaced, this might not be necessary.
+    if (clearFormButtonOriginal) { // The one in .form-actions
+        clearFormButtonOriginal.addEventListener('click', clearDiaryForm);
+    }
+
 
     function initializeForm() {
         if (!dateInput.value) {
              const today = new Date();
              dateInput.value = formatDate(today);
         }
-        updateCurrentDateDisplay(dateInput.value); // Initialize date display
+        updateCurrentDateDisplay(dateInput.value);
 
         ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 'meditationDurationMin'].forEach(id => {
             const el = document.getElementById(id);
@@ -193,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         loadAllSuggestions();
-        loadFormFromLocalStorage();
+        loadFormFromLocalStorage(); // This might override defaults if data exists
         updateSummaryCounts();
         slideToPanel(currentTabIndex, false);
     }
@@ -243,7 +285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         bottomNavButtons.forEach((btn, i) => {
             btn.classList.toggle('active', i === index);
         });
-        // Ensure the panel itself knows it's active (for non-visual things or fallback)
         tabPanels.forEach((panel, i) => {
             panel.classList.toggle('active', i === index);
         });
@@ -287,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedDateStr = getValue('date');
                 let dayId = null;
                 if (selectedDateStr) {
-                    const selectedDate = new Date(selectedDateStr);
+                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/')); // Ensure correct parsing on all browsers
                     if(!isNaN(selectedDate.getTime())) {
                         const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
                         dayId = Math.floor((selectedDate - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
@@ -311,13 +352,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     });
 
-    clearFormButton.addEventListener('click', function() {
-        if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
-            diaryForm.reset(); localStorage.removeItem(LOCAL_STORAGE_KEY); initializeForm();
-            showToast("Form cleared and local save removed.", "info");
-            slideToPanel(0);
-        }
-    });
 
     importJsonButton.addEventListener('click', () => jsonFileInput.click());
     jsonFileInput.addEventListener('change', function(event) {
@@ -331,21 +365,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     const importedData = JSON.parse(e.target.result);
                     populateFormWithJson(importedData);
                     showToast('Diary entry imported successfully!', 'success');
-                    // Try to find the first panel that has some data to make it active
                     let firstPopulatedIndex = 0;
                     for(let i=0; i < tabPanels.length; i++) {
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]), textarea');
                         let hasData = false;
                         for(const input of panelInputs) {
                             if(input.value && input.value.trim() !== '' && input.value !== 'Na' && input.value !== '0') {
-                                hasData = true;
-                                break;
+                                hasData = true; break;
                             }
                         }
-                        if(hasData) {
-                            firstPopulatedIndex = i;
-                            break;
-                        }
+                        if(hasData) { firstPopulatedIndex = i; break; }
                     }
                     slideToPanel(firstPopulatedIndex);
 
