@@ -10,8 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('date');
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
+    const currentDateDisplay = document.getElementById('currentDateDisplay'); // For top bar
 
-    const tabButtons = document.querySelectorAll('.tab-button');
+    // Tab Navigation (Bottom Bar)
+    const bottomNavButtons = document.querySelectorAll('.bottom-nav-button');
     const tabPanels = document.querySelectorAll('.tab-panel');
     const tabViewPort = document.getElementById('tabViewPort');
     const tabPanelsSlider = document.getElementById('tabPanelsSlider');
@@ -31,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTabIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
-    const swipeThreshold = 50; // Minimum pixels for a swipe
+    const swipeThreshold = 50;
 
     const suggestionConfigs = [
         { key: 'myPersonalDiaryPersonalCareSuggestions', fieldIds: ['faceProductName', 'faceProductBrand', 'hairProductName', 'hairProductBrand', 'hairOil', 'skincareRoutine'] },
@@ -79,16 +81,41 @@ document.addEventListener('DOMContentLoaded', () => {
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+     function updateCurrentDateDisplay(dateStr) {
+        if (currentDateDisplay && dateStr) {
+            try {
+                const dateObj = new Date(dateStr);
+                 // Add one day to compensate for timezone issues if date is parsed as UTC midnight
+                dateObj.setDate(dateObj.getDate() + 1);
+                currentDateDisplay.textContent = dateObj.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            } catch (e) {
+                currentDateDisplay.textContent = "Select Date";
+            }
+        } else if (currentDateDisplay) {
+             currentDateDisplay.textContent = "Select Date";
+        }
+    }
+
 
     function changeDate(days) {
         const currentDateValue = dateInput.value ? new Date(dateInput.value) : new Date();
         if (!isNaN(currentDateValue.getTime())) {
-            currentDateValue.setDate(currentDateValue.getDate() + days);
-            dateInput.value = formatDate(currentDateValue);
+             // For date input, ensure we're using local midnight
+            const localDate = new Date(currentDateValue.getFullYear(), currentDateValue.getMonth(), currentDateValue.getDate());
+            localDate.setDate(localDate.getDate() + days);
+            dateInput.value = formatDate(localDate);
+            updateCurrentDateDisplay(dateInput.value);
         } else {
-            dateInput.value = formatDate(new Date());
+            const today = new Date();
+            dateInput.value = formatDate(today);
+            updateCurrentDateDisplay(dateInput.value);
         }
     }
+    
+    if(dateInput) {
+        dateInput.addEventListener('change', () => updateCurrentDateDisplay(dateInput.value));
+    }
+
 
     if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
     if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
@@ -104,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const text = dailyActivitySummaryTextarea.value;
             const charCount = text.length;
             const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).filter(Boolean).length;
-            summaryCountsDisplay.textContent = `Words: ${wordCount}, Characters: ${charCount}`;
+            summaryCountsDisplay.textContent = `Words: ${wordCount}, Chars: ${charCount}`;
         }
     }
     if (dailyActivitySummaryTextarea) dailyActivitySummaryTextarea.addEventListener('input', updateSummaryCounts);
@@ -146,7 +173,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeForm() {
-        if (!dateInput.value) dateInput.value = formatDate(new Date());
+        if (!dateInput.value) {
+             const today = new Date();
+             dateInput.value = formatDate(today);
+        }
+        updateCurrentDateDisplay(dateInput.value); // Initialize date display
+
         ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 'meditationDurationMin'].forEach(id => {
             const el = document.getElementById(id);
             if(el) {
@@ -163,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadAllSuggestions();
         loadFormFromLocalStorage();
         updateSummaryCounts();
-        slideToPanel(currentTabIndex, false); // Initialize slider position without animation
+        slideToPanel(currentTabIndex, false);
     }
 
     function getValue(elementId, type = 'text') {
@@ -195,12 +227,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return age >= 0 ? age : null;
     }
     
-    // --- Tab and Swipe Navigation ---
     function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
         currentTabIndex = index;
-        const offset = -index * 100; // Percentage offset
+        const offset = -index * 100; 
 
         if (animate) {
             tabPanelsSlider.style.transition = 'transform 0.35s ease-in-out';
@@ -209,62 +240,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         tabPanelsSlider.style.transform = `translateX(${offset}%)`;
 
-        // Update active tab button
-        tabButtons.forEach((btn, i) => {
+        bottomNavButtons.forEach((btn, i) => {
             btn.classList.toggle('active', i === index);
-            btn.setAttribute('aria-selected', i === index);
         });
-
-        // Update active panel class (for accessibility and non-visual cues)
-        // Delay slightly if animating to allow slide to start
-        setTimeout(() => {
-            tabPanels.forEach((panel, i) => {
-                panel.classList.toggle('active', i === index);
-            });
-        }, animate ? 50 : 0);
-         // Scroll the active tab button into view if tabs are scrollable
-        if (tabButtons[index]) {
-            tabButtons[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        }
+        // Ensure the panel itself knows it's active (for non-visual things or fallback)
+        tabPanels.forEach((panel, i) => {
+            panel.classList.toggle('active', i === index);
+        });
     }
 
-    tabButtons.forEach((button, index) => {
+    bottomNavButtons.forEach((button, index) => {
         button.addEventListener('click', () => slideToPanel(index));
     });
 
     if (tabViewPort) {
         tabViewPort.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX; // Reset endX
-            tabPanelsSlider.style.transition = 'none'; // Disable transition during drag
+            touchEndX = touchStartX; 
+            tabPanelsSlider.style.transition = 'none'; 
         }, { passive: true });
 
         tabViewPort.addEventListener('touchmove', (e) => {
             touchEndX = e.touches[0].clientX;
-            const deltaX = touchEndX - touchStartX;
-            // Optional: Live dragging visual feedback (more complex)
-            // const currentOffset = -currentTabIndex * tabViewPort.offsetWidth;
-            // tabPanelsSlider.style.transform = `translateX(${currentOffset + deltaX}px)`;
         }, { passive: true });
 
         tabViewPort.addEventListener('touchend', () => {
             const deltaX = touchEndX - touchStartX;
             let newIndex = currentTabIndex;
-
             if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX < 0) { // Swiped left
-                    newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
-                } else { // Swiped right
-                    newIndex = Math.max(currentTabIndex - 1, 0);
-                }
+                if (deltaX < 0) newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
+                else newIndex = Math.max(currentTabIndex - 1, 0);
             }
-            // Always slide, even if not past threshold, to snap back or to new panel
             slideToPanel(newIndex);
         });
     }
 
-
-    // --- Form Actions ---
     diaryForm.addEventListener('submit', function(event) {
         event.preventDefault();
         if (!downloadButton) return;
@@ -305,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
             diaryForm.reset(); localStorage.removeItem(LOCAL_STORAGE_KEY); initializeForm();
             showToast("Form cleared and local save removed.", "info");
-            slideToPanel(0); // Reset to first tab
+            slideToPanel(0);
         }
     });
 
@@ -321,11 +331,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const importedData = JSON.parse(e.target.result);
                     populateFormWithJson(importedData);
                     showToast('Diary entry imported successfully!', 'success');
-                    // Determine active tab based on imported data if possible, or default to first
-                    const firstPopulatedTab = tabPanelsNodeList.findIndex(panel => {
-                        return Array.from(panel.querySelectorAll('input, textarea')).some(input => input.value !== '' && input.value !== 'Na' && input.value !== '0' && input.type !== 'range');
-                    });
-                    slideToPanel(firstPopulatedTab >= 0 ? firstPopulatedTab : 0);
+                    // Try to find the first panel that has some data to make it active
+                    let firstPopulatedIndex = 0;
+                    for(let i=0; i < tabPanels.length; i++) {
+                        const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]), textarea');
+                        let hasData = false;
+                        for(const input of panelInputs) {
+                            if(input.value && input.value.trim() !== '' && input.value !== 'Na' && input.value !== '0') {
+                                hasData = true;
+                                break;
+                            }
+                        }
+                        if(hasData) {
+                            firstPopulatedIndex = i;
+                            break;
+                        }
+                    }
+                    slideToPanel(firstPopulatedIndex);
 
                 } catch (error) { console.error("Error parsing JSON file:", error); showToast('Failed to import diary entry. Invalid JSON file.', 'error');
                 } finally { jsonFileInput.value = ''; setButtonLoadingState(importJsonButton, false, originalImportIconHTML); }
@@ -336,6 +358,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateFormWithJson(jsonData) {
         setValue('date', jsonData.date);
+        updateCurrentDateDisplay(jsonData.date);
         if (jsonData.environment) Object.keys(jsonData.environment).forEach(key => { const elId = { temperature_c: 'temperatureC', air_quality_index: 'airQualityIndex', humidity_percent: 'humidityPercent', uv_index: 'uvIndex', weather_condition: 'weatherCondition' }[key]; if (elId) setValue(elId, jsonData.environment[key]); });
         if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(key => { const elId = { weight_kg: 'weightKg', height_cm: 'heightCm', chest: 'chest', belly: 'belly' }[key]; if (elId) setValue(elId, jsonData.body_measurements[key]); });
         if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(key => { const elId = { sleep_hours: 'sleepHours', steps_count: 'stepsCount', steps_distance_km: 'stepsDistanceKm', kilocalorie: 'kilocalorie', water_intake_liters: 'waterIntakeLiters', medications_taken: 'medicationsTaken', physical_symptoms: 'physicalSymptoms', energy_level: 'energyLevel', stress_level: 'stressLevel' }[key]; if (elId) setValue(elId, jsonData.health_and_fitness[key]); });
