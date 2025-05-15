@@ -19,8 +19,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const stressLevelSlider = document.getElementById('stressLevel');
     const stressLevelValueDisplay = document.getElementById('stressLevelValue');
 
-    const BIRTH_DATE = new Date(2003, 6, 4);
+    const dailyActivitySummaryTextarea = document.getElementById('dailyActivitySummary');
+    const summaryCountsDisplay = document.getElementById('summaryCounts');
+
+
+    const BIRTH_DATE = new Date(2003, 6, 4); // Month is 0-indexed, so 6 is July
     const LOCAL_STORAGE_KEY = 'myPersonalDiaryFormData';
+    const MAX_SUGGESTIONS_PER_FIELD = 7;
+
+    // Suggestion fields configuration
+    const suggestionConfigs = [
+        {
+            key: 'myPersonalDiaryPersonalCareSuggestions',
+            fieldIds: ['faceProductName', 'faceProductBrand', 'hairProductName', 'hairProductBrand', 'hairOil', 'skincareRoutine']
+        },
+        {
+            key: 'myPersonalDiaryDietSuggestions',
+            fieldIds: ['breakfast', 'lunch', 'dinner']
+        }
+    ];
 
     // --- Toast Notification System ---
     function showToast(message, type = 'info') {
@@ -46,46 +63,94 @@ document.addEventListener('DOMContentLoaded', () => {
     function changeDate(days) {
         if (dateInput.value) {
             const currentDate = new Date(dateInput.value);
-            // Check if currentDate is valid. dateInput.value can be empty or malformed initially.
-            // However, `new Date("")` results in "Invalid Date".
-            // `new Date("YYYY-MM-DD")` is parsed as local time at midnight.
             if (!isNaN(currentDate.getTime())) {
                  currentDate.setDate(currentDate.getDate() + days);
                  dateInput.value = formatDate(currentDate);
             } else {
-                // If current date is invalid, set to today
                 dateInput.value = formatDate(new Date());
             }
         } else {
-            // If date input is empty, set to today
             dateInput.value = formatDate(new Date());
         }
     }
 
-    if (dateIncrementButton) {
-        dateIncrementButton.addEventListener('click', () => changeDate(1));
-    }
-    if (dateDecrementButton) {
-        dateDecrementButton.addEventListener('click', () => changeDate(-1));
-    }
-
+    if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
+    if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
 
     // --- Slider Value Display ---
     function updateSliderDisplay(slider, displayElement) {
-        if (slider && displayElement) {
-            displayElement.textContent = slider.value;
+        if (slider && displayElement) displayElement.textContent = slider.value;
+    }
+    if (energyLevelSlider) energyLevelSlider.addEventListener('input', () => updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay));
+    if (stressLevelSlider) stressLevelSlider.addEventListener('input', () => updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay));
+
+    // --- Summary Word/Character Count ---
+    function updateSummaryCounts() {
+        if (dailyActivitySummaryTextarea && summaryCountsDisplay) {
+            const text = dailyActivitySummaryTextarea.value;
+            const charCount = text.length;
+            const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).filter(Boolean).length;
+            summaryCountsDisplay.textContent = `Words: ${wordCount}, Characters: ${charCount}`;
         }
     }
-    if (energyLevelSlider) {
-        energyLevelSlider.addEventListener('input', () => updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay));
+    if (dailyActivitySummaryTextarea) {
+        dailyActivitySummaryTextarea.addEventListener('input', updateSummaryCounts);
     }
-    if (stressLevelSlider) {
-        stressLevelSlider.addEventListener('input', () => updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay));
+
+
+    // --- Generic Suggestions Logic ---
+    function loadAllSuggestions() {
+        suggestionConfigs.forEach(config => {
+            const suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
+            config.fieldIds.forEach(fieldId => {
+                const datalistElement = document.getElementById(`${fieldId}Suggestions`);
+                if (datalistElement && suggestionsData[fieldId] && Array.isArray(suggestionsData[fieldId])) {
+                    datalistElement.innerHTML = ''; 
+                    suggestionsData[fieldId].forEach(suggestionText => {
+                        const option = document.createElement('option');
+                        option.value = suggestionText;
+                        datalistElement.appendChild(option);
+                    });
+                }
+            });
+        });
     }
+
+    function saveAllSuggestions() {
+        let overallUpdated = false;
+        suggestionConfigs.forEach(config => {
+            let suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
+            let configUpdated = false;
+
+            config.fieldIds.forEach(fieldId => {
+                const inputElement = document.getElementById(fieldId);
+                if (inputElement && inputElement.value.trim() !== '') {
+                    const newValue = inputElement.value.trim();
+                    suggestionsData[fieldId] = suggestionsData[fieldId] || [];
+                    
+                    suggestionsData[fieldId] = suggestionsData[fieldId].filter(s => s !== newValue);
+                    suggestionsData[fieldId].unshift(newValue); 
+
+                    if (suggestionsData[fieldId].length > MAX_SUGGESTIONS_PER_FIELD) {
+                        suggestionsData[fieldId] = suggestionsData[fieldId].slice(0, MAX_SUGGESTIONS_PER_FIELD);
+                    }
+                    configUpdated = true;
+                }
+            });
+
+            if (configUpdated) {
+                localStorage.setItem(config.key, JSON.stringify(suggestionsData));
+                overallUpdated = true;
+            }
+        });
+        if (overallUpdated) {
+            loadAllSuggestions(); 
+        }
+    }
+
 
     // --- Initialize Form ---
     function initializeForm() {
-        // Set default date to today (if not already set by loadFormFromLocalStorage)
         if (!dateInput.value) {
             dateInput.value = formatDate(new Date());
         }
@@ -94,39 +159,39 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('heightCm').value = "178";
         document.getElementById('chest').value = "82";
         document.getElementById('belly').value = "91";
+        document.getElementById('meditationStatus').value = "Na"; 
+        document.getElementById('meditationDurationMin').value = "0"; 
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-
-        loadFormFromLocalStorage();
+        
+        loadAllSuggestions(); 
+        loadFormFromLocalStorage(); 
+        updateSummaryCounts(); // Initial count update
     }
 
 
     // --- Tab functionality ---
-tabButtons.forEach(button => {
-    button.addEventListener('click', () => {
-        tabButtons.forEach(btn => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-selected', 'false');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+            tabPanels.forEach(panel => panel.classList.remove('active'));
+            button.classList.add('active');
+            button.setAttribute('aria-selected', 'true');
+            const targetTabId = button.getAttribute('data-tab');
+            document.getElementById(targetTabId).classList.add('active');
         });
-        tabPanels.forEach(panel => panel.classList.remove('active'));
-        button.classList.add('active');
-        button.setAttribute('aria-selected', 'true');
-        const targetTabId = button.getAttribute('data-tab');
-        document.getElementById(targetTabId).classList.add('active');
     });
-});
 
     // --- Get/Set Form Values ---
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
-        if (!element) {
-            return type === 'number' || type === 'range' ? null : '';
-        }
+        if (!element) return type === 'number' || type === 'range' ? null : '';
         const value = element.value.trim();
-        if (type === 'number' || type === 'range') {
-            return value === '' ? null : parseFloat(value);
-        }
+        if (type === 'number' || type === 'range') return value === '' ? null : parseFloat(value);
         return value;
     }
 
@@ -148,15 +213,15 @@ tabButtons.forEach(button => {
         if (isNaN(entryDate.getTime())) return null;
         let age = entryDate.getFullYear() - BIRTH_DATE.getFullYear();
         const monthDiff = entryDate.getMonth() - BIRTH_DATE.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && entryDate.getDate() < BIRTH_DATE.getDate())) {
-            age--;
-        }
+        if (monthDiff < 0 || (monthDiff === 0 && entryDate.getDate() < BIRTH_DATE.getDate())) age--;
         return age >= 0 ? age : null;
     }
 
     // --- Form Submission (Generate JSON) ---
     diaryForm.addEventListener('submit', function(event) {
         event.preventDefault();
+        saveAllSuggestions(); 
+
         const data = {};
         const selectedDateStr = getValue('date');
         let dayId = null;
@@ -174,7 +239,7 @@ tabButtons.forEach(button => {
         data.age = calculateAge(selectedDateStr);
 
         data.environment = {
-            temperature_c: getValue('temperatureC', 'number'),
+            temperature_c: getValue('temperatureC'),
             air_quality_index: getValue('airQualityIndex', 'number'),
             humidity_percent: getValue('humidityPercent', 'number'),
             uv_index: getValue('uvIndex', 'number'),
@@ -198,7 +263,7 @@ tabButtons.forEach(button => {
             stress_level: getValue('stressLevel', 'range')
         };
         data.mental_and_emotional_health = {
-            mental_state: getValue('mentalState'),
+            mental_state: getValue('mentalState'), 
             meditation_status: getValue('meditationStatus'),
             meditation_duration_min: getValue('meditationDurationMin', 'number'),
             other_thoughts_detailed_entry: getValue('otherThoughtsDetailedEntry')
@@ -227,28 +292,27 @@ tabButtons.forEach(button => {
         data.daily_activity_summary = getValue('dailyActivitySummary');
 
         const jsonString = JSON.stringify(data, null, 2);
-        downloadJSON(jsonString, `diary_entry_${data.date || 'nodate'}.json`);
+        downloadJSON(jsonString, `${data.date || 'nodate'}.json`);
     });
 
     // --- Clear Form ---
     clearFormButton.addEventListener('click', function() {
-        const confirmClear = confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data.");
+        const confirmClear = confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).");
         if (confirmClear) {
-            diaryForm.reset(); // Resets form elements to their default state in HTML
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-            initializeForm(); // Re-apply defaults, today's date, slider display etc.
+            diaryForm.reset(); 
+            localStorage.removeItem(LOCAL_STORAGE_KEY); 
+            initializeForm(); 
             showToast("Form cleared and local save removed.", "info");
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            tabPanels.forEach(panel => panel.classList.remove('active'));
-            if(tabButtons.length > 0) tabButtons[0].classList.add('active');
-            if(tabPanels.length > 0) tabPanels[0].classList.add('active');
+            tabButtons.forEach((btn, index) => {
+                btn.classList.toggle('active', index === 0);
+                btn.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+            });
+            tabPanels.forEach((panel, index) => panel.classList.toggle('active', index === 0));
         }
     });
 
     // --- Import JSON ---
-    importJsonButton.addEventListener('click', () => {
-        jsonFileInput.click();
-    });
+    importJsonButton.addEventListener('click', () => jsonFileInput.click());
     jsonFileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file) {
@@ -317,6 +381,10 @@ tabButtons.forEach(button => {
             setValue('keyEvents', jsonData.additional_notes.key_events);
         }
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
+
+        if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
+        if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
+        updateSummaryCounts(); // Update counts after populating from JSON
     }
 
     // --- Download JSON ---
@@ -333,6 +401,8 @@ tabButtons.forEach(button => {
 
     // --- Local Storage Save/Load ---
     saveFormButton.addEventListener('click', () => {
+        saveAllSuggestions(); 
+
         const formDataToSave = {};
         const elementsToSave = diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]');
         elementsToSave.forEach(element => {
@@ -372,6 +442,5 @@ tabButtons.forEach(button => {
         }
     }
 
-    // Call initializeForm at the end to ensure all elements are ready
     initializeForm();
 });
