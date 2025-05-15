@@ -64,59 +64,91 @@ h1 {
 /* --- Tabs Styling --- */
 .tabs {
     display: flex;
+    flex-wrap: nowrap;
     margin-bottom: 20px;
-    border-bottom: 2px solid var(--tertiary-bg); /* Continuous line for non-active areas */
-    position: relative; /* For z-index stacking context of tab buttons */
+    border-bottom: 2px solid var(--tertiary-bg);
+    position: relative;
+    overflow-x: auto; /* Fallback for extreme cases */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+    scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
+
+.tabs::-webkit-scrollbar {
+    display: none; /* Hide scrollbar in WebKit browsers */
 }
 
 .tab-button {
-    padding: 12px 10px; /* Base padding */
+    flex: 1;
+    min-width: 80px; /* Prevent tabs from becoming too narrow */
+    padding: 10px 12px;
     cursor: pointer;
-    border: var(--active-tab-border-thickness) solid transparent; /* Reserve space for border to prevent layout shift */
-    border-bottom-width: var(--active-tab-bottom-thickness); /* Consistent bottom border area */
+    border: 2px solid transparent;
+    border-bottom-width: 3px;
     background-color: transparent;
     color: var(--text-secondary);
-    font-size: 1.2rem;
-    transition: color 0.2s ease, transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-    white-space: nowrap;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     text-align: center;
-    flex-grow: 1;
-    flex-basis: 0;
     position: relative;
-    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0; /* Round top corners */
-    /* Ensure content (icon) inside doesn't shrink padding area due to border */
-    line-height: 1; /* Helps center icon if font-size is main factor */
+    border-radius: var(--border-radius-sm) var(--border-radius-sm) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px; /* Space between icon and text */
 }
 
-.tab-button:hover:not(.active) { /* Hover for non-active tabs */
+.tab-button:hover:not(.active) {
     color: var(--text-primary);
-    background-color: rgba(255,255,255,0.05); /* Subtle hover background */
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .tab-button.active {
-    color: var(--accent-color); /* Icon color */
-    background-color: var(--secondary-bg); /* Match container to "lift" it visually */
-    border-color: var(--text-primary); /* Light border all around */
-    border-bottom-color: var(--accent-color); /* Bottom part of THIS border is accent */
-    /* border-bottom-width is already var(--active-tab-bottom-thickness) */
-    
-    /* Lift it to cover the .tabs continuous border-bottom */
-    margin-bottom: -2px; /* Amount of .tabs border-bottom to cover */
-    z-index: 1; /* To sit on top */
-
-    /* No padding change needed here because all buttons have transparent border reserving space */
+    color: var(--accent-color);
+    background-color: var(--secondary-bg);
+    border-color: var(--accent-color);
+    border-bottom-color: var(--accent-color);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1;
 }
 
+.tab-button i {
+    font-size: 1rem; /* Match text size for alignment */
+    line-height: 1.2; /* Ensure vertical centering */
+}
 
 .tab-panel {
     display: none;
     animation: fadeIn 0.4s ease-out;
 }
-.tab-panel.active { display: block; }
+
+.tab-panel.active {
+    display: block;
+}
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+    .tab-button {
+        font-size: 0.95rem;
+        padding: 8px 10px;
+        min-width: 60px;
+    }
+    .tab-button i {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .tab-button {
+        font-size: 0.85rem;
+        padding: 6px 8px;
+        min-width: 50px;
+    }
 }
 
 /* --- Form Elements (No changes from here down, but included for completeness) --- */
