@@ -18,10 +18,17 @@
             <div class="date-controls">
                 <button type="button" id="dateDecrement" class="date-control-btn" aria-label="Previous day"><i class="fas fa-chevron-left"></i></button>
                 <span id="currentDateDisplay">Loading Date...</span> 
-                <input type="date" id="date" name="date" required> <!-- Hidden but used by JS -->
                 <button type="button" id="dateIncrement" class="date-control-btn" aria-label="Next day"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <!-- Other top bar actions can go here if needed -->
+            <input type="date" id="date" name="date" required> <!-- Hidden but used by JS -->
+            <div class="top-actions">
+                <button type="button" id="pickDateButton" class="top-action-btn" aria-label="Pick Date" title="Pick Date">
+                    <i class="fas fa-calendar-alt"></i>
+                </button>
+                <button type="button" id="topBarClearButton" class="top-action-btn" aria-label="Clear Form" title="Clear Form">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
         </header>
 
         <form id="diaryForm">
@@ -29,7 +36,6 @@
                 <div id="tabPanelsSlider">
                     <!-- TAB: Basic & Environment -->
                     <div id="tab-basic" class="tab-panel active">
-                        <!-- Content is single column for mobile -->
                         <fieldset>
                             <legend><i class="fas fa-cloud-sun icon-legend"></i> Environment</legend>
                             <div> <label for="temperatureC">Temperature Range (°C):</label> <input type="text" id="temperatureC" name="temperatureC" placeholder="e.g., 23-35"> </div>
@@ -118,6 +124,7 @@
                 <button type="button" id="saveFormButton" title="Save Form Data Locally"><i class="fas fa-save"></i> <span class="btn-text">Save</span></button>
                 <button type="button" id="importJsonButton" title="Import JSON Data"><i class="fas fa-file-import"></i> <span class="btn-text">Import</span></button>
                 <input type="file" id="jsonFile" accept=".json" style="display:none;">
+                <!-- Original Clear button is now hidden by CSS, functionality moved to top bar -->
                 <button type="button" id="clearForm" title="Clear All Form Data"><i class="fas fa-trash-alt"></i> <span class="btn-text">Clear</span></button>
             </div>
         </form> <!-- End #diaryForm -->
