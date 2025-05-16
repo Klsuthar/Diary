@@ -15,16 +15,27 @@
 <body>
     <div class="app-container">
         <header class="top-bar">
+            <div class="logo-container">
+                <!-- Replace with your actual logo or icon -->
+                <i class="fas fa-book-open app-logo"></i>
+            </div>
             <div class="date-controls">
                 <button type="button" id="dateDecrement" class="date-control-btn" aria-label="Previous day"><i class="fas fa-chevron-left"></i></button>
-                <!-- This span will show the formatted date and act as a click target for the transparent input -->
                 <span id="currentDateDisplay">Loading Date... <i class="fas fa-calendar-alt date-display-icon"></i></span> 
-                <!-- The actual date input, styled to be transparent and overlaid -->
                 <input type="date" id="date" name="date" required> 
                 <button type="button" id="dateIncrement" class="date-control-btn" aria-label="Next day"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="top-actions">
-                <!-- pickDateButton removed, covered by clicking currentDateDisplay/date input -->
+                <button type="submit" form="diaryForm" id="downloadButton" class="top-action-btn" aria-label="Download Diary" title="Download Diary (Export JSON)">
+                    <i class="fas fa-file-arrow-down"></i>
+                </button>
+                <button type="button" id="saveFormButton" class="top-action-btn" aria-label="Save Form" title="Save Form Data Locally">
+                    <i class="fas fa-save"></i>
+                </button>
+                <button type="button" id="importJsonButton" class="top-action-btn" aria-label="Import Diary" title="Import JSON Data">
+                    <i class="fas fa-file-import"></i>
+                </button>
+                <input type="file" id="jsonFile" accept=".json" style="display:none;">
                 <button type="button" id="topBarClearButton" class="top-action-btn" aria-label="Clear Form" title="Clear Form">
                     <i class="fas fa-trash-alt"></i>
                 </button>
@@ -61,7 +72,7 @@
                             <div> <label for="stepsCount">Steps Count:</label> <input type="number" id="stepsCount" name="stepsCount" placeholder="e.g., 8500"> </div>
                             <div> <label for="stepsDistanceKm">Steps Distance (km):</label> <input type="number" id="stepsDistanceKm" name="stepsDistanceKm" step="0.1" placeholder="e.g., 6.8"> </div>
                             <div> <label for="kilocalorie">Kilocalories Burned:</label> <input type="number" id="kilocalorie" name="kilocalorie" placeholder="e.g., 2200"> </div>
-                            <div> <label for="waterIntakeLiters">Water Intake (liters):</label> <input type="number" id="waterIntakeLiters" name="waterIntakeLiters" step="0.1" placeholder="e.g., 2.5"> </div>
+                            <div> <label for="waterIntakeLiters">Water Intake (liters):</label> <input type="number" id="waterIntakeLiters" name="waterIntLiters" step="0.1" placeholder="e.g., 2.5"> </div>
                             <div> <label for="medicationsTaken">Medications Taken:</label> <input type="text" id="medicationsTaken" name="medicationsTaken" placeholder="e.g., Vitamin D, Omega 3"> </div>
                             <div> <label for="physicalSymptoms">Physical Symptoms:</label> <input type="text" id="physicalSymptoms" name="physicalSymptoms" placeholder="e.g., Headache, None"> </div>
                             <div class="slider-container"> <label for="energyLevel">Energy Level: <span id="energyLevelValue">5</span></label> <input type="range" id="energyLevel" name="energyLevel" min="1" max="10" value="5" step="1" inputmode="none"> </div>
@@ -119,13 +130,7 @@
                 </div> <!-- End #tabPanelsSlider -->
             </div> <!-- End #tabViewPort -->
 
-            <div class="form-actions">
-                <button type="submit" title="Generate JSON and Download"><i class="fas fa-file-arrow-down"></i> <span class="btn-text">Download</span></button>
-                <button type="button" id="saveFormButton" title="Save Form Data Locally"><i class="fas fa-save"></i> <span class="btn-text">Save</span></button>
-                <button type="button" id="importJsonButton" title="Import JSON Data"><i class="fas fa-file-import"></i> <span class="btn-text">Import</span></button>
-                <input type="file" id="jsonFile" accept=".json" style="display:none;">
-                <button type="button" id="clearForm" title="Clear All Form Data"><i class="fas fa-trash-alt"></i> <span class="btn-text">Clear</span></button>
-            </div>
+            <!-- .form-actions div REMOVED from here -->
         </form> <!-- End #diaryForm -->
 
         <nav class="bottom-nav">

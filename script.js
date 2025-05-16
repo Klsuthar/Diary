@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
     const diaryForm = document.getElementById('diaryForm');
-    const clearFormButtonOriginal = document.getElementById('clearForm');
-    const importJsonButton = document.getElementById('importJsonButton');
+    // const clearFormButtonOriginal = document.getElementById('clearForm'); // This button is removed from HTML
+    const importJsonButton = document.getElementById('importJsonButton'); // Now in top bar
     const jsonFileInput = document.getElementById('jsonFile');
-    const saveFormButton = document.getElementById('saveFormButton');
+    const saveFormButton = document.getElementById('saveFormButton'); // Now in top bar
     const toastContainer = document.getElementById('toast-container');
-    const downloadButton = diaryForm.querySelector('button[type="submit"]');
+    const downloadButton = document.getElementById('downloadButton'); // Now in top bar with this ID
 
     // Top Bar Elements
     const dateInput = document.getElementById('date');
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
     const currentDateDisplay = document.getElementById('currentDateDisplay');
-    const topBarClearButton = document.getElementById('topBarClearButton');
+    const topBarClearButton = document.getElementById('topBarClearButton'); // Already in top bar
 
     // Tab Navigation (Bottom Bar)
     const bottomNavButtons = document.querySelectorAll('.bottom-nav-button');
@@ -56,8 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (iconElement && button.dataset.originalIcon) {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = button.dataset.originalIcon;
-                iconElement.className = tempDiv.firstChild.className;
-            } else if (iconElement && originalIconHTML) {
+                iconElement.className = tempDiv.firstChild.className; // Restore original classes
+                // delete button.dataset.originalIcon; // Clean up
+            } else if (iconElement && originalIconHTML) { // Fallback if dataset.originalIcon wasn't set
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = originalIconHTML;
                 iconElement.className = tempDiv.firstChild.className;
@@ -73,8 +74,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'success') iconClass = 'fas fa-check-circle';
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
-        toastContainer.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 500);
+        
+        // If new toasts should appear at the top of the container
+        if (toastContainer.firstChild) {
+            toastContainer.insertBefore(toast, toastContainer.firstChild);
+        } else {
+            toastContainer.appendChild(toast);
+        }
+        // Original was just appendChild, which works with flex-direction: column-reverse
+        // For flex-direction: column, and new toasts at top, use insertBefore or prepend.
+        // toastContainer.appendChild(toast); // This will add to the bottom with flex-direction: column
+
+        setTimeout(() => { toast.remove(); }, 3000); // Increased toast display time to 3s from 0.5s
     }
 
     function formatDate(date) {
@@ -192,18 +203,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
             diaryForm.reset();
             localStorage.removeItem(LOCAL_STORAGE_KEY);
-            initializeForm();
+            initializeForm(); // Re-initialize to set defaults and load suggestions
             showToast("Form cleared and local save removed.", "info");
-            slideToPanel(0);
+            slideToPanel(0); // Go back to the first tab
         }
     }
 
     if (topBarClearButton) {
         topBarClearButton.addEventListener('click', clearDiaryForm);
     }
-    if (clearFormButtonOriginal) {
-        clearFormButtonOriginal.addEventListener('click', clearDiaryForm);
-    }
+    // No longer need listener for clearFormButtonOriginal
 
     function initializeForm() {
         if (!dateInput.value) {
@@ -278,77 +287,68 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         tabPanels.forEach((panel, i) => {
             panel.classList.toggle('active', i === index);
-            // Make panel scrollable only if active to potentially help with touch conflicts, though primary fix is JS.
-            // panel.style.overflowY = i === index ? 'auto' : 'hidden'; // Re-evaluate if needed
         });
 
-
-        // Show form-actions only on Summary tab (index 4)
-        const formActions = document.querySelector('.form-actions');
-        if (formActions) {
-            formActions.style.display = index === 4 ? 'grid' : 'none';
-        }
+        // Logic to show/hide .form-actions based on tab index is REMOVED
+        // const formActions = document.querySelector('.form-actions');
+        // if (formActions) {
+        //     formActions.style.display = index === 4 ? 'grid' : 'none';
+        // }
     }
 
     bottomNavButtons.forEach((button, index) => {
         button.addEventListener('click', () => slideToPanel(index));
     });
 
-    // MODIFIED: Tab swipe logic
     if (tabViewPort) {
-        let swipeInProgress = false; // Flag to track if swipe should be processed for tabs
+        let swipeInProgress = false; 
 
         tabViewPort.addEventListener('touchstart', (e) => {
-            // If the touch starts on a slider container, do not initiate a tab swipe.
-            if (e.target.closest('.slider-container')) {
-                swipeInProgress = false; // Mark that tab swipe should not occur
+            if (e.target.closest('.slider-container') || e.target.closest('input[type="range"]')) {
+                swipeInProgress = false; 
                 return;
             }
-            swipeInProgress = true; // OK to initiate tab swipe
+            swipeInProgress = true; 
             touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX; // Initialize touchEndX
-            tabPanelsSlider.style.transition = 'none'; // Prepare for manual drag feedback (if any) or instant change
-        }, { passive: true }); // passive: true is generally good for performance if not calling preventDefault()
+            touchEndX = touchStartX; 
+            tabPanelsSlider.style.transition = 'none'; 
+        }, { passive: true }); 
 
         tabViewPort.addEventListener('touchmove', (e) => {
-            if (!swipeInProgress) return; // Don't track move if tab swipe is not active
+            if (!swipeInProgress) return; 
             touchEndX = e.touches[0].clientX;
-            // Optional: For live dragging visual feedback (not implemented here for simplicity)
-            // const deltaX = touchEndX - touchStartX;
-            // const currentOffset = -currentTabIndex * tabViewPort.offsetWidth; // or 100 for %
-            // tabPanelsSlider.style.transform = `translateX(calc(${currentOffset}% + ${deltaX}px))`;
         }, { passive: true });
 
         tabViewPort.addEventListener('touchend', () => {
-            if (!swipeInProgress) return; // Don't process touchend if tab swipe was not active
+            if (!swipeInProgress) return; 
 
             const deltaX = touchEndX - touchStartX;
             let newIndex = currentTabIndex;
 
             if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX < 0) { // Swiped left (user wants to see next tab)
+                if (deltaX < 0) { 
                     newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
-                } else { // Swiped right (user wants to see previous tab)
+                } else { 
                     newIndex = Math.max(currentTabIndex - 1, 0);
                 }
             }
+            slideToPanel(newIndex, true); 
             
-            // slideToPanel handles applying transition and moving to the newIndex
-            // (or snapping back to currentTabIndex if swipe wasn't past threshold)
-            slideToPanel(newIndex, true); // Ensure animation is enabled for the slide
-            
-            // Reset for next potential swipe
-            swipeInProgress = false; // Reset the flag
-            touchStartX = 0; // Reset coordinates
+            swipeInProgress = false; 
+            touchStartX = 0; 
             touchEndX = 0;
         });
     }
 
+    // The 'submit' event is now on the form, and the submit button is in the top bar
+    // but has `form="diaryForm"` attribute, so this should still work.
     diaryForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        if (!downloadButton) return;
+        if (!downloadButton) return; // downloadButton is now the one in the top bar
+        
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(downloadButton, true);
+        setButtonLoadingState(downloadButton, true, originalDownloadIconHTML); // Pass current icon
+        
         setTimeout(() => {
             try {
                 saveAllSuggestions();
@@ -429,12 +429,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     });
 
-    importJsonButton.addEventListener('click', () => jsonFileInput.click());
+    if (importJsonButton) { // Check if button exists
+        importJsonButton.addEventListener('click', () => jsonFileInput.click());
+    }
     jsonFileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
-        if (file) {
+        if (file && importJsonButton) { // Check importJsonButton again
             const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
-            setButtonLoadingState(importJsonButton, true);
+            setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -461,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Error parsing JSON file:", error);
                     showToast('Failed to import diary entry. Invalid JSON file.', 'error');
                 } finally {
-                    jsonFileInput.value = '';
+                    jsonFileInput.value = ''; // Reset file input
                     setButtonLoadingState(importJsonButton, false, originalImportIconHTML);
                 }
             };
@@ -553,26 +555,28 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(a.href);
     }
 
-    saveFormButton.addEventListener('click', () => {
-        const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(saveFormButton, true);
-        setTimeout(() => {
-            try {
-                saveAllSuggestions();
-                const formDataToSave = {};
-                diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
-                    if (element.id) formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
-                });
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formDataToSave));
-                showToast('Form data saved locally!', 'success');
-            } catch (e) {
-                console.error("Error saving to localStorage:", e);
-                showToast('Failed to save form data. Storage might be full.', 'error');
-            } finally {
-                setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
-            }
-        }, 50);
-    });
+    if (saveFormButton) { // Check if button exists
+        saveFormButton.addEventListener('click', () => {
+            const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
+            setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
+            setTimeout(() => {
+                try {
+                    saveAllSuggestions();
+                    const formDataToSave = {};
+                    diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
+                        if (element.id) formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+                    });
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formDataToSave));
+                    showToast('Form data saved locally!', 'success');
+                } catch (e) {
+                    console.error("Error saving to localStorage:", e);
+                    showToast('Failed to save form data. Storage might be full.', 'error');
+                } finally {
+                    setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
+                }
+            }, 50);
+        });
+    }
 
     function loadFormFromLocalStorage() {
         const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -580,11 +584,16 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const formData = JSON.parse(savedData);
                 Object.keys(formData).forEach(elementId => setValue(elementId, formData[elementId]));
-                if (Object.keys(formData).length > 0) showToast('Previously saved data loaded.', 'info');
+                if (Object.keys(formData).length > 0 && dateInput.value === formData['date']) { // Only show if data matches current date context
+                     showToast('Previously saved data for this date loaded.', 'info');
+                } else if (Object.keys(formData).length > 0) {
+                    // Data exists but maybe for a different date, or form was cleared.
+                    // Decide if a generic "saved data available" toast is desired. For now, only load if date matches.
+                }
             } catch (e) {
                 console.error("Error loading from localStorage:", e);
                 showToast('Could not load saved data. It might be corrupted.', 'error');
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove corrupted data
             }
         }
     }
