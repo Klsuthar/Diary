@@ -15,7 +15,7 @@
     --border-radius-sm: 6px;
     --border-radius-md: 10px;
     --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    --input-padding-y: 10px; /* Slightly reduced for mobile */
+    --input-padding-y: 10px;
     --input-padding-x: 14px;
     --button-padding-y: 10px;
     --button-padding-x: 16px;
@@ -25,11 +25,11 @@
 
 *, *::before, *::after {
     box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+    -webkit-tap-highlight-color: transparent;
 }
 
 html {
-    font-size: 16px; /* Base font size for rem units */
+    font-size: 16px;
 }
 
 body {
@@ -37,13 +37,12 @@ body {
     background-color: var(--primary-bg);
     color: var(--text-primary);
     margin: 0;
-    display: flex; /* For centering container if needed, but container is full width now */
-    /* justify-content: center; align-items: flex-start; */
+    display: flex;
     min-height: 100vh;
-    font-size: 0.95rem; /* Default mobile font size */
+    font-size: 0.95rem;
     line-height: 1.6;
-    overflow: hidden; /* Prevent body scroll, individual panels will scroll */
-    -webkit-font-smoothing: antialiased; /* Smoother fonts on mobile */
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
@@ -52,20 +51,20 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: var(--primary-bg); /* Match body if container edges are visible */
+    background-color: var(--primary-bg);
 }
 
 /* --- Top Bar --- */
 .top-bar {
     background-color: var(--secondary-bg);
     color: var(--text-primary);
-    padding: 0 10px; /* Reduced padding for mobile */
+    padding: 0 10px;
     height: var(--top-bar-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
     box-shadow: var(--box-shadow);
-    position: fixed; /* Fixed at the top */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -75,34 +74,67 @@ body {
 .top-bar .date-controls {
     display: flex;
     align-items: center;
-    gap: 6px; /* Reduced gap */
-    flex-grow: 1; /* Allow date controls to take available space */
+    gap: 6px;
+    flex-grow: 1;
+    position: relative; /* For positioning the transparent date input */
 }
 .top-bar #currentDateDisplay {
-    font-size: 0.85rem; /* Slightly smaller for mobile */
+    font-size: 0.85rem;
     font-weight: 500;
-    flex-grow: 1;
+    /* flex-grow: 1; No, let it size to content */
     text-align: center;
-    margin: 0 5px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    padding: 8px 10px; /* Make it easily clickable */
+    border-radius: var(--border-radius-sm);
+    cursor: pointer; /* Indicates it's clickable */
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 130px; /* Ensure enough space for date and icon */
 }
+.top-bar #currentDateDisplay:hover {
+    background-color: rgba(255,255,255,0.05);
+}
+.date-display-icon {
+    margin-left: 8px;
+    font-size: 0.9em;
+    color: var(--text-secondary);
+}
+
+.top-bar #date { /* The actual date input, styled to be transparent and overlay */
+    position: absolute;
+    left: 0; /* Position it over the entire date control area */
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0; /* Make it invisible */
+    cursor: pointer; /* Ensure cursor indicates clickability */
+    border: none;
+    padding: 0;
+    z-index: 1; /* Above other elements in date-controls for click */
+}
+/* Make sure prev/next buttons are clickable above the transparent input */
+.top-bar .date-control-btn {
+    z-index: 2; 
+    position: relative; /* Needed for z-index to work reliably */
+}
+
+
 .top-bar .date-control-btn,
-.top-bar .top-action-btn { /* Common style for top bar icon buttons */
-    background-color: transparent; /* Cleaner look */
+.top-bar .top-action-btn {
+    background-color: transparent;
     color: var(--text-secondary);
     border: none;
     padding: 0;
-    border-radius: 50%; /* Circular buttons */
+    border-radius: 50%;
     cursor: pointer;
-    font-size: 1.1rem; /* Icon size */
+    font-size: 1.1rem;
     line-height: 1;
     transition: color 0.2s ease, background-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;  /* Touch-friendly size */
+    width: 38px; 
     height: 38px;
 }
 .top-bar .date-control-btn:hover,
@@ -114,24 +146,23 @@ body {
 .top-bar .top-action-btn:active {
     background-color: rgba(255,255,255,0.15);
 }
-.top-bar #date { /* Hide actual date input, use JS to update */
-    display: none;
-}
+
 .top-bar .top-actions {
     display: flex;
     align-items: center;
     gap: 6px;
+    margin-left: auto; /* Push top actions to the right */
 }
 
 
 /* --- Main Content Area (Swipeable) --- */
-#diaryForm { /* Renamed from .container to .app-container for body structure */
+#diaryForm {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-    padding-top: var(--top-bar-height); /* Space for fixed top bar */
-    padding-bottom: var(--bottom-nav-height); /* Space for fixed bottom nav */
+    padding-top: var(--top-bar-height);
+    padding-bottom: var(--bottom-nav-height);
 }
 
 #tabViewPort {
@@ -144,7 +175,6 @@ body {
 #tabPanelsSlider {
     display: flex;
     height: 100%;
-    /* transition is handled by JS for swipe */
 }
 
 .tab-panel {
@@ -152,17 +182,9 @@ body {
     flex-shrink: 0;
     overflow-y: auto;
     height: 100%;
-    padding: 15px; /* Padding inside each panel */
-    background-color: var(--primary-bg); /* Panels have main bg color */
+    padding: 15px;
+    background-color: var(--primary-bg);
 }
-/* Remove two-column layout, all fieldsets stack */
-.tab-panel-content {
-    /* No flex needed, fieldsets will stack by default */
-}
-.tab-panel-column {
-    /* Not used in mobile-only single column */
-}
-
 
 /* --- Bottom Navigation --- */
 .bottom-nav {
@@ -172,7 +194,7 @@ body {
     background-color: var(--secondary-bg);
     height: var(--bottom-nav-height);
     box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-    position: fixed; /* Fixed at the bottom */
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
@@ -194,12 +216,12 @@ body {
     text-align: center;
 }
 .bottom-nav-button i {
-    font-size: 1.4rem; /* Adjusted for better proportion with text */
+    font-size: 1.4rem;
     margin-bottom: 3px;
     transition: transform 0.2s ease-out;
 }
 .bottom-nav-button span {
-    font-size: 0.65rem; /* Smaller text for bottom nav */
+    font-size: 0.65rem;
     display: block; 
 }
 .bottom-nav-button.active {
@@ -224,7 +246,7 @@ label {
 
 input[type="text"],
 input[type="number"],
-input[type="date"], 
+/* input[type="date"], Already styled for top bar */
 textarea {
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
@@ -239,7 +261,7 @@ textarea {
 }
 input[type="text"]:focus,
 input[type="number"]:focus,
-input[type="date"]:focus,
+/* input[type="date"]:focus, */
 textarea:focus {
     outline: none;
     border-color: var(--accent-color);
@@ -286,18 +308,16 @@ datalist {} datalist option {}
 .form-actions {
     text-align: center;
     margin-top: 20px;
-    padding-top: 10px; /* Space above buttons */
-    border-top: 1px solid var(--tertiary-bg); /* Separator line */
-    display: grid; /* Use grid for more flexible button layout */
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Smaller min for more buttons on small screens */
+    padding-top: 10px;
+    border-top: 1px solid var(--tertiary-bg);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 10px;
 }
-/* Hide original clear button from .form-actions */
 .form-actions #clearForm {
     display: none;
 }
 
-/* Styles for Download, Save, Import buttons specifically */
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex; align-items: center; justify-content: center;
     gap: 8px;
@@ -328,7 +348,7 @@ button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
 /* --- Toast Notifications --- */
 #toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
 .toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
-    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.2s forwards;
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.1s forwards; /* Adjusted timing */
     display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
 .toast i { font-size: 1em; }
 .toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
@@ -340,7 +360,6 @@ button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
     to { opacity: 0; transform: translateY(10px); }
 }
 
-/* Minor adjustments for larger "mobile" screens if needed */
 @media (min-width: 400px) {
     .top-bar #currentDateDisplay {
         font-size: 0.9rem;

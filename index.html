@@ -17,14 +17,14 @@
         <header class="top-bar">
             <div class="date-controls">
                 <button type="button" id="dateDecrement" class="date-control-btn" aria-label="Previous day"><i class="fas fa-chevron-left"></i></button>
-                <span id="currentDateDisplay">Loading Date...</span> 
+                <!-- This span will show the formatted date and act as a click target for the transparent input -->
+                <span id="currentDateDisplay">Loading Date... <i class="fas fa-calendar-alt date-display-icon"></i></span> 
+                <!-- The actual date input, styled to be transparent and overlaid -->
+                <input type="date" id="date" name="date" required> 
                 <button type="button" id="dateIncrement" class="date-control-btn" aria-label="Next day"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <input type="date" id="date" name="date" required> <!-- Hidden but used by JS -->
             <div class="top-actions">
-                <button type="button" id="pickDateButton" class="top-action-btn" aria-label="Pick Date" title="Pick Date">
-                    <i class="fas fa-calendar-alt"></i>
-                </button>
+                <!-- pickDateButton removed, covered by clicking currentDateDisplay/date input -->
                 <button type="button" id="topBarClearButton" class="top-action-btn" aria-label="Clear Form" title="Clear Form">
                     <i class="fas fa-trash-alt"></i>
                 </button>
@@ -124,7 +124,6 @@
                 <button type="button" id="saveFormButton" title="Save Form Data Locally"><i class="fas fa-save"></i> <span class="btn-text">Save</span></button>
                 <button type="button" id="importJsonButton" title="Import JSON Data"><i class="fas fa-file-import"></i> <span class="btn-text">Import</span></button>
                 <input type="file" id="jsonFile" accept=".json" style="display:none;">
-                <!-- Original Clear button is now hidden by CSS, functionality moved to top bar -->
                 <button type="button" id="clearForm" title="Clear All Form Data"><i class="fas fa-trash-alt"></i> <span class="btn-text">Clear</span></button>
             </div>
         </form> <!-- End #diaryForm -->

@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const diaryForm = document.getElementById('diaryForm');
-    // Clear button from .form-actions is now hidden, new one is in top-bar
-    const clearFormButtonOriginal = document.getElementById('clearForm'); // Keep ref if needed, or remove if fully handled by new btn
+    const clearFormButtonOriginal = document.getElementById('clearForm'); 
     const importJsonButton = document.getElementById('importJsonButton');
     const jsonFileInput = document.getElementById('jsonFile');
     const saveFormButton = document.getElementById('saveFormButton');
@@ -9,11 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadButton = diaryForm.querySelector('button[type="submit"]');
 
     // Top Bar Elements
-    const dateInput = document.getElementById('date');
+    const dateInput = document.getElementById('date'); // This will be the actual input field
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
-    const currentDateDisplay = document.getElementById('currentDateDisplay');
-    const pickDateButton = document.getElementById('pickDateButton');
+    const currentDateDisplay = document.getElementById('currentDateDisplay'); // Span to show formatted date
+    // pickDateButton is removed, functionality integrated
     const topBarClearButton = document.getElementById('topBarClearButton');
 
     // Tab Navigation (Bottom Bar)
@@ -76,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
         toastContainer.appendChild(toast);
-        // Toast visibility time changed to 0.5 seconds
         setTimeout(() => { toast.remove(); }, 500);
     }
 
@@ -91,19 +89,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentDateDisplay) {
             if (dateStr) {
                 try {
-                    // Parse date string as local
                     const [year, month, day] = dateStr.split('-').map(Number);
-                    const dateObj = new Date(year, month - 1, day); // Month is 0-indexed for Date constructor
+                    const dateObj = new Date(year, month - 1, day);
                      if (isNaN(dateObj.getTime())) {
-                        currentDateDisplay.textContent = "Invalid Date";
+                        currentDateDisplay.innerHTML = `Invalid Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     } else {
-                        currentDateDisplay.textContent = dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                        currentDateDisplay.innerHTML = `${dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     }
                 } catch (e) {
-                    currentDateDisplay.textContent = "Select Date";
+                    currentDateDisplay.innerHTML = `Select Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                 }
             } else {
-                currentDateDisplay.textContent = "Select Date";
+                currentDateDisplay.innerHTML = `Select Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
             }
         }
     }
@@ -114,8 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const [year, month, day] = dateInput.value.split('-').map(Number);
             currentDateValue = new Date(year, month - 1, day);
         } else {
-            currentDateValue = new Date(); // Default to today if input is empty
-             // Ensure dateInput gets a value if it was empty
+            currentDateValue = new Date(); 
             dateInput.value = formatDate(currentDateValue);
         }
 
@@ -123,7 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             currentDateValue.setDate(currentDateValue.getDate() + days);
             dateInput.value = formatDate(currentDateValue);
             updateCurrentDateDisplay(dateInput.value);
-        } else { // Fallback if date somehow becomes invalid
+        } else { 
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
@@ -133,10 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(dateInput) {
         dateInput.addEventListener('change', () => updateCurrentDateDisplay(dateInput.value));
     }
-    if(pickDateButton && dateInput) {
-        pickDateButton.addEventListener('click', () => dateInput.click());
-    }
-
+    // pickDateButton functionality is now handled by clicking the styled dateInput
 
     if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
     if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
@@ -197,22 +190,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
             diaryForm.reset(); 
             localStorage.removeItem(LOCAL_STORAGE_KEY); 
-            initializeForm(); // This will set defaults and load persistent suggestions
+            initializeForm(); 
             showToast("Form cleared and local save removed.", "info");
-            slideToPanel(0); // Reset to first tab
+            slideToPanel(0); 
         }
     }
 
     if (topBarClearButton) {
         topBarClearButton.addEventListener('click', clearDiaryForm);
     }
-    // If you decide to keep the original clear button in HTML (even if hidden)
-    // and want it to also work, its event listener needs to be set up.
-    // However, since it's hidden and replaced, this might not be necessary.
-    if (clearFormButtonOriginal) { // The one in .form-actions
+    if (clearFormButtonOriginal) { 
         clearFormButtonOriginal.addEventListener('click', clearDiaryForm);
     }
-
 
     function initializeForm() {
         if (!dateInput.value) {
@@ -235,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         loadAllSuggestions();
-        loadFormFromLocalStorage(); // This might override defaults if data exists
+        loadFormFromLocalStorage(); 
         updateSummaryCounts();
         slideToPanel(currentTabIndex, false);
     }
@@ -328,7 +317,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedDateStr = getValue('date');
                 let dayId = null;
                 if (selectedDateStr) {
-                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/')); // Ensure correct parsing on all browsers
+                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/')); 
                     if(!isNaN(selectedDate.getTime())) {
                         const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
                         dayId = Math.floor((selectedDate - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
@@ -351,7 +340,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally { setButtonLoadingState(downloadButton, false, originalDownloadIconHTML); }
         }, 50);
     });
-
 
     importJsonButton.addEventListener('click', () => jsonFileInput.click());
     jsonFileInput.addEventListener('change', function(event) {
