@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dailyActivitySummaryTextarea = document.getElementById('dailyActivitySummary');
     const summaryCountsDisplay = document.getElementById('summaryCounts');
 
-    const BIRTH_DATE = new Date(2003, 6, 4);
+    const REFERENCE_START_DATE = new Date(2003, 6, 4); // July is month 6 (0-indexed)
     const LOCAL_STORAGE_KEY = 'myPersonalDiaryFormData';
     const MAX_SUGGESTIONS_PER_FIELD = 7;
 
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const suggestionConfigs = [
         { key: 'myPersonalDiaryPersonalCareSuggestions', fieldIds: ['faceProductName', 'faceProductBrand', 'hairProductName', 'hairProductBrand', 'hairOil', 'skincareRoutine'] },
-        { key: 'myPersonalDiaryDietSuggestions', fieldIds: ['breakfast', 'lunch', 'dinner', 'additionalItems'] } // Added 'additionalItems'
+        { key: 'myPersonalDiaryDietSuggestions', fieldIds: ['breakfast', 'lunch', 'dinner', 'additionalItems'] } 
     ];
 
     function isPotentiallyFocusableForKeyboard(element) {
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset(); // This will reset sliders to their HTML 'value' attribute.
+            diaryForm.reset(); 
             const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 }
             }
-            initializeForm(true); // Re-apply defaults and update displays
+            initializeForm(true); 
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -283,7 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCurrentDateDisplay(dateInput.value);
 
         if (isClearing) {
-             // Default text/number fields
             ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 
              'meditationDurationMin', 'sleepHours', 'medicationsTaken', 'skincareRoutine'].forEach(id => {
                 const el = document.getElementById(id);
@@ -299,14 +298,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (id === 'skincareRoutine') el.value = "Na";
                 }
             });
-            // Default slider values
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
             if (humidityPercentSlider) humidityPercentSlider.value = 10;
             if (uvIndexSlider) uvIndexSlider.value = 9;
         }
         
-        // Update all slider displays
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
@@ -325,8 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
-        const value = element.value.trim(); // For text/number, trim
-        if (type === 'range') return element.value === '' ? null : parseFloat(element.value); // Range value is not trimmed
+        const value = element.value.trim(); 
+        if (type === 'range') return element.value === '' ? null : parseFloat(element.value); 
         if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
     }
@@ -344,15 +341,25 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function calculateAge(entryDateStr) {
-        if (!entryDateStr) return null;
-        const entryDate = new Date(entryDateStr);
-        if (isNaN(entryDate.getTime())) return null;
-        let age = entryDate.getFullYear() - BIRTH_DATE.getFullYear();
-        const monthDiff = entryDate.getMonth() - BIRTH_DATE.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && entryDate.getDate() < BIRTH_DATE.getDate())) age--;
-        return age >= 0 ? age : null;
+    function calculateDaysSince(startDate, endDateStr) {
+        if (!endDateStr) return null;
+        // Ensure dates are treated as UTC to avoid timezone issues in calculation
+        // by parsing the date string and then creating a new Date object for UTC midnight.
+        const [year, month, day] = endDateStr.split('-').map(Number);
+        const endDate = new Date(Date.UTC(year, month - 1, day));
+
+        if (isNaN(endDate.getTime())) return null;
+        
+        // Ensure startDate is also treated as UTC midnight for consistent calculation
+        const start = new Date(Date.UTC(startDate.getFullYear(), startDate.getMonth(), startDate.getDate()));
+
+        const diffTime = endDate.getTime() - start.getTime();
+        if (diffTime < 0) return null; // endDate is before startDate
+
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays + 1; // +1 to make the start date day 1
     }
+
 
     function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
@@ -405,19 +412,15 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = {};
                 const selectedDateStr = getValue('date');
-                let dayId = null;
-                if (selectedDateStr) {
-                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/'));
-                    if (!isNaN(selectedDate.getTime())) {
-                        const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
-                        dayId = Math.floor((selectedDate.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-                    }
-                }
-                data.date = selectedDateStr; data.day_id = dayId; data.age = calculateAge(selectedDateStr);
+                
+                data.date = selectedDateStr; 
+                data.day_id = calculateDaysSince(REFERENCE_START_DATE, selectedDateStr); // Calculate day_id
+                // Age property is removed
+
                 data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: getValue('airQualityIndex', 'number'), humidity_percent: getValue('humidityPercent', 'range'), uv_index: getValue('uvIndex', 'range'), weather_condition: getValue('weatherCondition') };
                 data.body_measurements = { weight_kg: getValue('weightKg', 'number'), height_cm: getValue('heightCm', 'number'), chest: getValue('chest', 'number'), belly: getValue('belly', 'number') };
                 data.health_and_fitness = { sleep_hours: getValue('sleepHours', 'number'), steps_count: getValue('stepsCount', 'number'), steps_distance_km: getValue('stepsDistanceKm', 'number'), kilocalorie: getValue('kilocalorie', 'number'), water_intake_liters: getValue('waterIntakeLiters', 'number'), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
-                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number') /* otherThoughtsDetailedEntry removed */ };
+                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number') };
                 data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
                 data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
                 data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: getValue('phoneScreenOnHr', 'number') };
@@ -474,9 +477,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function populateFormWithJson(jsonData) {
         diaryForm.reset(); 
-        initializeForm(true); // Reset with new defaults, then populate
+        initializeForm(true); 
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
+        // Note: day_id and age from imported JSON are not directly used to populate form fields.
+        // day_id is calculated on export. age is removed.
         if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'}[k], jsonData.environment[k]));
         if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(k => setValue({weight_kg:'weightKg', height_cm:'heightCm', chest:'chest', belly:'belly'}[k], jsonData.body_measurements[k]));
         if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(k => setValue({sleep_hours:'sleepHours', steps_count:'stepsCount', steps_distance_km:'stepsDistanceKm', kilocalorie:'kilocalorie', water_intake_liters:'waterIntakeLiters', medications_taken:'medicationsTaken', physical_symptoms:'physicalSymptoms', energy_level:'energyLevel', stress_level:'stressLevel'}[k], jsonData.health_and_fitness[k]));
@@ -484,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
             setValue('mentalState', jsonData.mental_and_emotional_health.mental_state); 
             setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status); 
             setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min); 
-            // otherThoughtsDetailedEntry is removed
         }
         if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
         if (jsonData.diet_and_nutrition) { 
@@ -497,7 +501,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
 
-        // Update all slider displays after populating
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
@@ -566,18 +569,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
             diaryForm.reset();
-            initializeForm(true); // Reset with new defaults
+            initializeForm(true); 
             return;
         }
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
-        diaryForm.reset(); // Reset form elements to their HTML defaults first
-        initializeForm(true); // Apply JS defaults (including slider visual updates)
+        diaryForm.reset(); 
+        initializeForm(true); 
 
         if (formDataForDate) {
             try {
                 Object.keys(formDataForDate).forEach(elementId => {
-                    // Don't try to set value for a non-existent element (e.g., removed 'otherThoughtsDetailedEntry')
                     if (document.getElementById(elementId)) { 
                         if (elementId === 'date' && formDataForDate[elementId] === currentFormDate) { /* Date already set */ } 
                         else { setValue(elementId, formDataForDate[elementId]); }
@@ -594,7 +596,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
              updateCurrentDateDisplay(currentFormDate);
         }
-        // Ensure all slider displays are correct after loading potentially saved values
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
