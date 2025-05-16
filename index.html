@@ -6,8 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>My Personal Diary</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1e293b"> <!-- Matches --secondary-bg and manifest.json theme_color -->
-    <link rel="apple-touch-icon" href="images/logo.png"> <!-- iOS home screen icon -->
+    <meta name="theme-color" content="#1e293b">
+
+    <!-- Favicons - Revised for better compatibility and new assets -->
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml"> <!-- Preferred: SVG for modern browsers -->
+    <link rel="alternate icon" href="images/logo.ico" sizes="any"> <!-- Fallback: ICO for older browsers / specific cases -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo32.png"> <!-- Common PNG size -->
+    <link rel="icon" type="image/png" sizes="16x16" href="images/logo16.png">
+    <link rel="apple-touch-icon" href="images/logo256.png"> <!-- Good size for Apple Touch Icon -->
+    <!-- Removed shortcut icon as it's mostly redundant with modern declarations -->
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">

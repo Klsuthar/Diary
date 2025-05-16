@@ -1,6 +1,6 @@
-const CACHE_NAME = 'my-personal-diary-cache-v1'; // Consider incrementing if major assets change (e.g., v2)
+const CACHE_NAME = 'my-personal-diary-cache-v2'; // <<< INCREMENTED CACHE VERSION
 const ASSETS_TO_CACHE = [
-    '/', // Alias for index.html for the root path
+    '/', 
     '/index.html',
     '/style.css',
     '/script.js',
@@ -9,8 +9,9 @@ const ASSETS_TO_CACHE = [
     '/images/logo.svg',
     '/images/logo16.png',
     '/images/logo32.png',
-    '/images/logo64.png'
-    // Note: External assets like Google Fonts and Font Awesome are not cached in this basic setup.
+    '/images/logo64.png',
+    '/images/logo256.png', // Added new larger icon
+    '/images/logo512.png'  // Added new larger icon
 ];
 
 // Install event: cache core assets
@@ -18,8 +19,7 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('Service Worker: Caching core assets');
-                // Map to new Request objects to ensure 'reload' cache mode is effective for all.
+                console.log('Service Worker: Caching core assets for version:', CACHE_NAME);
                 const requests = ASSETS_TO_CACHE.map(url => new Request(url, { cache: 'reload' }));
                 return cache.addAll(requests)
                            .catch(error => {
@@ -28,6 +28,7 @@ self.addEventListener('install', event => {
             })
             .then(() => {
                 console.log('Service Worker: Core assets cached successfully.');
+                return self.skipWaiting(); // Force the waiting service worker to become the active service worker
             })
             .catch(error => {
                 console.error('Service Worker: Failed to open cache or complete caching during install:', error);
@@ -48,14 +49,13 @@ self.addEventListener('activate', event => {
                 })
             );
         }).then(() => {
-            return self.clients.claim(); // Ensure new SW takes control of clients immediately
+            return self.clients.claim(); 
         })
     );
 });
 
 // Fetch event: serve assets from cache, fallback to network
 self.addEventListener('fetch', event => {
-    // We only want to handle GET requests for caching
     if (event.request.method !== 'GET') {
         return;
     }
@@ -63,24 +63,14 @@ self.addEventListener('fetch', event => {
     event.respondWith(
         caches.match(event.request)
             .then(cachedResponse => {
-                // If a cached response is found, return it.
                 if (cachedResponse) {
                     return cachedResponse;
                 }
-
-                // If not in cache, fetch from network.
                 return fetch(event.request).then(networkResponse => {
-                    // This basic SW caches only predefined local assets.
-                    // For a more robust offline experience, you might consider caching
-                    // network responses for assets like fonts or dynamically loaded data.
                     return networkResponse;
                 }).catch(error => {
                     console.error('Service Worker: Fetch error for', event.request.url, error);
-                    // Optionally, return a generic offline fallback page for HTML navigation requests
-                    // if (event.request.mode === 'navigate') {
-                    //   return caches.match('/offline.html'); // You would need to create and cache an offline.html
-                    // }
-                    throw error; // Let the browser handle the error.
+                    throw error;
                 });
             })
     );
