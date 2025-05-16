@@ -93,14 +93,14 @@ body {
     font-size: 0.85rem;
     font-weight: 500;
     text-align: center;
-    padding: 8px 10px; 
+    padding: 8px 10px;
     border-radius: var(--border-radius-sm);
-    cursor: pointer; 
+    cursor: pointer;
     transition: background-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 130px; 
+    min-width: 130px;
 }
 .top-bar #currentDateDisplay:hover {
     background-color: rgba(255,255,255,0.05);
@@ -111,21 +111,20 @@ body {
     color: var(--text-secondary);
 }
 
-.top-bar #date { 
+.top-bar #date {
     position: absolute;
-    /* Adjust left/width to cover currentDateDisplay for click-to-open calendar */
-    left: 50%; 
+    left: 50%;
     transform: translateX(-50%);
-    width: auto; /* Let it size based on currentDateDisplay's effective clickable area */
-    min-width: 130px; /* Match currentDateDisplay clickable area */
-    max-width: 200px; /* Prevent it from becoming too wide */
+    width: auto;
+    min-width: 130px;
+    max-width: 200px;
     top: 0;
     height: 100%;
-    opacity: 0; 
-    cursor: pointer; 
+    opacity: 0;
+    cursor: pointer;
     border: none;
     padding: 0;
-    z-index: 1; 
+    z-index: 1;
 }
 
 .top-bar .date-control-btn,
@@ -142,11 +141,11 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px; 
+    width: 38px;
     height: 38px;
-    flex-shrink: 0; /* Prevent buttons from shrinking */
-    z-index: 2; /* Ensure buttons are clickable over transparent date input */
-    position: relative; 
+    flex-shrink: 0;
+    z-index: 2;
+    position: relative;
 }
 .top-bar .date-control-btn:hover,
 .top-bar .top-action-btn:hover {
@@ -161,8 +160,7 @@ body {
 .top-bar .top-actions {
     display: flex;
     align-items: center;
-    gap: 6px; /* Spacing between action buttons */
-    /* margin-left: auto; Removed as justify-content: space-between on top-bar handles spacing */
+    gap: 6px;
 }
 
 
@@ -171,7 +169,7 @@ body {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden; 
+    overflow: hidden;
     padding-top: var(--top-bar-height);
     padding-bottom: var(--bottom-nav-height);
 }
@@ -193,7 +191,7 @@ body {
     flex-shrink: 0;
     overflow-y: auto;
     height: 100%;
-    padding: 15px 15px 30px; /* Top: 15px, Horizontal (Right/Left): 15px, Bottom: 30px */
+    padding: 15px 15px 30px;
     background-color: var(--primary-bg);
 }
 
@@ -233,7 +231,7 @@ body {
 }
 .bottom-nav-button span {
     font-size: 0.65rem;
-    display: block; 
+    display: block;
 }
 .bottom-nav-button.active {
     color: var(--accent-color);
@@ -313,9 +311,6 @@ input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); h
 #summaryCounts { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 8px; }
 datalist {} datalist option {}
 
-/* Removed .form-actions styles as it's no longer used */
-
-/* Generic button styling (if needed beyond top/bottom bar buttons) */
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex; align-items: center; justify-content: center;
     gap: 8px;
@@ -334,26 +329,143 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):activ
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i { font-size: 1em; transition: none; }
 button:disabled { cursor: not-allowed; opacity: 0.7; }
 
-/* Specific button styling for top bar actions can be done via .top-action-btn if needed, */
-/* but they share styling with .date-control-btn currently. */
-/* Example if specific styling was needed for submit in top bar: */
-/* .top-action-btn#downloadButton { background-color: var(--accent-color); color: var(--primary-bg); } */
-/* .top-action-btn#downloadButton:hover:not(:disabled) { background-color: var(--accent-hover); } */
-
 
 /* --- Toast Notifications --- */
 #toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
-.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
-    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards; /* Display for ~2.5s before fading */
+.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px);
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards;
     display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
 .toast i { font-size: 1em; }
 .toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
 .toast.error { border-left-color: var(--danger-color); } .toast.error i { color: var(--danger-color); }
 .toast.info { border-left-color: var(--info-color); } .toast.info i { color: var(--info-color); }
 @keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
-@keyframes fadeOutToastGeneral { 
-    from { opacity: 1; transform: translateY(0); } 
+@keyframes fadeOutToastGeneral {
+    from { opacity: 1; transform: translateY(0); }
     to { opacity: 0; transform: translateY(10px); }
+}
+
+/* --- History Tab Styles --- */
+#tab-history {
+    padding-bottom: 15px;
+}
+
+#historyListContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.history-item {
+    background-color: var(--secondary-bg);
+    padding: 12px 15px;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--box-shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-left-color 0.2s ease;
+    border-left: 3px solid transparent;
+    user-select: none; /* Prevent text selection during long press/drag attempts */
+}
+
+.history-item:hover:not(.selected) {
+    background-color: var(--tertiary-bg);
+}
+
+.history-item.selected {
+    background-color: #2c3a4f; /* Slightly darker/different for selection */
+    border-left-color: var(--accent-color);
+}
+
+.history-item-details {
+    flex-grow: 1;
+    margin-right: 10px;
+    overflow: hidden;
+}
+
+.history-item-date {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    margin-bottom: 3px;
+}
+
+.history-item-preview {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px; /* Adjust based on typical screen width */
+}
+
+.history-item-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.history-item-actions button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    padding: 5px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+.history-item-actions button:hover {
+    color: var(--text-primary);
+}
+.history-item-actions button.action-edit:hover { color: var(--info-color); }
+.history-item-actions button.action-export:hover { color: var(--success-color); }
+.history-item-actions button.action-delete:hover { color: var(--danger-color); }
+
+.history-item.multi-select-active .history-item-actions {
+    display: none; /* Hide individual actions when an item is part of a multi-select operation */
+}
+
+/* Top Bar Multi-Select Info and Button Styling */
+.multi-select-info {
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    margin-right: auto; /* Pushes multi-select buttons to the far right of remaining space */
+    padding-left: 5px;
+    display: none; /* Hidden by default */
+}
+
+/* Hide original top-actions and date-controls when multi-select-mode is active */
+.top-bar.multi-select-mode .date-controls {
+    display: none !important;
+}
+
+/* Hide regular action buttons in multi-select mode */
+.top-bar.multi-select-mode .top-actions .top-action-btn:not(#multiSelectCount):not(#exportSelectedButton):not(#deleteSelectedButton):not(#cancelMultiSelectButton) {
+    display: none !important;
+}
+.top-bar.multi-select-mode .top-actions #downloadButton,
+.top-bar.multi-select-mode .top-actions #saveFormButton,
+.top-bar.multi-select-mode .top-actions #importJsonButton,
+.top-bar.multi-select-mode .top-actions #topBarClearButton {
+    display: none !important;
+}
+
+
+/* Show multi-select specific elements when active */
+.top-bar.multi-select-mode .top-actions #multiSelectCount,
+.top-bar.multi-select-mode .top-actions #exportSelectedButton,
+.top-bar.multi-select-mode .top-actions #deleteSelectedButton,
+.top-bar.multi-select-mode .top-actions #cancelMultiSelectButton {
+    display: flex !important; /* Use flex to ensure icon centering */
+}
+
+.no-history-message {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-secondary);
 }
 
 @media (min-width: 400px) {
@@ -365,5 +477,8 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
     }
     .bottom-nav-button span {
         font-size: 0.7rem;
+    }
+    .history-item-preview {
+        max-width: 250px; /* More space on wider screens */
     }
 }

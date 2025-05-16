@@ -27,7 +27,6 @@
 <body>
     <div class="app-container">
         <header class="top-bar">
-
             <div class="date-controls">
                 <button type="button" id="dateDecrement" class="date-control-btn" aria-label="Previous day"><i
                         class="fas fa-chevron-left"></i></button>
@@ -38,6 +37,7 @@
                         class="fas fa-chevron-right"></i></button>
             </div>
             <div class="top-actions">
+                <!-- Regular Action Buttons -->
                 <button type="submit" form="diaryForm" id="downloadButton" class="top-action-btn"
                     aria-label="Download Diary" title="Download Diary (Export JSON)">
                     <i class="fas fa-file-arrow-down"></i>
@@ -55,6 +55,18 @@
                     title="Clear Form">
                     <i class="fas fa-trash-alt"></i>
                 </button>
+
+                <!-- Multi-Select Action Buttons (initially hidden by CSS or inline style if needed) -->
+                <span id="multiSelectCount" class="multi-select-info" style="display:none;">0 selected</span>
+                <button type="button" id="exportSelectedButton" class="top-action-btn" aria-label="Export Selected" title="Export Selected Entries" style="display:none;">
+                    <i class="fas fa-file-export"></i>
+                </button>
+                <button type="button" id="deleteSelectedButton" class="top-action-btn" aria-label="Delete Selected" title="Delete Selected Entries" style="display:none;">
+                    <i class="fas fa-trash"></i> <!-- Changed icon for multi-delete clarity -->
+                </button>
+                <button type="button" id="cancelMultiSelectButton" class="top-action-btn" aria-label="Cancel Selection" title="Cancel Multi-Selection" style="display:none;">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </header>
 
@@ -69,11 +81,11 @@
                                     id="temperatureC" name="temperatureC" placeholder="e.g., 23-35"> </div>
                             <div> <label for="airQualityIndex">Air Quality Index:</label> <input type="number"
                                     id="airQualityIndex" name="airQualityIndex"> </div>
-                            <div class="slider-container"> <label for="humidityPercent">Humidity (%): <span id="humidityPercentValue">10</span></label> 
-                                <input type="range" id="humidityPercent" name="humidityPercent" min="0" max="100" value="10" step="5" inputmode="none"> 
+                            <div class="slider-container"> <label for="humidityPercent">Humidity (%): <span id="humidityPercentValue">10</span></label>
+                                <input type="range" id="humidityPercent" name="humidityPercent" min="0" max="100" value="10" step="5" inputmode="none">
                             </div>
-                            <div class="slider-container"> <label for="uvIndex">UV Index: <span id="uvIndexValue">9</span></label> 
-                                <input type="range" id="uvIndex" name="uvIndex" min="1" max="12" value="9" step="1" inputmode="none"> 
+                            <div class="slider-container"> <label for="uvIndex">UV Index: <span id="uvIndexValue">9</span></label>
+                                <input type="range" id="uvIndex" name="uvIndex" min="1" max="12" value="9" step="1" inputmode="none">
                             </div>
                             <div> <label for="weatherCondition">Weather Condition:</label> <input type="text"
                                     id="weatherCondition" name="weatherCondition" list="weatherConditionsList"
@@ -132,8 +144,6 @@
                                         id="stressLevelValue">5</span></label> <input type="range" id="stressLevel"
                                     name="stressLevel" min="1" max="10" value="5" step="1" inputmode="none"> </div>
                             <div style=" height: 20px; background-color: transparent;"></div>
-
-
                         </fieldset>
                     </div>
 
@@ -165,7 +175,6 @@
                             <div> <label for="meditationDurationMin">Meditation Duration (min):</label> <input
                                     type="number" id="meditationDurationMin" name="meditationDurationMin"
                                     placeholder="e.g., 15"> </div>
-                            <!-- Other Thoughts / Detailed Entry: Removed -->
                         </fieldset>
                         <fieldset>
                             <legend><i class="fas fa-spa icon-legend"></i> Personal Care</legend>
@@ -245,6 +254,17 @@
                             </div>
                         </fieldset>
                     </div>
+
+                    <!-- TAB: History -->
+                    <div id="tab-history" class="tab-panel">
+                        <div id="historyListContainer">
+                            <!-- History items will be dynamically inserted here -->
+                            <p class="no-history-message" style="display:none; text-align:center; margin-top: 20px; color: var(--text-secondary);">
+                                No diary entries found.
+                            </p>
+                        </div>
+                    </div>
+
                 </div> <!-- End #tabPanelsSlider -->
             </div> <!-- End #tabViewPort -->
         </form> <!-- End #diaryForm -->
@@ -274,6 +294,11 @@
                 title="Notes & Summary">
                 <i class="fas fa-clipboard-list"></i>
                 <span>Summary</span>
+            </button>
+            <button class="bottom-nav-button" data-tab-target="tab-history" aria-label="History"
+                title="View History">
+                <i class="fas fa-history"></i>
+                <span>History</span>
             </button>
         </nav>
         <div id="toast-container"></div>

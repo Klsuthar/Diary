@@ -31,7 +31,7 @@ self.addEventListener('install', event => {
             })
             .then(() => {
                 console.log('Service Worker: Core assets cached successfully.');
-                return self.skipWaiting(); 
+                return self.skipWaiting();
             })
             .catch(error => {
                 console.error('Service Worker: Failed to open cache or complete caching during install:', error);
@@ -52,7 +52,7 @@ self.addEventListener('activate', event => {
                 })
             );
         }).then(() => {
-            return self.clients.claim(); 
+            return self.clients.claim();
         })
     );
 });

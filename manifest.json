@@ -2,7 +2,7 @@
   "name": "Diary",
   "short_name": "Diary",
   "description": "A personal diary PWA to log daily activities and thoughts.",
-  "start_url": ".", 
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#1e293b",
