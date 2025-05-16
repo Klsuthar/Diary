@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             toastContainer.appendChild(toast);
         }
-        setTimeout(() => { toast.remove(); }, 3000);
+        setTimeout(() => { toast.remove(); }, 1000);
     }
 
     function formatDate(date) {
