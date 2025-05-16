@@ -1,14 +1,16 @@
-const CACHE_NAME = 'my-personal-diary-cache-v1';
+const CACHE_NAME = 'my-personal-diary-cache-v1'; // Consider incrementing if major assets change (e.g., v2)
 const ASSETS_TO_CACHE = [
     '/', // Alias for index.html for the root path
     '/index.html',
     '/style.css',
     '/script.js',
     '/manifest.json',
-    '/images/logo.png' // Cache the logo
-    // Note: External assets like Google Fonts and Font Awesome are not cached in this basic setup
-    // to keep it simple. For full offline functionality of these, you'd need to add them here
-    // or implement a more robust caching strategy (e.g., stale-while-revalidate for external resources).
+    '/images/logo.ico',
+    '/images/logo.svg',
+    '/images/logo16.png',
+    '/images/logo32.png',
+    '/images/logo64.png'
+    // Note: External assets like Google Fonts and Font Awesome are not cached in this basic setup.
 ];
 
 // Install event: cache core assets
@@ -17,11 +19,11 @@ self.addEventListener('install', event => {
         caches.open(CACHE_NAME)
             .then(cache => {
                 console.log('Service Worker: Caching core assets');
-                return cache.addAll(ASSETS_TO_CACHE.map(url => new Request(url, { cache: 'reload' }))) // Force reload from network during install
+                // Map to new Request objects to ensure 'reload' cache mode is effective for all.
+                const requests = ASSETS_TO_CACHE.map(url => new Request(url, { cache: 'reload' }));
+                return cache.addAll(requests)
                            .catch(error => {
                                 console.error('Service Worker: Failed to cache one or more core assets during install:', error);
-                                // Optionally, you can decide if this is a fatal error for the SW install.
-                                // For now, we log it and let the SW install proceed if other assets succeed.
                            });
             })
             .then(() => {
@@ -68,10 +70,9 @@ self.addEventListener('fetch', event => {
 
                 // If not in cache, fetch from network.
                 return fetch(event.request).then(networkResponse => {
-                    // We don't cache responses from external domains in this simple setup to avoid issues.
-                    // You might want to cache opaque responses for fonts, etc., but that's more complex.
-                    // Example: if (ASSETS_TO_CACHE.includes(event.request.url) || event.request.url.startsWith(self.location.origin))
-                    // This service worker primarily caches predefined local assets.
+                    // This basic SW caches only predefined local assets.
+                    // For a more robust offline experience, you might consider caching
+                    // network responses for assets like fonts or dynamically loaded data.
                     return networkResponse;
                 }).catch(error => {
                     console.error('Service Worker: Fetch error for', event.request.url, error);
@@ -79,8 +80,7 @@ self.addEventListener('fetch', event => {
                     // if (event.request.mode === 'navigate') {
                     //   return caches.match('/offline.html'); // You would need to create and cache an offline.html
                     // }
-                    // For other requests, just let the browser handle the error (e.g. show default offline error)
-                    throw error;
+                    throw error; // Let the browser handle the error.
                 });
             })
     );
