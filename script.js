@@ -283,8 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (el) {
                     if (id === 'weightKg') el.value = "72";
                     else if (id === 'heightCm') el.value = "178";
-                    else if (id === 'chest') el.value = "82";
-                    else if (id === 'belly') el.value = "91";
+                    else if (id === 'chest') el.value = "90";
+                    else if (id === 'belly') el.value = "89";
                     else if (id === 'meditationStatus') el.value = "Na";
                     else if (id === 'meditationDurationMin') el.value = "0";
                 }
