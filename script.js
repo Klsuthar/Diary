@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTabIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
+    let isSliderTouch = false; // Flag to track if touch started on a slider
     const swipeThreshold = 50;
 
     const suggestionConfigs = [
@@ -74,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
         toastContainer.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 500);
+        setTimeout(() => { toast.remove(); }, 2500); // Increased duration for visibility
     }
 
     function formatDate(date) {
@@ -293,23 +294,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (tabViewPort) {
         tabViewPort.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX;
-            tabPanelsSlider.style.transition = 'none';
+            // Check if the touch started on a slider
+            isSliderTouch = e.target.type === 'range';
+            if (!isSliderTouch) {
+                touchStartX = e.touches[0].clientX;
+                touchEndX = touchStartX;
+                tabPanelsSlider.style.transition = 'none';
+            }
         }, { passive: true });
 
         tabViewPort.addEventListener('touchmove', (e) => {
-            touchEndX = e.touches[0].clientX;
+            if (!isSliderTouch) {
+                touchEndX = e.touches[0].clientX;
+            }
         }, { passive: true });
 
         tabViewPort.addEventListener('touchend', () => {
-            const deltaX = touchEndX - touchStartX;
-            let newIndex = currentTabIndex;
-            if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX < 0) newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
-                else newIndex = Math.max(currentTabIndex - 1, 0);
+            if (!isSliderTouch) {
+                const deltaX = touchEndX - touchStartX;
+                let newIndex = currentTabIndex;
+                if (Math.abs(deltaX) > swipeThreshold) {
+                    if (deltaX < 0) newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
+                    else newIndex = Math.max(currentTabIndex - 1, 0);
+                }
+                slideToPanel(newIndex);
             }
-            slideToPanel(newIndex);
+            isSliderTouch = false; // Reset the flag
         });
     }
 
@@ -502,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (jsonData.activities_and_productivity) {
             setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english);
             setValue('travelDestination', jsonData.activities_and_productivity.travel_destination);
+            setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hrbrary
             setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr);
         }
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
@@ -523,6 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     saveFormButton.addEventListener('click', () => {
+        const originalSaveIconHTML++
         const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(saveFormButton, true);
         setTimeout(() => {
