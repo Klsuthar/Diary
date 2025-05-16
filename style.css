@@ -346,7 +346,19 @@ button#importJsonButton { background-color: var(--info-color); color: white; }
 button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
 
 /* --- Toast Notifications --- */
-#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
+#toast-container {
+    position: fixed;
+    /* Original: bottom: calc(var(--bottom-nav-height) + 10px); */
+    /* Adjusted to be above form action buttons */
+    bottom: calc(var(--bottom-nav-height) + 80px); /* Approx. 60px (nav) + 70px (actions) + 10px (spacing) -> 140px from screen bottom */
+    left: 15px;
+    right: 15px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 10px;
+}
 .toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
     animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.1s forwards; /* Adjusted timing */
     display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }

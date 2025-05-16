@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let touchStartX = 0;
     let touchEndX = 0;
     const swipeThreshold = 50;
-    let isSliderInteractionTarget = false; // Flag for slider interaction
 
     const suggestionConfigs = [
         { key: 'myPersonalDiaryPersonalCareSuggestions', fieldIds: ['faceProductName', 'faceProductBrand', 'hairProductName', 'hairProductBrand', 'hairOil', 'skincareRoutine'] },
@@ -75,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
         toastContainer.appendChild(toast);
-        setTimeout(() => { toast.remove(); }, 5000); // Increased duration for visibility
+        setTimeout(() => { toast.remove(); }, 500);
     }
 
     function formatDate(date) {
@@ -112,14 +111,14 @@ document.addEventListener('DOMContentLoaded', () => {
             currentDateValue = new Date(year, month - 1, day);
         } else {
             currentDateValue = new Date();
-            // dateInput.value = formatDate(currentDateValue); // No need to set here, will be set below
+            dateInput.value = formatDate(currentDateValue);
         }
 
         if (!isNaN(currentDateValue.getTime())) {
             currentDateValue.setDate(currentDateValue.getDate() + days);
             dateInput.value = formatDate(currentDateValue);
             updateCurrentDateDisplay(dateInput.value);
-        } else { // Fallback if current date input is invalid
+        } else {
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
@@ -279,12 +278,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         tabPanels.forEach((panel, i) => {
             panel.classList.toggle('active', i === index);
+            // Make panel scrollable only if active to potentially help with touch conflicts, though primary fix is JS.
+            // panel.style.overflowY = i === index ? 'auto' : 'hidden'; // Re-evaluate if needed
         });
+
 
         // Show form-actions only on Summary tab (index 4)
         const formActions = document.querySelector('.form-actions');
         if (formActions) {
-            formActions.style.display = index === (tabPanels.length - 1) ? 'grid' : 'none'; // Assuming summary is last tab
+            formActions.style.display = index === 4 ? 'grid' : 'none';
         }
     }
 
@@ -292,42 +294,53 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => slideToPanel(index));
     });
 
+    // MODIFIED: Tab swipe logic
     if (tabViewPort) {
+        let swipeInProgress = false; // Flag to track if swipe should be processed for tabs
+
         tabViewPort.addEventListener('touchstart', (e) => {
-            isSliderInteractionTarget = (e.target.tagName === 'INPUT' && e.target.type === 'range');
+            // If the touch starts on a slider container, do not initiate a tab swipe.
+            if (e.target.closest('.slider-container')) {
+                swipeInProgress = false; // Mark that tab swipe should not occur
+                return;
+            }
+            swipeInProgress = true; // OK to initiate tab swipe
             touchStartX = e.touches[0].clientX;
             touchEndX = touchStartX; // Initialize touchEndX
-            if (!isSliderInteractionTarget) { // Only interfere with panel transition if not a slider
-                 tabPanelsSlider.style.transition = 'none';
-            }
-        }, { passive: true });
+            tabPanelsSlider.style.transition = 'none'; // Prepare for manual drag feedback (if any) or instant change
+        }, { passive: true }); // passive: true is generally good for performance if not calling preventDefault()
 
         tabViewPort.addEventListener('touchmove', (e) => {
+            if (!swipeInProgress) return; // Don't track move if tab swipe is not active
             touchEndX = e.touches[0].clientX;
-            // If it's not a slider interaction, and we want live swipe preview:
-            // if (!isSliderInteractionTarget) {
-            //     const deltaX = touchEndX - touchStartX;
-            //     const currentOffset = -currentTabIndex * tabViewPort.offsetWidth;
-            //     tabPanelsSlider.style.transform = `translateX(${currentOffset + deltaX}px)`;
-            // }
+            // Optional: For live dragging visual feedback (not implemented here for simplicity)
+            // const deltaX = touchEndX - touchStartX;
+            // const currentOffset = -currentTabIndex * tabViewPort.offsetWidth; // or 100 for %
+            // tabPanelsSlider.style.transform = `translateX(calc(${currentOffset}% + ${deltaX}px))`;
         }, { passive: true });
 
         tabViewPort.addEventListener('touchend', () => {
-            if (isSliderInteractionTarget) {
-                isSliderInteractionTarget = false; // Reset flag
-                // Do not process as a swipe, let the browser handle slider.
-                // Ensure panel transition is set for next non-slider swipe.
-                // slideToPanel(currentTabIndex, false); // or ensure transition is set for next swipe
-                return;
-            }
+            if (!swipeInProgress) return; // Don't process touchend if tab swipe was not active
 
             const deltaX = touchEndX - touchStartX;
             let newIndex = currentTabIndex;
+
             if (Math.abs(deltaX) > swipeThreshold) {
-                if (deltaX < 0) newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
-                else newIndex = Math.max(currentTabIndex - 1, 0);
+                if (deltaX < 0) { // Swiped left (user wants to see next tab)
+                    newIndex = Math.min(currentTabIndex + 1, tabPanels.length - 1);
+                } else { // Swiped right (user wants to see previous tab)
+                    newIndex = Math.max(currentTabIndex - 1, 0);
+                }
             }
-            slideToPanel(newIndex); // This will handle animation and setting the correct transition
+            
+            // slideToPanel handles applying transition and moving to the newIndex
+            // (or snapping back to currentTabIndex if swipe wasn't past threshold)
+            slideToPanel(newIndex, true); // Ensure animation is enabled for the slide
+            
+            // Reset for next potential swipe
+            swipeInProgress = false; // Reset the flag
+            touchStartX = 0; // Reset coordinates
+            touchEndX = 0;
         });
     }
 
@@ -343,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedDateStr = getValue('date');
                 let dayId = null;
                 if (selectedDateStr) {
-                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/')); // More robust date parsing
+                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/'));
                     if (!isNaN(selectedDate.getTime())) {
                         const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
                         dayId = Math.floor((selectedDate - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
@@ -433,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]), textarea');
                         let hasData = false;
                         for (const input of panelInputs) {
-                            if (input.value && input.value.trim() !== '' && input.value !== 'Na' && input.value !== '0' && input.value !== '5') { // '5' is default for sliders
+                            if (input.value && input.value.trim() !== '' && input.value !== 'Na' && input.value !== '0') {
                                 hasData = true;
                                 break;
                             }
