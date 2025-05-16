@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const diaryForm = document.getElementById('diaryForm');
-    const clearFormButtonOriginal = document.getElementById('clearForm'); 
+    const clearFormButtonOriginal = document.getElementById('clearForm');
     const importJsonButton = document.getElementById('importJsonButton');
     const jsonFileInput = document.getElementById('jsonFile');
     const saveFormButton = document.getElementById('saveFormButton');
@@ -8,11 +8,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadButton = diaryForm.querySelector('button[type="submit"]');
 
     // Top Bar Elements
-    const dateInput = document.getElementById('date'); // This will be the actual input field
+    const dateInput = document.getElementById('date');
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
-    const currentDateDisplay = document.getElementById('currentDateDisplay'); // Span to show formatted date
-    // pickDateButton is removed, functionality integrated
+    const currentDateDisplay = document.getElementById('currentDateDisplay');
     const topBarClearButton = document.getElementById('topBarClearButton');
 
     // Tab Navigation (Bottom Bar)
@@ -91,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const [year, month, day] = dateStr.split('-').map(Number);
                     const dateObj = new Date(year, month - 1, day);
-                     if (isNaN(dateObj.getTime())) {
+                    if (isNaN(dateObj.getTime())) {
                         currentDateDisplay.innerHTML = `Invalid Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     } else {
                         currentDateDisplay.innerHTML = `${dateObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })} <i class="fas fa-calendar-alt date-display-icon"></i>`;
@@ -111,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const [year, month, day] = dateInput.value.split('-').map(Number);
             currentDateValue = new Date(year, month - 1, day);
         } else {
-            currentDateValue = new Date(); 
+            currentDateValue = new Date();
             dateInput.value = formatDate(currentDateValue);
         }
 
@@ -119,18 +118,16 @@ document.addEventListener('DOMContentLoaded', () => {
             currentDateValue.setDate(currentDateValue.getDate() + days);
             dateInput.value = formatDate(currentDateValue);
             updateCurrentDateDisplay(dateInput.value);
-        } else { 
+        } else {
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
         }
     }
-    
-    if(dateInput) {
+
+    if (dateInput) {
         dateInput.addEventListener('change', () => updateCurrentDateDisplay(dateInput.value));
     }
-    // pickDateButton functionality is now handled by clicking the styled dateInput
-
     if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
     if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
 
@@ -158,7 +155,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (datalistElement && suggestionsData[fieldId] && Array.isArray(suggestionsData[fieldId])) {
                     datalistElement.innerHTML = '';
                     suggestionsData[fieldId].forEach(suggestionText => {
-                        const option = document.createElement('option'); option.value = suggestionText; datalistElement.appendChild(option);
+                        const option = document.createElement('option');
+                        option.value = suggestionText;
+                        datalistElement.appendChild(option);
                     });
                 }
             });
@@ -181,50 +180,53 @@ document.addEventListener('DOMContentLoaded', () => {
                     configUpdated = true;
                 }
             });
-            if (configUpdated) { localStorage.setItem(config.key, JSON.stringify(suggestionsData)); overallUpdated = true; }
+            if (configUpdated) {
+                localStorage.setItem(config.key, JSON.stringify(suggestionsData));
+                overallUpdated = true;
+            }
         });
         if (overallUpdated) loadAllSuggestions();
     }
-    
+
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
-            diaryForm.reset(); 
-            localStorage.removeItem(LOCAL_STORAGE_KEY); 
-            initializeForm(); 
+            diaryForm.reset();
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+            initializeForm();
             showToast("Form cleared and local save removed.", "info");
-            slideToPanel(0); 
+            slideToPanel(0);
         }
     }
 
     if (topBarClearButton) {
         topBarClearButton.addEventListener('click', clearDiaryForm);
     }
-    if (clearFormButtonOriginal) { 
+    if (clearFormButtonOriginal) {
         clearFormButtonOriginal.addEventListener('click', clearDiaryForm);
     }
 
     function initializeForm() {
         if (!dateInput.value) {
-             const today = new Date();
-             dateInput.value = formatDate(today);
+            const today = new Date();
+            dateInput.value = formatDate(today);
         }
         updateCurrentDateDisplay(dateInput.value);
 
         ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 'meditationDurationMin'].forEach(id => {
             const el = document.getElementById(id);
-            if(el) {
-                if(id === 'weightKg') el.value = "72";
-                else if(id === 'heightCm') el.value = "178";
-                else if(id === 'chest') el.value = "82";
-                else if(id === 'belly') el.value = "91";
-                else if(id === 'meditationStatus') el.value = "Na";
-                else if(id === 'meditationDurationMin') el.value = "0";
+            if (el) {
+                if (id === 'weightKg') el.value = "72";
+                else if (id === 'heightCm') el.value = "178";
+                else if (id === 'chest') el.value = "82";
+                else if (id === 'belly') el.value = "91";
+                else if (id === 'meditationStatus') el.value = "Na";
+                else if (id === 'meditationDurationMin') el.value = "0";
             }
         });
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         loadAllSuggestions();
-        loadFormFromLocalStorage(); 
+        loadFormFromLocalStorage();
         updateSummaryCounts();
         slideToPanel(currentTabIndex, false);
     }
@@ -257,12 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (monthDiff < 0 || (monthDiff === 0 && entryDate.getDate() < BIRTH_DATE.getDate())) age--;
         return age >= 0 ? age : null;
     }
-    
+
     function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
         currentTabIndex = index;
-        const offset = -index * 100; 
+        const offset = -index * 100;
 
         if (animate) {
             tabPanelsSlider.style.transition = 'transform 0.35s ease-in-out';
@@ -277,6 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
         tabPanels.forEach((panel, i) => {
             panel.classList.toggle('active', i === index);
         });
+
+        // Show form-actions only on Summary tab (index 4)
+        const formActions = document.querySelector('.form-actions');
+        if (formActions) {
+            formActions.style.display = index === 4 ? 'grid' : 'none';
+        }
     }
 
     bottomNavButtons.forEach((button, index) => {
@@ -286,8 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabViewPort) {
         tabViewPort.addEventListener('touchstart', (e) => {
             touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX; 
-            tabPanelsSlider.style.transition = 'none'; 
+            touchEndX = touchStartX;
+            tabPanelsSlider.style.transition = 'none';
         }, { passive: true });
 
         tabViewPort.addEventListener('touchmove', (e) => {
@@ -317,27 +325,76 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selectedDateStr = getValue('date');
                 let dayId = null;
                 if (selectedDateStr) {
-                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/')); 
-                    if(!isNaN(selectedDate.getTime())) {
+                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/'));
+                    if (!isNaN(selectedDate.getTime())) {
                         const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
                         dayId = Math.floor((selectedDate - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
                     }
                 }
-                data.date = selectedDateStr; data.day_id = dayId; data.age = calculateAge(selectedDateStr);
-                data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: getValue('airQualityIndex', 'number'), humidity_percent: getValue('humidityPercent', 'number'), uv_index: getValue('uvIndex', 'number'), weather_condition: getValue('weatherCondition') };
-                data.body_measurements = { weight_kg: getValue('weightKg', 'number'), height_cm: getValue('heightCm', 'number'), chest: getValue('chest', 'number'), belly: getValue('belly', 'number') };
-                data.health_and_fitness = { sleep_hours: getValue('sleepHours', 'number'), steps_count: getValue('stepsCount', 'number'), steps_distance_km: getValue('stepsDistanceKm', 'number'), kilocalorie: getValue('kilocalorie', 'number'), water_intake_liters: getValue('waterIntakeLiters', 'number'), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
-                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number'), other_thoughts_detailed_entry: getValue('otherThoughtsDetailedEntry') };
-                data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
-                data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner') };
-                data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: getValue('phoneScreenOnHr', 'number') };
-                data.additional_notes = { key_events: getValue('keyEvents') };
+                data.date = selectedDateStr;
+                data.day_id = dayId;
+                data.age = calculateAge(selectedDateStr);
+                data.environment = {
+                    temperature_c: getValue('temperatureC'),
+                    air_quality_index: getValue('airQualityIndex', 'number'),
+                    humidity_percent: getValue('humidityPercent', 'number'),
+                    uv_index: getValue('uvIndex', 'number'),
+                    weather_condition: getValue('weatherCondition')
+                };
+                data.body_measurements = {
+                    weight_kg: getValue('weightKg', 'number'),
+                    height_cm: getValue('heightCm', 'number'),
+                    chest: getValue('chest', 'number'),
+                    belly: getValue('belly', 'number')
+                };
+                data.health_and_fitness = {
+                    sleep_hours: getValue('sleepHours', 'number'),
+                    steps_count: getValue('stepsCount', 'number'),
+                    steps_distance_km: getValue('stepsDistanceKm', 'number'),
+                    kilocalorie: getValue('kilocalorie', 'number'),
+                    water_intake_liters: getValue('waterIntakeLiters', 'number'),
+                    medications_taken: getValue('medicationsTaken'),
+                    physical_symptoms: getValue('physicalSymptoms'),
+                    energy_level: getValue('energyLevel', 'range'),
+                    stress_level: getValue('stressLevel', 'range')
+                };
+                data.mental_and_emotional_health = {
+                    mental_state: getValue('mentalState'),
+                    meditation_status: getValue('meditationStatus'),
+                    meditation_duration_min: getValue('meditationDurationMin', 'number'),
+                    other_thoughts_detailed_entry: getValue('otherThoughtsDetailedEntry')
+                };
+                data.personal_care = {
+                    face_product_name: getValue('faceProductName'),
+                    face_product_brand: getValue('faceProductBrand'),
+                    hair_product_name: getValue('hairProductName'),
+                    hair_product_brand: getValue('hairProductBrand'),
+                    hair_oil: getValue('hairOil'),
+                    skincare_routine: getValue('skincareRoutine')
+                };
+                data.diet_and_nutrition = {
+                    breakfast: getValue('breakfast'),
+                    lunch: getValue('lunch'),
+                    dinner: getValue('dinner')
+                };
+                data.activities_and_productivity = {
+                    tasks_today_english: getValue('tasksTodayEnglish'),
+                    travel_destination: getValue('travelDestination'),
+                    phone_screen_on_hr: getValue('phoneScreenOnHr', 'number')
+                };
+                data.additional_notes = {
+                    key_events: getValue('keyEvents')
+                };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
                 downloadJSON(jsonString, `${data.date || 'nodate'}.json`);
                 showToast('JSON file downloaded.', 'success');
-            } catch (error) { console.error("Error during JSON generation/download:", error); showToast('Error generating/downloading JSON.', 'error');
-            } finally { setButtonLoadingState(downloadButton, false, originalDownloadIconHTML); }
+            } catch (error) {
+                console.error("Error during JSON generation/download:", error);
+                showToast('Error generating/downloading JSON.', 'error');
+            } finally {
+                setButtonLoadingState(downloadButton, false, originalDownloadIconHTML);
+            }
         }, 50);
     });
 
@@ -354,20 +411,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     populateFormWithJson(importedData);
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
-                    for(let i=0; i < tabPanels.length; i++) {
+                    for (let i = 0; i < tabPanels.length; i++) {
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]), textarea');
                         let hasData = false;
-                        for(const input of panelInputs) {
-                            if(input.value && input.value.trim() !== '' && input.value !== 'Na' && input.value !== '0') {
-                                hasData = true; break;
+                        for (const input of panelInputs) {
+                            if (input.value && input.value.trim() !== '' && input.value !== 'Na' && input.value !== '0') {
+                                hasData = true;
+                                break;
                             }
                         }
-                        if(hasData) { firstPopulatedIndex = i; break; }
+                        if (hasData) {
+                            firstPopulatedIndex = i;
+                            break;
+                        }
                     }
                     slideToPanel(firstPopulatedIndex);
-
-                } catch (error) { console.error("Error parsing JSON file:", error); showToast('Failed to import diary entry. Invalid JSON file.', 'error');
-                } finally { jsonFileInput.value = ''; setButtonLoadingState(importJsonButton, false, originalImportIconHTML); }
+                } catch (error) {
+                    console.error("Error parsing JSON file:", error);
+                    showToast('Failed to import diary entry. Invalid JSON file.', 'error');
+                } finally {
+                    jsonFileInput.value = '';
+                    setButtonLoadingState(importJsonButton, false, originalImportIconHTML);
+                }
             };
             reader.readAsText(file);
         }
@@ -376,13 +441,69 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateFormWithJson(jsonData) {
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
-        if (jsonData.environment) Object.keys(jsonData.environment).forEach(key => { const elId = { temperature_c: 'temperatureC', air_quality_index: 'airQualityIndex', humidity_percent: 'humidityPercent', uv_index: 'uvIndex', weather_condition: 'weatherCondition' }[key]; if (elId) setValue(elId, jsonData.environment[key]); });
-        if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(key => { const elId = { weight_kg: 'weightKg', height_cm: 'heightCm', chest: 'chest', belly: 'belly' }[key]; if (elId) setValue(elId, jsonData.body_measurements[key]); });
-        if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(key => { const elId = { sleep_hours: 'sleepHours', steps_count: 'stepsCount', steps_distance_km: 'stepsDistanceKm', kilocalorie: 'kilocalorie', water_intake_liters: 'waterIntakeLiters', medications_taken: 'medicationsTaken', physical_symptoms: 'physicalSymptoms', energy_level: 'energyLevel', stress_level: 'stressLevel' }[key]; if (elId) setValue(elId, jsonData.health_and_fitness[key]); });
-        if (jsonData.mental_and_emotional_health) { setValue('mentalState', jsonData.mental_and_emotional_health.mental_state); setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status); setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min); setValue('otherThoughtsDetailedEntry', jsonData.mental_and_emotional_health.other_thoughts_detailed_entry); }
-        if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
-        if (jsonData.diet_and_nutrition) { setValue('breakfast', jsonData.diet_and_nutrition.breakfast); setValue('lunch', jsonData.diet_and_nutrition.lunch); setValue('dinner', jsonData.diet_and_nutrition.dinner); }
-        if (jsonData.activities_and_productivity) { setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english); setValue('travelDestination', jsonData.activities_and_productivity.travel_destination); setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr); }
+        if (jsonData.environment) {
+            Object.keys(jsonData.environment).forEach(key => {
+                const elId = {
+                    temperature_c: 'temperatureC',
+                    air_quality_index: 'airQualityIndex',
+                    humidity_percent: 'humidityPercent',
+                    uv_index: 'uvIndex',
+                    weather_condition: 'weatherCondition'
+                }[key];
+                if (elId) setValue(elId, jsonData.environment[key]);
+            });
+        }
+        if (jsonData.body_measurements) {
+            Object.keys(jsonData.body_measurements).forEach(key => {
+                const elId = {
+                    weight_kg: 'weightKg',
+                    height_cm: 'heightCm',
+                    chest: 'chest',
+                    belly: 'belly'
+                }[key];
+                if (elId) setValue(elId, jsonData.body_measurements[key]);
+            });
+        }
+        if (jsonData.health_and_fitness) {
+            Object.keys(jsonData.health_and_fitness).forEach(key => {
+                const elId = {
+                    sleep_hours: 'sleepHours',
+                    steps_count: 'stepsCount',
+                    steps_distance_km: 'stepsDistanceKm',
+                    kilocalorie: 'kilocalorie',
+                    water_intake_liters: 'waterIntakeLiters',
+                    medications_taken: 'medicationsTaken',
+                    physical_symptoms: 'physicalSymptoms',
+                    energy_level: 'energyLevel',
+                    stress_level: 'stressLevel'
+                }[key];
+                if (elId) setValue(elId, jsonData.health_and_fitness[key]);
+            });
+        }
+        if (jsonData.mental_and_emotional_health) {
+            setValue('mentalState', jsonData.mental_and_emotional_health.mental_state);
+            setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status);
+            setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min);
+            setValue('otherThoughtsDetailedEntry', jsonData.mental_and_emotional_health.other_thoughts_detailed_entry);
+        }
+        if (jsonData.personal_care) {
+            setValue('faceProductName', jsonData.personal_care.face_product_name);
+            setValue('faceProductBrand', jsonData.personal_care.face_product_brand);
+            setValue('hairProductName', jsonData.personal_care.hair_product_name);
+            setValue('hairProductBrand', jsonData.personal_care.hair_product_brand);
+            setValue('hairOil', jsonData.personal_care.hair_oil);
+            setValue('skincareRoutine', jsonData.personal_care.skincare_routine);
+        }
+        if (jsonData.diet_and_nutrition) {
+            setValue('breakfast', jsonData.diet_and_nutrition.breakfast);
+            setValue('lunch', jsonData.diet_and_nutrition.lunch);
+            setValue('dinner', jsonData.diet_and_nutrition.dinner);
+        }
+        if (jsonData.activities_and_productivity) {
+            setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english);
+            setValue('travelDestination', jsonData.activities_and_productivity.travel_destination);
+            setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr);
+        }
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
@@ -393,8 +514,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function downloadJSON(content, fileName) {
         const a = document.createElement('a');
         const file = new Blob([content], { type: 'application/json' });
-        a.href = URL.createObjectURL(file); a.download = fileName;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
     }
 
     saveFormButton.addEventListener('click', () => {
@@ -409,8 +534,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formDataToSave));
                 showToast('Form data saved locally!', 'success');
-            } catch (e) { console.error("Error saving to localStorage:", e); showToast('Failed to save form data. Storage might be full.', 'error');
-            } finally { setButtonLoadingState(saveFormButton, false, originalSaveIconHTML); }
+            } catch (e) {
+                console.error("Error saving to localStorage:", e);
+                showToast('Failed to save form data. Storage might be full.', 'error');
+            } finally {
+                setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
+            }
         }, 50);
     });
 
@@ -421,7 +550,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const formData = JSON.parse(savedData);
                 Object.keys(formData).forEach(elementId => setValue(elementId, formData[elementId]));
                 if (Object.keys(formData).length > 0) showToast('Previously saved data loaded.', 'info');
-            } catch (e) { console.error("Error loading from localStorage:", e); showToast('Could not load saved data. It might be corrupted.', 'error'); localStorage.removeItem(LOCAL_STORAGE_KEY); }
+            } catch (e) {
+                console.error("Error loading from localStorage:", e);
+                showToast('Could not load saved data. It might be corrupted.', 'error');
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+            }
         }
     }
 
