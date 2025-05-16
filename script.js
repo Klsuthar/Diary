@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // --- Utility Functions ---
-    function isPotentiallyFocusableForKeyboard(element) { /* ... (no changes) ... */
+    function isPotentiallyFocusableForKeyboard(element) {
         if (!element) return false;
         const tagName = element.tagName;
         const type = element.type;
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return false;
     }
-    function updateKeyboardStatus() { /* ... (no changes) ... */
+    function updateKeyboardStatus() {
         const currentWindowHeight = window.innerHeight;
         const activeElement = document.activeElement;
         const isTextInputActive = isPotentiallyFocusableForKeyboard(activeElement);
@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             viewportHeightBeforeKeyboard = currentWindowHeight;
         }
     }
-    function setButtonLoadingState(button, isLoading, originalIconHTML = null) { /* ... (no changes) ... */
+    function setButtonLoadingState(button, isLoading, originalIconHTML = null) {
         if (!button) return;
         const iconElement = button.querySelector('i');
         if (isLoading) {
@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    function showToast(message, type = 'info') { /* ... (no changes) ... */
+    function showToast(message, type = 'info') {
         if (!toastContainer) return;
         const toast = document.createElement('div');
         toast.classList.add('toast', type);
@@ -126,17 +126,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setTimeout(() => { toast.remove(); }, 3000);
     }
-    function formatDate(date) { /* ... (no changes) ... */
+    function formatDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
-    function updateCurrentDateDisplay(dateStr) { /* ... (no changes, relies on YYYY-MM-DD + T00:00:00 for parsing) ... */
+    function updateCurrentDateDisplay(dateStr) {
         if (currentDateDisplay) {
             if (dateStr) {
                 try {
-                    const dateObj = new Date(dateStr + 'T00:00:00'); // Ensure parsing as local date
+                    const dateObj = new Date(dateStr + 'T00:00:00');
                     if (isNaN(dateObj.getTime())) {
                         currentDateDisplay.innerHTML = `Invalid Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     } else {
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    function changeDate(days) { /* ... (no changes) ... */
+    function changeDate(days) {
         let currentDateValue;
         if (dateInput.value) {
             const [year, month, day] = dateInput.value.split('-').map(Number);
@@ -171,10 +171,10 @@ document.addEventListener('DOMContentLoaded', () => {
             loadFormFromLocalStorage();
         }
     }
-    function updateSliderDisplay(slider, displayElement) { /* ... (no changes) ... */
+    function updateSliderDisplay(slider, displayElement) {
         if (slider && displayElement) displayElement.textContent = slider.value;
     }
-    function updateSummaryCounts() { /* ... (no changes) ... */
+    function updateSummaryCounts() {
         if (dailyActivitySummaryTextarea && summaryCountsDisplay) {
             const text = dailyActivitySummaryTextarea.value;
             const charCount = text.length;
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryCountsDisplay.textContent = `Words: ${wordCount}, Chars: ${charCount}`;
         }
     }
-    function getValue(elementId, type = 'text') { /* ... (no changes) ... */
+    function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
         const value = element.value.trim();
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
     }
-    function setValue(elementId, value) { /* ... (no changes) ... */
+    function setValue(elementId, value) {
         const element = document.getElementById(elementId);
         if (element) {
             element.value = (value === null || value === undefined) ? '' : value;
@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    function calculateDaysSince(startDate, endDateStr) { /* ... (no changes) ... */
+    function calculateDaysSince(startDate, endDateStr) {
         if (!endDateStr) return null;
         const [year, month, day] = endDateStr.split('-').map(Number);
         const endDate = new Date(Date.UTC(year, month - 1, day));
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         return diffDays + 1;
     }
-    function downloadJSON(content, fileName) { /* ... (no changes) ... */
+    function downloadJSON(content, fileName) {
         const a = document.createElement('a');
         const file = new Blob([content], { type: 'application/json' });
         a.href = URL.createObjectURL(file);
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Suggestion Logic ---
-    function loadAllSuggestions() { /* ... (no changes) ... */
+    function loadAllSuggestions() {
         suggestionConfigs.forEach(config => {
             const suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
             config.fieldIds.forEach(fieldId => {
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    function saveAllSuggestions() { /* ... (no changes) ... */
+    function saveAllSuggestions() {
         suggestionConfigs.forEach(config => {
             let suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
             config.fieldIds.forEach(fieldId => {
@@ -261,7 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Form Management ---
-    function clearDiaryForm() { /* ... (no changes) ... */
+    function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
             diaryForm.reset();
             const currentFormDate = dateInput.value;
@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             slideToPanel(0);
         }
     }
-    function initializeForm(isClearing = false) { /* ... (no changes) ... */
+    function initializeForm(isClearing = false) {
         if (!dateInput.value || isClearing) {
             const today = new Date();
             dateInput.value = formatDate(today);
@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSummaryCounts();
         updateKeyboardStatus();
     }
-    function populateFormWithJson(jsonData) { /* ... (no changes) ... */
+    function populateFormWithJson(jsonData) {
         diaryForm.reset();
         initializeForm(true);
         
@@ -345,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
     }
-    function performSaveOperation(isSilent = false) { /* ... (no changes) ... */
+    function performSaveOperation(isSilent = false) {
         try {
             saveAllSuggestions();
             const currentFormDate = dateInput.value;
@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     }
-    function loadFormFromLocalStorage() { /* ... (no changes) ... */
+    function loadFormFromLocalStorage() {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
             diaryForm.reset();
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
     }
-    function autoSaveOnPageHide() { /* ... (no changes) ... */
+    function autoSaveOnPageHide() {
         if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return;
         const success = performSaveOperation(true);
         if (success) {
@@ -429,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Tab Navigation ---
-    function slideToPanel(index, animate = true) { /* ... (no changes) ... */
+    function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
         if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
@@ -471,13 +471,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 listItem.dataset.date = dateStr;
 
                 if (isMultiSelectModeActive) {
-                    listItem.classList.add('multi-select-active'); // For CSS to show checkbox container & hide actions
+                    listItem.classList.add('multi-select-active');
                 }
                 if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) {
-                    listItem.classList.add('selected'); // For visual highlight
+                    listItem.classList.add('selected');
                 }
 
-                // Checkbox Container (shown/hidden by CSS via .multi-select-active on listItem)
                 const checkboxContainer = document.createElement('div');
                 checkboxContainer.classList.add('history-item-checkbox-container');
                 const checkbox = document.createElement('input');
@@ -486,13 +485,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.dataset.date = dateStr;
                 checkbox.checked = isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr);
                 checkbox.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent listItem's click listener
+                    e.stopPropagation();
                     toggleMultiSelectEntry(dateStr, listItem, checkbox);
                 });
                 checkboxContainer.appendChild(checkbox);
                 listItem.appendChild(checkboxContainer);
 
-                // Details
                 const details = document.createElement('div');
                 details.classList.add('history-item-details');
                 const itemDate = document.createElement('div');
@@ -508,32 +506,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 details.appendChild(preview);
                 listItem.appendChild(details);
 
-                // Actions (shown/hidden by CSS via .multi-select-active on listItem)
                 const actions = document.createElement('div');
                 actions.classList.add('history-item-actions');
-                const editBtn = document.createElement('button');
-                editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = 'Edit Entry'; editBtn.classList.add('action-edit');
-                editBtn.addEventListener('click', (e) => { e.stopPropagation(); handleEditEntry(dateStr); });
+                
+                // Edit button removed as per request
+                // const editBtn = document.createElement('button');
+                // editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = 'Edit Entry'; editBtn.classList.add('action-edit');
+                // editBtn.addEventListener('click', (e) => { e.stopPropagation(); handleEditEntry(dateStr); });
+
                 const exportBtn = document.createElement('button');
                 exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
                 exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
+
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
                 deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
-                actions.appendChild(editBtn);
+
+                // actions.appendChild(editBtn); // Edit button removed
                 actions.appendChild(exportBtn);
                 actions.appendChild(deleteBtn);
                 listItem.appendChild(actions);
 
-                // Main item click listeners
-                listItem.addEventListener('click', () => handleHistoryItemClick(dateStr, listItem)); // For broader tap target in multi-select
+                listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem)); // Pass event
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
                 listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
                 listItem.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    if (!isMultiSelectModeActive) enableMultiSelectMode(); // This re-renders list
-                    const currentCheckbox = listItem.querySelector('.history-item-checkbox'); // Get checkbox after re-render
+                    if (!isMultiSelectModeActive) enableMultiSelectMode();
+                    const currentCheckbox = listItem.querySelector('.history-item-checkbox');
                     toggleMultiSelectEntry(dateStr, listItem, currentCheckbox);
                 });
 
@@ -554,14 +555,13 @@ document.addEventListener('DOMContentLoaded', () => {
         longPressTimer = setTimeout(() => {
             longPressTimer = null;
             if (!isMultiSelectModeActive) {
-                enableMultiSelectMode(); // This will re-render the list with checkboxes
-                // After re-render, find the new checkbox for the item and toggle it
+                enableMultiSelectMode();
                 const freshListItem = historyListContainer.querySelector(`.history-item[data-date="${dateStr}"]`);
                 if (freshListItem) {
                     const checkbox = freshListItem.querySelector('.history-item-checkbox');
                     toggleMultiSelectEntry(dateStr, freshListItem, checkbox);
                 }
-            } else { // Already in multi-select mode, just toggle
+            } else {
                 const checkbox = listItem.querySelector('.history-item-checkbox');
                 toggleMultiSelectEntry(dateStr, listItem, checkbox);
             }
@@ -584,26 +584,26 @@ document.addEventListener('DOMContentLoaded', () => {
         if (longPressTimer) { // Was a short tap
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            handleHistoryItemClick(dateStr, listItem);
+            handleHistoryItemClick(null, dateStr, listItem); // Pass null for event if not available
         }
     }
 
-    function handleHistoryItemClick(dateStr, listItem) {
+    function handleHistoryItemClick(event, dateStr, listItem) {
         // If the click target is the checkbox itself, its own listener has already handled it.
-        if (event && event.target && event.target.matches('.history-item-checkbox')) {
+        // Or if it's one of the action buttons.
+        if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) {
             return;
         }
         if (isMultiSelectModeActive) {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
         } else {
+            // Default action for clicking item when not in multi-select is to edit
             handleEditEntry(dateStr);
         }
     }
 
     function handleEditEntry(dateStr) {
-        // This function should ONLY load data to the form for editing.
-        // It should NOT trigger any download.
         if (isMultiSelectModeActive) disableMultiSelectMode();
 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -628,13 +628,13 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSummaryCounts();
 
             showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
-            slideToPanel(0); // Go to first tab
+            slideToPanel(0);
         } else {
             showToast('Could not find entry data to edit.', 'error');
         }
     }
 
-    function getFullEntryDataForExport(entryFormData, dateKey) { /* ... (no changes) ... */
+    function getFullEntryDataForExport(entryFormData, dateKey) {
         const exportData = {};
         exportData.date = entryFormData.date || dateKey;
         exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
@@ -655,7 +655,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleExportEntry(dateStr) {
-        // This function should ONLY export the specific entry.
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
@@ -668,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function handleDeleteEntry(dateStr, isPartOfMulti = false) { /* ... (no changes) ... */
+    function handleDeleteEntry(dateStr, isPartOfMulti = false) {
         const confirmed = isPartOfMulti ? true : confirm(`Are you sure you want to delete the entry for ${new Date(dateStr+'T00:00:00').toLocaleDateString()}? This action cannot be undone.`);
         if (confirmed) {
             const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -693,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = true;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(true);
-        renderHistoryList(); // Re-render to show checkboxes and apply .multi-select-active
+        renderHistoryList();
         showToast('Multi-select enabled. Tap items to select.', 'info');
     }
 
@@ -702,7 +701,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = false;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(false);
-        renderHistoryList(); // Re-render to hide checkboxes
+        renderHistoryList();
     }
 
     function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) {
@@ -721,13 +720,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateMultiSelectCount();
     }
 
-    function updateMultiSelectCount() { /* ... (no changes) ... */
+    function updateMultiSelectCount() {
         if (multiSelectCountSpan) multiSelectCountSpan.textContent = `${selectedEntriesForMultiAction.length} selected`;
         const hasSelection = selectedEntriesForMultiAction.length > 0;
         if (deleteSelectedButton) deleteSelectedButton.disabled = !hasSelection;
         if (exportSelectedButton) exportSelectedButton.disabled = !hasSelection;
     }
-    function updateTopBarForMultiSelectView(isActive) { /* ... (no changes) ... */
+    function updateTopBarForMultiSelectView(isActive) {
         if (!topBar) return;
         if (isActive) {
             topBar.classList.add('multi-select-mode');
@@ -736,7 +735,7 @@ document.addEventListener('DOMContentLoaded', () => {
             topBar.classList.remove('multi-select-mode');
         }
     }
-    function handleDeleteSelectedEntries() { /* ... (no changes) ... */
+    function handleDeleteSelectedEntries() {
         if (selectedEntriesForMultiAction.length === 0) {
             showToast('No entries selected for deletion.', 'info');
             return;
@@ -751,7 +750,7 @@ document.addEventListener('DOMContentLoaded', () => {
             disableMultiSelectMode();
         }
     }
-    function handleExportSelectedEntries() { /* ... (no changes) ... */
+    function handleExportSelectedEntries() {
         if (selectedEntriesForMultiAction.length === 0) {
             showToast('No entries selected for export.', 'info');
             return;
@@ -793,7 +792,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (uvIndexSlider) uvIndexSlider.addEventListener('input', () => updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay));
     if (dailyActivitySummaryTextarea) dailyActivitySummaryTextarea.addEventListener('input', updateSummaryCounts);
     if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm);
-    diaryForm.addEventListener('submit', function(event) { /* ... (no changes, uses getValue to build export data) ... */
+    diaryForm.addEventListener('submit', function(event) {
         event.preventDefault();
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
@@ -831,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     });
     if (importJsonButton) importJsonButton.addEventListener('click', () => jsonFileInput.click());
-    jsonFileInput.addEventListener('change', function(event) { /* ... (no changes) ... */
+    jsonFileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file && importJsonButton) {
             const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
@@ -864,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsText(file);
         }
     });
-    if (saveFormButton) saveFormButton.addEventListener('click', () => { /* ... (no changes) ... */
+    if (saveFormButton) saveFormButton.addEventListener('click', () => {
         const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
         setTimeout(() => {
@@ -873,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
     });
     bottomNavButtons.forEach((button, index) => button.addEventListener('click', () => slideToPanel(index)));
-    if (tabViewPort) { /* ... (swipe logic, no changes) ... */
+    if (tabViewPort) {
         let swipeInProgress = false;
         tabViewPort.addEventListener('touchstart', (e) => {
             if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
