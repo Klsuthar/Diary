@@ -63,8 +63,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (viewportHeightBeforeKeyboard - currentWindowHeight > MIN_KEYBOARD_HEIGHT_PX) {
                 isKeyboardOpen = true;
             } else if (currentWindowHeight > (viewportHeightBeforeKeyboard - MIN_KEYBOARD_HEIGHT_PX + (MIN_KEYBOARD_HEIGHT_PX / 3))) {
-                 isKeyboardOpen = false;
-                 viewportHeightBeforeKeyboard = currentWindowHeight;
+                isKeyboardOpen = false;
+                viewportHeightBeforeKeyboard = currentWindowHeight;
             }
         } else {
             isKeyboardOpen = false;
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     diaryForm.addEventListener('focusout', (event) => {
-         if (isPotentiallyFocusableForKeyboard(event.target)) {
+        if (isPotentiallyFocusableForKeyboard(event.target)) {
             setTimeout(() => {
                 isKeyboardOpen = false;
                 viewportHeightBeforeKeyboard = window.innerHeight;
@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'success') iconClass = 'fas fa-check-circle';
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
-        
+
         if (toastContainer.firstChild) {
             toastContainer.insertBefore(toast, toastContainer.firstChild);
         } else {
@@ -292,10 +292,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
         }
-        
+
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-        
+
         loadAllSuggestions();
         if (!isClearing) {
             loadFormFromLocalStorage();
@@ -349,16 +349,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (tabViewPort) {
-        let swipeInProgress = false; 
+        let swipeInProgress = false;
         tabViewPort.addEventListener('touchstart', (e) => {
             if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]')) {
                 swipeInProgress = false; return;
             }
-            swipeInProgress = true; 
+            swipeInProgress = true;
             touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX; 
-            tabPanelsSlider.style.transition = 'none'; 
-        }, { passive: true }); 
+            touchEndX = touchStartX;
+            tabPanelsSlider.style.transition = 'none';
+        }, { passive: true });
 
         tabViewPort.addEventListener('touchmove', (e) => {
             if (!swipeInProgress || isKeyboardOpen) return;
@@ -372,12 +372,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.abs(deltaX) > swipeThreshold) {
                 newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
             }
-            slideToPanel(newIndex, true); 
+            slideToPanel(newIndex, true);
             swipeInProgress = false; touchStartX = 0; touchEndX = 0;
         });
     }
 
-    diaryForm.addEventListener('submit', function(event) {
+    diaryForm.addEventListener('submit', function (event) {
         event.preventDefault();
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
@@ -419,13 +419,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (importJsonButton) {
         importJsonButton.addEventListener('click', () => jsonFileInput.click());
     }
-    jsonFileInput.addEventListener('change', function(event) {
+    jsonFileInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file && importJsonButton) {
             const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
             setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     populateFormWithJson(importedData);
@@ -454,13 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function populateFormWithJson(jsonData) {
-        diaryForm.reset(); 
-        initializeForm(true); 
+        diaryForm.reset();
+        initializeForm(true);
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
-        if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'}[k], jsonData.environment[k]));
-        if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(k => setValue({weight_kg:'weightKg', height_cm:'heightCm', chest:'chest', belly:'belly'}[k], jsonData.body_measurements[k]));
-        if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(k => setValue({sleep_hours:'sleepHours', steps_count:'stepsCount', steps_distance_km:'stepsDistanceKm', kilocalorie:'kilocalorie', water_intake_liters:'waterIntakeLiters', medications_taken:'medicationsTaken', physical_symptoms:'physicalSymptoms', energy_level:'energyLevel', stress_level:'stressLevel'}[k], jsonData.health_and_fitness[k]));
+        if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({ temperature_c: 'temperatureC', air_quality_index: 'airQualityIndex', humidity_percent: 'humidityPercent', uv_index: 'uvIndex', weather_condition: 'weatherCondition' }[k], jsonData.environment[k]));
+        if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(k => setValue({ weight_kg: 'weightKg', height_cm: 'heightCm', chest: 'chest', belly: 'belly' }[k], jsonData.body_measurements[k]));
+        if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(k => setValue({ sleep_hours: 'sleepHours', steps_count: 'stepsCount', steps_distance_km: 'stepsDistanceKm', kilocalorie: 'kilocalorie', water_intake_liters: 'waterIntakeLiters', medications_taken: 'medicationsTaken', physical_symptoms: 'physicalSymptoms', energy_level: 'energyLevel', stress_level: 'stressLevel' }[k], jsonData.health_and_fitness[k]));
         if (jsonData.mental_and_emotional_health) { setValue('mentalState', jsonData.mental_and_emotional_health.mental_state); setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status); setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min); setValue('otherThoughtsDetailedEntry', jsonData.mental_and_emotional_health.other_thoughts_detailed_entry); }
         if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
         if (jsonData.diet_and_nutrition) { setValue('breakfast', jsonData.diet_and_nutrition.breakfast); setValue('lunch', jsonData.diet_and_nutrition.lunch); setValue('dinner', jsonData.diet_and_nutrition.dinner); }
@@ -498,10 +498,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const formDataToSave = {};
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
                 if (element.id) { // Ensure element has an ID
-                   formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                 }
             });
-            
+
             let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
             allSavedData[currentFormDate] = formDataToSave; // Store data under the specific date
 
@@ -542,11 +542,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
         diaryForm.reset();
-        initializeForm(true); 
+        initializeForm(true);
         if (formDataForDate) {
             try {
                 Object.keys(formDataForDate).forEach(elementId => {
-                    if (elementId === 'date' && formDataForDate[elementId] === currentFormDate) { /* Date already set */ } 
+                    if (elementId === 'date' && formDataForDate[elementId] === currentFormDate) { /* Date already set */ }
                     else { setValue(elementId, formDataForDate[elementId]); }
                 });
                 updateCurrentDateDisplay(currentFormDate);
@@ -558,13 +558,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
         } else {
-             updateCurrentDateDisplay(currentFormDate);
+            updateCurrentDateDisplay(currentFormDate);
         }
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         updateSummaryCounts();
     }
-    
+
     // --- START: Auto-save on page hide ---
     function autoSaveOnPageHide() {
         console.log('Page is being hidden, attempting auto-save...');
@@ -578,12 +578,17 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('pagehide', autoSaveOnPageHide);
     // --- END: Auto-save on page hide ---
 
+
+
     initializeForm();
 
     // Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js') // Path relative to origin
+            // CORRECTED PATH: Use a relative path or one that includes the repo name.
+            // 'sw.js' is relative to the current script's location.
+            // If script.js is at /Diary/script.js, this will register /Diary/sw.js
+            navigator.serviceWorker.register('sw.js')
                 .then(registration => {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 })
