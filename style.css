@@ -76,20 +76,21 @@ body {
     align-items: center;
     gap: 6px;
     flex-grow: 1;
-    position: relative;
+    position: relative; /* For positioning the transparent date input */
 }
 .top-bar #currentDateDisplay {
     font-size: 0.85rem;
     font-weight: 500;
+    /* flex-grow: 1; No, let it size to content */
     text-align: center;
-    padding: 8px 10px;
+    padding: 8px 10px; /* Make it easily clickable */
     border-radius: var(--border-radius-sm);
-    cursor: pointer;
+    cursor: pointer; /* Indicates it's clickable */
     transition: background-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 130px;
+    min-width: 130px; /* Ensure enough space for date and icon */
 }
 .top-bar #currentDateDisplay:hover {
     background-color: rgba(255,255,255,0.05);
@@ -100,22 +101,24 @@ body {
     color: var(--text-secondary);
 }
 
-.top-bar #date {
+.top-bar #date { /* The actual date input, styled to be transparent and overlay */
     position: absolute;
-    left: 0;
+    left: 0; /* Position it over the entire date control area */
     top: 0;
     width: 100%;
     height: 100%;
-    opacity: 0;
-    cursor: pointer;
+    opacity: 0; /* Make it invisible */
+    cursor: pointer; /* Ensure cursor indicates clickability */
     border: none;
     padding: 0;
-    z-index: 1;
+    z-index: 1; /* Above other elements in date-controls for click */
 }
+/* Make sure prev/next buttons are clickable above the transparent input */
 .top-bar .date-control-btn {
-    z-index: 2;
-    position: relative;
+    z-index: 2; 
+    position: relative; /* Needed for z-index to work reliably */
 }
+
 
 .top-bar .date-control-btn,
 .top-bar .top-action-btn {
@@ -131,7 +134,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
+    width: 38px; 
     height: 38px;
 }
 .top-bar .date-control-btn:hover,
@@ -148,15 +151,16 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: auto;
+    margin-left: auto; /* Push top actions to the right */
 }
+
 
 /* --- Main Content Area (Swipeable) --- */
 #diaryForm {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; 
     padding-top: var(--top-bar-height);
     padding-bottom: var(--bottom-nav-height);
 }
@@ -218,7 +222,7 @@ body {
 }
 .bottom-nav-button span {
     font-size: 0.65rem;
-    display: block;
+    display: block; 
 }
 .bottom-nav-button.active {
     color: var(--accent-color);
@@ -229,6 +233,7 @@ body {
 .bottom-nav-button:hover:not(.active) {
     color: var(--text-primary);
 }
+
 
 /* --- General Form Elements (Mobile Optimized) --- */
 label {
@@ -241,6 +246,7 @@ label {
 
 input[type="text"],
 input[type="number"],
+/* input[type="date"], Already styled for top bar */
 textarea {
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
@@ -255,6 +261,7 @@ textarea {
 }
 input[type="text"]:focus,
 input[type="number"]:focus,
+/* input[type="date"]:focus, */
 textarea:focus {
     outline: none;
     border-color: var(--accent-color);
@@ -295,33 +302,24 @@ input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance
 input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); height: 18px; width: 18px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
 
 #summaryCounts { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 8px; }
+datalist {} datalist option {}
 
 /* --- Action Buttons (within form) --- */
 .form-actions {
-    position: fixed;
-    bottom: var(--bottom-nav-height);
-    left: 0;
-    right: 0;
-    background-color: var(--primary-bg);
-    z-index: 99;
-    padding: 10px 15px;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 10px;
     border-top: 1px solid var(--tertiary-bg);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 10px;
-}
-.form-actions button {
-    display: inline-flex !important;
-    visibility: visible !important;
 }
 .form-actions #clearForm {
     display: none;
 }
 
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    display: inline-flex; align-items: center; justify-content: center;
     gap: 8px;
     padding: var(--button-padding-y) var(--button-padding-x);
     border: none;
@@ -333,101 +331,33 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     box-shadow: var(--box-shadow);
 }
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
-}
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) {
-    transform: translateY(0px);
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
-}
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i {
-    font-size: 1em;
-    transition: none;
-}
-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
-}
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) { transform: translateY(0px); box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); }
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i { font-size: 1em; transition: none; }
+button:disabled { cursor: not-allowed; opacity: 0.7; }
 
-button[type="submit"] {
-    background-color: var(--accent-color);
-    color: var(--primary-bg);
-}
-button[type="submit"]:hover:not(:disabled) {
-    background-color: var(--accent-hover);
-}
-button#saveFormButton {
-    background-color: var(--success-color);
-    color: white;
-}
-button#saveFormButton:hover:not(:disabled) {
-    background-color: #16a34a;
-}
-button#importJsonButton {
-    background-color: var(--info-color);
-    color: white;
-}
-button#importJsonButton:hover:not(:disabled) {
-    background-color: #2563eb;
-}
+.btn-text { }
+
+button[type="submit"] { background-color: var(--accent-color); color: var(--primary-bg); }
+button[type="submit"]:hover:not(:disabled) { background-color: var(--accent-hover); }
+button#saveFormButton { background-color: var(--success-color); color: white; }
+button#saveFormButton:hover:not(:disabled) { background-color: #16a34a; }
+button#importJsonButton { background-color: var(--info-color); color: white; }
+button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
 
 /* --- Toast Notifications --- */
-#toast-container {
-    position: fixed;
-    top: calc(var(--top-bar-height) + 10px);
-    left: 15px;
-    right: 15px;
-    z-index: 101; /* Above form-actions (99) and top-bar (100) */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-.toast {
-    background-color: var(--secondary-bg);
-    color: var(--text-primary);
-    padding: 10px 15px;
-    border-radius: var(--border-radius-sm);
-    box-shadow: var(--box-shadow);
-    border-left: 4px solid var(--accent-color);
-    width: 100%;
-    max-width: 320px;
-    opacity: 0;
-    transform: translateY(-20px);
-    animation: slideDownToast 0.3s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2s forwards;
-    display: flex;
-    align-items: center;
-    gaphal: 10px;
-    font-size: 0.85rem;
-}
-.toast i {
-    font-size: 1em;
-}
-.toast.success {
-    border-left-color: var(--success-color);
-}
-.toast.success i {
-    color: var(--success-color);
-}
-.toast.error {
-    border-left-color: var(--danger-color);
-}
-.toast.error i {
-    color: var(--danger-color);
-}
-.toast.info {
-    border-left-color: var(--info-color);
-}
-.toast.info i {
-    color: var(--info-color);
-}
-@keyframes slideDownToast {
-    to { opacity: 1; transform: translateY(0); }
-}
-@keyframes fadeOutToastGeneral {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-10px); }
+#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
+.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.1s forwards; /* Adjusted timing */
+    display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
+.toast i { font-size: 1em; }
+.toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
+.toast.error { border-left-color: var(--danger-color); } .toast.error i { color: var(--danger-color); }
+.toast.info { border-left-color: var(--info-color); } .toast.info i { color: var(--info-color); }
+@keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeOutToastGeneral { 
+    from { opacity: 1; transform: translateY(0); } 
+    to { opacity: 0; transform: translateY(10px); }
 }
 
 @media (min-width: 400px) {
@@ -440,7 +370,7 @@ button#importJsonButton:hover:not(:disabled) {
     .bottom-nav-button span {
         font-size: 0.7rem;
     }
-    .form-actions {
+     .form-actions {
         grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
 }
