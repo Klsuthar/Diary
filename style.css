@@ -71,26 +71,36 @@ body {
     z-index: 100;
 }
 
+.logo-container {
+    padding-right: 10px; /* Space between logo and date controls */
+}
+
+.app-logo {
+    font-size: 1.6rem;
+    color: var(--accent-color);
+}
+
 .top-bar .date-controls {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-grow: 1;
+    flex-grow: 1; /* Allows date controls to take available space */
+    justify-content: center; /* Center the date controls content */
     position: relative; /* For positioning the transparent date input */
+    min-width: 180px; /* Ensure enough space for date controls */
 }
 .top-bar #currentDateDisplay {
     font-size: 0.85rem;
     font-weight: 500;
-    /* flex-grow: 1; No, let it size to content */
     text-align: center;
-    padding: 8px 10px; /* Make it easily clickable */
+    padding: 8px 10px; 
     border-radius: var(--border-radius-sm);
-    cursor: pointer; /* Indicates it's clickable */
+    cursor: pointer; 
     transition: background-color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 130px; /* Ensure enough space for date and icon */
+    min-width: 130px; 
 }
 .top-bar #currentDateDisplay:hover {
     background-color: rgba(255,255,255,0.05);
@@ -101,24 +111,22 @@ body {
     color: var(--text-secondary);
 }
 
-.top-bar #date { /* The actual date input, styled to be transparent and overlay */
+.top-bar #date { 
     position: absolute;
-    left: 0; /* Position it over the entire date control area */
+    /* Adjust left/width to cover currentDateDisplay for click-to-open calendar */
+    left: 50%; 
+    transform: translateX(-50%);
+    width: auto; /* Let it size based on currentDateDisplay's effective clickable area */
+    min-width: 130px; /* Match currentDateDisplay clickable area */
+    max-width: 200px; /* Prevent it from becoming too wide */
     top: 0;
-    width: 100%;
     height: 100%;
-    opacity: 0; /* Make it invisible */
-    cursor: pointer; /* Ensure cursor indicates clickability */
+    opacity: 0; 
+    cursor: pointer; 
     border: none;
     padding: 0;
-    z-index: 1; /* Above other elements in date-controls for click */
+    z-index: 1; 
 }
-/* Make sure prev/next buttons are clickable above the transparent input */
-.top-bar .date-control-btn {
-    z-index: 2; 
-    position: relative; /* Needed for z-index to work reliably */
-}
-
 
 .top-bar .date-control-btn,
 .top-bar .top-action-btn {
@@ -136,6 +144,9 @@ body {
     justify-content: center;
     width: 38px; 
     height: 38px;
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+    z-index: 2; /* Ensure buttons are clickable over transparent date input */
+    position: relative; 
 }
 .top-bar .date-control-btn:hover,
 .top-bar .top-action-btn:hover {
@@ -150,8 +161,8 @@ body {
 .top-bar .top-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
-    margin-left: auto; /* Push top actions to the right */
+    gap: 6px; /* Spacing between action buttons */
+    /* margin-left: auto; Removed as justify-content: space-between on top-bar handles spacing */
 }
 
 
@@ -246,7 +257,6 @@ label {
 
 input[type="text"],
 input[type="number"],
-/* input[type="date"], Already styled for top bar */
 textarea {
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
@@ -261,7 +271,6 @@ textarea {
 }
 input[type="text"]:focus,
 input[type="number"]:focus,
-/* input[type="date"]:focus, */
 textarea:focus {
     outline: none;
     border-color: var(--accent-color);
@@ -304,20 +313,9 @@ input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); h
 #summaryCounts { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 8px; }
 datalist {} datalist option {}
 
-/* --- Action Buttons (within form) --- */
-.form-actions {
-    text-align: center;
-    margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid var(--tertiary-bg);
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 10px;
-}
-.form-actions #clearForm {
-    display: none;
-}
+/* Removed .form-actions styles as it's no longer used */
 
+/* Generic button styling (if needed beyond top/bottom bar buttons) */
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex; align-items: center; justify-content: center;
     gap: 8px;
@@ -336,31 +334,17 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):activ
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i { font-size: 1em; transition: none; }
 button:disabled { cursor: not-allowed; opacity: 0.7; }
 
-.btn-text { }
+/* Specific button styling for top bar actions can be done via .top-action-btn if needed, */
+/* but they share styling with .date-control-btn currently. */
+/* Example if specific styling was needed for submit in top bar: */
+/* .top-action-btn#downloadButton { background-color: var(--accent-color); color: var(--primary-bg); } */
+/* .top-action-btn#downloadButton:hover:not(:disabled) { background-color: var(--accent-hover); } */
 
-button[type="submit"] { background-color: var(--accent-color); color: var(--primary-bg); }
-button[type="submit"]:hover:not(:disabled) { background-color: var(--accent-hover); }
-button#saveFormButton { background-color: var(--success-color); color: white; }
-button#saveFormButton:hover:not(:disabled) { background-color: #16a34a; }
-button#importJsonButton { background-color: var(--info-color); color: white; }
-button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
 
 /* --- Toast Notifications --- */
-#toast-container {
-    position: fixed;
-    /* Original: bottom: calc(var(--bottom-nav-height) + 10px); */
-    /* Adjusted to be above form action buttons */
-    bottom: calc(var(--bottom-nav-height) + 80px); /* Approx. 60px (nav) + 70px (actions) + 10px (spacing) -> 140px from screen bottom */
-    left: 15px;
-    right: 15px;
-    z-index: 1000;
-    display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
-    gap: 10px;
-}
+#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
 .toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
-    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.1s forwards; /* Adjusted timing */
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards; /* Display for ~2.5s before fading */
     display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
 .toast i { font-size: 1em; }
 .toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
@@ -381,8 +365,5 @@ button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
     }
     .bottom-nav-button span {
         font-size: 0.7rem;
-    }
-     .form-actions {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
 }

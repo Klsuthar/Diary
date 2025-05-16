@@ -75,17 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
         
-        // If new toasts should appear at the top of the container
         if (toastContainer.firstChild) {
             toastContainer.insertBefore(toast, toastContainer.firstChild);
         } else {
             toastContainer.appendChild(toast);
         }
-        // Original was just appendChild, which works with flex-direction: column-reverse
-        // For flex-direction: column, and new toasts at top, use insertBefore or prepend.
-        // toastContainer.appendChild(toast); // This will add to the bottom with flex-direction: column
-
-        setTimeout(() => { toast.remove(); }, 3000); // Increased toast display time to 3s from 0.5s
+        setTimeout(() => { toast.remove(); }, 3000);
     }
 
     function formatDate(date) {
@@ -129,15 +124,20 @@ document.addEventListener('DOMContentLoaded', () => {
             currentDateValue.setDate(currentDateValue.getDate() + days);
             dateInput.value = formatDate(currentDateValue);
             updateCurrentDateDisplay(dateInput.value);
+            loadFormFromLocalStorage(); // Reload data for the new date
         } else {
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
+            loadFormFromLocalStorage(); // Reload data for today
         }
     }
 
     if (dateInput) {
-        dateInput.addEventListener('change', () => updateCurrentDateDisplay(dateInput.value));
+        dateInput.addEventListener('change', () => {
+            updateCurrentDateDisplay(dateInput.value);
+            loadFormFromLocalStorage(); // Reload data when date is manually picked
+        });
     }
     if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
     if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
@@ -200,11 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function clearDiaryForm() {
-        if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data (but not persistent suggestions).")) {
+        if (confirm("Are you sure you want to clear the form and any unsaved changes? This will also remove locally saved data for the current date (but not persistent suggestions).")) {
             diaryForm.reset();
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-            initializeForm(); // Re-initialize to set defaults and load suggestions
-            showToast("Form cleared and local save removed.", "info");
+            // Remove only data associated with the current date from LOCAL_STORAGE_KEY
+            const currentFormDate = dateInput.value;
+            const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+            if (allSavedData[currentFormDate]) {
+                delete allSavedData[currentFormDate];
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
+            }
+            
+            initializeForm(true); // Re-initialize to set defaults, pass true to indicate it's a clear operation
+            showToast("Form cleared for current date and local save removed.", "info");
             slideToPanel(0); // Go back to the first tab
         }
     }
@@ -212,33 +219,42 @@ document.addEventListener('DOMContentLoaded', () => {
     if (topBarClearButton) {
         topBarClearButton.addEventListener('click', clearDiaryForm);
     }
-    // No longer need listener for clearFormButtonOriginal
 
-    function initializeForm() {
-        if (!dateInput.value) {
+    function initializeForm(isClearing = false) {
+        if (!dateInput.value || isClearing) { // Set to today if no date or if clearing
             const today = new Date();
             dateInput.value = formatDate(today);
         }
         updateCurrentDateDisplay(dateInput.value);
 
-        ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 'meditationDurationMin'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                if (id === 'weightKg') el.value = "72";
-                else if (id === 'heightCm') el.value = "178";
-                else if (id === 'chest') el.value = "82";
-                else if (id === 'belly') el.value = "91";
-                else if (id === 'meditationStatus') el.value = "Na";
-                else if (id === 'meditationDurationMin') el.value = "0";
-            }
-        });
+        // Reset specific fields to default only if clearing, otherwise they might be loaded from LS
+        if(isClearing){
+            ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 'meditationDurationMin'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === 'weightKg') el.value = "72";
+                    else if (id === 'heightCm') el.value = "178";
+                    else if (id === 'chest') el.value = "82";
+                    else if (id === 'belly') el.value = "91";
+                    else if (id === 'meditationStatus') el.value = "Na";
+                    else if (id === 'meditationDurationMin') el.value = "0";
+                }
+            });
+            if(energyLevelSlider) energyLevelSlider.value = 5;
+            if(stressLevelSlider) stressLevelSlider.value = 5;
+        }
+        
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
+        
         loadAllSuggestions();
-        loadFormFromLocalStorage();
+        if (!isClearing) { // Don't load from LS if we just cleared, it's already handled
+            loadFormFromLocalStorage();
+        }
         updateSummaryCounts();
         slideToPanel(currentTabIndex, false);
     }
+
 
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
@@ -288,12 +304,6 @@ document.addEventListener('DOMContentLoaded', () => {
         tabPanels.forEach((panel, i) => {
             panel.classList.toggle('active', i === index);
         });
-
-        // Logic to show/hide .form-actions based on tab index is REMOVED
-        // const formActions = document.querySelector('.form-actions');
-        // if (formActions) {
-        //     formActions.style.display = index === 4 ? 'grid' : 'none';
-        // }
     }
 
     bottomNavButtons.forEach((button, index) => {
@@ -340,26 +350,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // The 'submit' event is now on the form, and the submit button is in the top bar
-    // but has `form="diaryForm"` attribute, so this should still work.
     diaryForm.addEventListener('submit', function(event) {
         event.preventDefault();
-        if (!downloadButton) return; // downloadButton is now the one in the top bar
+        if (!downloadButton) return;
         
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(downloadButton, true, originalDownloadIconHTML); // Pass current icon
+        setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
         
         setTimeout(() => {
             try {
-                saveAllSuggestions();
+                // Suggestions are saved on local save, not necessarily on download
+                // saveAllSuggestions(); // Optional: save suggestions on download too
                 const data = {};
                 const selectedDateStr = getValue('date');
                 let dayId = null;
                 if (selectedDateStr) {
-                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/'));
+                    const selectedDate = new Date(selectedDateStr.replace(/-/g, '/')); // More robust date parsing
                     if (!isNaN(selectedDate.getTime())) {
                         const startOfYear = new Date(selectedDate.getFullYear(), 0, 1);
-                        dayId = Math.floor((selectedDate - startOfYear) / (1000 * 60 * 60 * 24)) + 1;
+                        dayId = Math.floor((selectedDate.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)) + 1;
                     }
                 }
                 data.date = selectedDateStr;
@@ -429,12 +438,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     });
 
-    if (importJsonButton) { // Check if button exists
+    if (importJsonButton) {
         importJsonButton.addEventListener('click', () => jsonFileInput.click());
     }
     jsonFileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
-        if (file && importJsonButton) { // Check importJsonButton again
+        if (file && importJsonButton) {
             const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
             setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
             const reader = new FileReader();
@@ -442,6 +451,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     populateFormWithJson(importedData);
+                    // Save imported data to local storage for the imported date
+                    if (importedData.date) {
+                        const formDataToSave = {};
+                        diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
+                            if (element.id) formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+                        });
+                        
+                        let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+                        allSavedData[importedData.date] = formDataToSave;
+                        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
+                    }
+
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
                     for (let i = 0; i < tabPanels.length; i++) {
@@ -463,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Error parsing JSON file:", error);
                     showToast('Failed to import diary entry. Invalid JSON file.', 'error');
                 } finally {
-                    jsonFileInput.value = ''; // Reset file input
+                    jsonFileInput.value = '';
                     setButtonLoadingState(importJsonButton, false, originalImportIconHTML);
                 }
             };
@@ -472,6 +493,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function populateFormWithJson(jsonData) {
+        // Clear form before populating to avoid merging with existing data
+        diaryForm.reset(); 
+        initializeForm(true); // Reset to defaults, important for sliders and specific fields
+
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
         if (jsonData.environment) {
@@ -539,6 +564,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
+        
+        // Ensure sliders and counts are updated after populating
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         updateSummaryCounts();
@@ -555,19 +582,32 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(a.href);
     }
 
-    if (saveFormButton) { // Check if button exists
+    if (saveFormButton) {
         saveFormButton.addEventListener('click', () => {
             const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
             setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
             setTimeout(() => {
                 try {
-                    saveAllSuggestions();
+                    saveAllSuggestions(); // Save suggestions for input fields
+                    const currentFormDate = dateInput.value;
+                    if (!currentFormDate) {
+                        showToast('Please select a date first.', 'error');
+                        setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
+                        return;
+                    }
+
                     const formDataToSave = {};
                     diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
-                        if (element.id) formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+                        if (element.id) { // Ensure element has an ID
+                           formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+                        }
                     });
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(formDataToSave));
-                    showToast('Form data saved locally!', 'success');
+                    
+                    let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+                    allSavedData[currentFormDate] = formDataToSave; // Store data under the specific date
+
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
+                    showToast('Form data saved locally for this date!', 'success');
                 } catch (e) {
                     console.error("Error saving to localStorage:", e);
                     showToast('Failed to save form data. Storage might be full.', 'error');
@@ -579,24 +619,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadFormFromLocalStorage() {
-        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedData) {
-            try {
-                const formData = JSON.parse(savedData);
-                Object.keys(formData).forEach(elementId => setValue(elementId, formData[elementId]));
-                if (Object.keys(formData).length > 0 && dateInput.value === formData['date']) { // Only show if data matches current date context
-                     showToast('Previously saved data for this date loaded.', 'info');
-                } else if (Object.keys(formData).length > 0) {
-                    // Data exists but maybe for a different date, or form was cleared.
-                    // Decide if a generic "saved data available" toast is desired. For now, only load if date matches.
-                }
-            } catch (e) {
-                console.error("Error loading from localStorage:", e);
-                showToast('Could not load saved data. It might be corrupted.', 'error');
-                localStorage.removeItem(LOCAL_STORAGE_KEY); // Remove corrupted data
-            }
-        }
-    }
+        const currentFormDate = dateInput.value;
+        if (!currentFormDate) return; // Don't load if no date is selected
 
+        const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+        const formDataForDate = allSavedData[currentFormDate];
+
+        // Clear the form before loading data for a new date or if no data exists for this date
+        diaryForm.reset();
+        initializeForm(true); // Reset to defaults, but date is already set
+
+        if (formDataForDate) {
+            try {
+                Object.keys(formDataForDate).forEach(elementId => setValue(elementId, formDataForDate[elementId]));
+                // Date is already set and handled by updateCurrentDateDisplay
+                // No need to set dateInput.value again here if it's part of formDataForDate
+                // but ensure display is correct for the loaded data's date context
+                if (formDataForDate['date']) {
+                     updateCurrentDateDisplay(formDataForDate['date']);
+                }
+                
+                showToast('Previously saved data for this date loaded.', 'info');
+            } catch (e) {
+                console.error("Error loading from localStorage for date:", e);
+                showToast('Could not load saved data for this date. It might be corrupted.', 'error');
+                // Optionally remove corrupted data for this specific date
+                // delete allSavedData[currentFormDate];
+                // localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
+            }
+        } else {
+            // No data for this date, form is already reset by initializeForm(true)
+            // showToast('No saved data for this date.', 'info'); // Optional: notify user
+        }
+        // Ensure sliders and counts are updated after potential load
+        if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
+        if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
+        updateSummaryCounts();
+    }
+    
     initializeForm();
 });
