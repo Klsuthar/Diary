@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const energyLevelValueDisplay = document.getElementById('energyLevelValue');
     const stressLevelSlider = document.getElementById('stressLevel');
     const stressLevelValueDisplay = document.getElementById('stressLevelValue');
+    const humidityPercentSlider = document.getElementById('humidityPercent');
+    const humidityPercentValueDisplay = document.getElementById('humidityPercentValue');
+    const uvIndexSlider = document.getElementById('uvIndex');
+    const uvIndexValueDisplay = document.getElementById('uvIndexValue');
+
 
     const dailyActivitySummaryTextarea = document.getElementById('dailyActivitySummary');
     const summaryCountsDisplay = document.getElementById('summaryCounts');
@@ -40,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const suggestionConfigs = [
         { key: 'myPersonalDiaryPersonalCareSuggestions', fieldIds: ['faceProductName', 'faceProductBrand', 'hairProductName', 'hairProductBrand', 'hairOil', 'skincareRoutine'] },
-        { key: 'myPersonalDiaryDietSuggestions', fieldIds: ['breakfast', 'lunch', 'dinner'] }
+        { key: 'myPersonalDiaryDietSuggestions', fieldIds: ['breakfast', 'lunch', 'dinner', 'additionalItems'] } // Added 'additionalItems'
     ];
 
     function isPotentiallyFocusableForKeyboard(element) {
@@ -63,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (viewportHeightBeforeKeyboard - currentWindowHeight > MIN_KEYBOARD_HEIGHT_PX) {
                 isKeyboardOpen = true;
             } else if (currentWindowHeight > (viewportHeightBeforeKeyboard - MIN_KEYBOARD_HEIGHT_PX + (MIN_KEYBOARD_HEIGHT_PX / 3))) {
-                isKeyboardOpen = false;
-                viewportHeightBeforeKeyboard = currentWindowHeight;
+                 isKeyboardOpen = false;
+                 viewportHeightBeforeKeyboard = currentWindowHeight;
             }
         } else {
             isKeyboardOpen = false;
@@ -81,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     diaryForm.addEventListener('focusout', (event) => {
-        if (isPotentiallyFocusableForKeyboard(event.target)) {
+         if (isPotentiallyFocusableForKeyboard(event.target)) {
             setTimeout(() => {
                 isKeyboardOpen = false;
                 viewportHeightBeforeKeyboard = window.innerHeight;
@@ -121,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (type === 'success') iconClass = 'fas fa-check-circle';
         else if (type === 'error') iconClass = 'fas fa-times-circle';
         toast.innerHTML = `<i class="${iconClass}"></i> <p>${message}</p>`;
-
+        
         if (toastContainer.firstChild) {
             toastContainer.insertBefore(toast, toastContainer.firstChild);
         } else {
@@ -193,6 +198,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (energyLevelSlider) energyLevelSlider.addEventListener('input', () => updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay));
     if (stressLevelSlider) stressLevelSlider.addEventListener('input', () => updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay));
+    if (humidityPercentSlider) humidityPercentSlider.addEventListener('input', () => updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay));
+    if (uvIndexSlider) uvIndexSlider.addEventListener('input', () => updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay));
+
 
     function updateSummaryCounts() {
         if (dailyActivitySummaryTextarea && summaryCountsDisplay) {
@@ -244,14 +252,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 overallUpdated = true;
             }
         });
-        // No need to call loadAllSuggestions() here if suggestions are only loaded at init
-        // or if the UI dynamically updates, but for datalists, this ensures they are fresh
-        // if (overallUpdated) loadAllSuggestions(); // Optional: re-populate datalists immediately
     }
 
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset();
+            diaryForm.reset(); // This will reset sliders to their HTML 'value' attribute.
             const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -260,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 }
             }
-            initializeForm(true);
+            initializeForm(true); // Re-apply defaults and update displays
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -278,24 +283,35 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCurrentDateDisplay(dateInput.value);
 
         if (isClearing) {
-            ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 'meditationDurationMin'].forEach(id => {
+             // Default text/number fields
+            ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus', 
+             'meditationDurationMin', 'sleepHours', 'medicationsTaken', 'skincareRoutine'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
                     if (id === 'weightKg') el.value = "72";
                     else if (id === 'heightCm') el.value = "178";
-                    else if (id === 'chest') el.value = "90";
-                    else if (id === 'belly') el.value = "89";
+                    else if (id === 'chest') el.value = "90"; 
+                    else if (id === 'belly') el.value = "89"; 
                     else if (id === 'meditationStatus') el.value = "Na";
                     else if (id === 'meditationDurationMin') el.value = "0";
+                    else if (id === 'sleepHours') el.value = "8";
+                    else if (id === 'medicationsTaken') el.value = "Na";
+                    else if (id === 'skincareRoutine') el.value = "Na";
                 }
             });
+            // Default slider values
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
+            if (humidityPercentSlider) humidityPercentSlider.value = 10;
+            if (uvIndexSlider) uvIndexSlider.value = 9;
         }
-
+        
+        // Update all slider displays
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-
+        if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
+        if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
+        
         loadAllSuggestions();
         if (!isClearing) {
             loadFormFromLocalStorage();
@@ -309,8 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
-        const value = element.value.trim();
-        if (type === 'number' || type === 'range') return value === '' ? null : parseFloat(value);
+        const value = element.value.trim(); // For text/number, trim
+        if (type === 'range') return element.value === '' ? null : parseFloat(element.value); // Range value is not trimmed
+        if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
     }
 
@@ -321,6 +338,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (element.type === 'range') {
                 if (element.id === 'energyLevel') updateSliderDisplay(element, energyLevelValueDisplay);
                 if (element.id === 'stressLevel') updateSliderDisplay(element, stressLevelValueDisplay);
+                if (element.id === 'humidityPercent') updateSliderDisplay(element, humidityPercentValueDisplay);
+                if (element.id === 'uvIndex') updateSliderDisplay(element, uvIndexValueDisplay);
             }
         }
     }
@@ -349,16 +368,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (tabViewPort) {
-        let swipeInProgress = false;
+        let swipeInProgress = false; 
         tabViewPort.addEventListener('touchstart', (e) => {
             if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]')) {
                 swipeInProgress = false; return;
             }
-            swipeInProgress = true;
+            swipeInProgress = true; 
             touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX;
-            tabPanelsSlider.style.transition = 'none';
-        }, { passive: true });
+            touchEndX = touchStartX; 
+            tabPanelsSlider.style.transition = 'none'; 
+        }, { passive: true }); 
 
         tabViewPort.addEventListener('touchmove', (e) => {
             if (!swipeInProgress || isKeyboardOpen) return;
@@ -372,17 +391,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.abs(deltaX) > swipeThreshold) {
                 newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
             }
-            slideToPanel(newIndex, true);
+            slideToPanel(newIndex, true); 
             swipeInProgress = false; touchStartX = 0; touchEndX = 0;
         });
     }
 
-    diaryForm.addEventListener('submit', function (event) {
+    diaryForm.addEventListener('submit', function(event) {
         event.preventDefault();
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
-        setTimeout(() => { // Give UI time to update spinner
+        setTimeout(() => { 
             try {
                 const data = {};
                 const selectedDateStr = getValue('date');
@@ -395,12 +414,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 data.date = selectedDateStr; data.day_id = dayId; data.age = calculateAge(selectedDateStr);
-                data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: getValue('airQualityIndex', 'number'), humidity_percent: getValue('humidityPercent', 'number'), uv_index: getValue('uvIndex', 'number'), weather_condition: getValue('weatherCondition') };
+                data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: getValue('airQualityIndex', 'number'), humidity_percent: getValue('humidityPercent', 'range'), uv_index: getValue('uvIndex', 'range'), weather_condition: getValue('weatherCondition') };
                 data.body_measurements = { weight_kg: getValue('weightKg', 'number'), height_cm: getValue('heightCm', 'number'), chest: getValue('chest', 'number'), belly: getValue('belly', 'number') };
                 data.health_and_fitness = { sleep_hours: getValue('sleepHours', 'number'), steps_count: getValue('stepsCount', 'number'), steps_distance_km: getValue('stepsDistanceKm', 'number'), kilocalorie: getValue('kilocalorie', 'number'), water_intake_liters: getValue('waterIntakeLiters', 'number'), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
-                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number'), other_thoughts_detailed_entry: getValue('otherThoughtsDetailedEntry') };
+                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number') /* otherThoughtsDetailedEntry removed */ };
                 data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
-                data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner') };
+                data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
                 data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: getValue('phoneScreenOnHr', 'number') };
                 data.additional_notes = { key_events: getValue('keyEvents') };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
@@ -419,18 +438,18 @@ document.addEventListener('DOMContentLoaded', () => {
     if (importJsonButton) {
         importJsonButton.addEventListener('click', () => jsonFileInput.click());
     }
-    jsonFileInput.addEventListener('change', function (event) {
+    jsonFileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
         if (file && importJsonButton) {
             const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
             setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
                     populateFormWithJson(importedData);
-                    if (importedData.date) { // Auto-save imported data for its date
-                        performSaveOperation(true); // true for silent save
+                    if (importedData.date) { 
+                        performSaveOperation(true); 
                     }
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
@@ -454,21 +473,35 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function populateFormWithJson(jsonData) {
-        diaryForm.reset();
-        initializeForm(true);
+        diaryForm.reset(); 
+        initializeForm(true); // Reset with new defaults, then populate
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
-        if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({ temperature_c: 'temperatureC', air_quality_index: 'airQualityIndex', humidity_percent: 'humidityPercent', uv_index: 'uvIndex', weather_condition: 'weatherCondition' }[k], jsonData.environment[k]));
-        if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(k => setValue({ weight_kg: 'weightKg', height_cm: 'heightCm', chest: 'chest', belly: 'belly' }[k], jsonData.body_measurements[k]));
-        if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(k => setValue({ sleep_hours: 'sleepHours', steps_count: 'stepsCount', steps_distance_km: 'stepsDistanceKm', kilocalorie: 'kilocalorie', water_intake_liters: 'waterIntakeLiters', medications_taken: 'medicationsTaken', physical_symptoms: 'physicalSymptoms', energy_level: 'energyLevel', stress_level: 'stressLevel' }[k], jsonData.health_and_fitness[k]));
-        if (jsonData.mental_and_emotional_health) { setValue('mentalState', jsonData.mental_and_emotional_health.mental_state); setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status); setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min); setValue('otherThoughtsDetailedEntry', jsonData.mental_and_emotional_health.other_thoughts_detailed_entry); }
+        if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'}[k], jsonData.environment[k]));
+        if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(k => setValue({weight_kg:'weightKg', height_cm:'heightCm', chest:'chest', belly:'belly'}[k], jsonData.body_measurements[k]));
+        if (jsonData.health_and_fitness) Object.keys(jsonData.health_and_fitness).forEach(k => setValue({sleep_hours:'sleepHours', steps_count:'stepsCount', steps_distance_km:'stepsDistanceKm', kilocalorie:'kilocalorie', water_intake_liters:'waterIntakeLiters', medications_taken:'medicationsTaken', physical_symptoms:'physicalSymptoms', energy_level:'energyLevel', stress_level:'stressLevel'}[k], jsonData.health_and_fitness[k]));
+        if (jsonData.mental_and_emotional_health) { 
+            setValue('mentalState', jsonData.mental_and_emotional_health.mental_state); 
+            setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status); 
+            setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min); 
+            // otherThoughtsDetailedEntry is removed
+        }
         if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
-        if (jsonData.diet_and_nutrition) { setValue('breakfast', jsonData.diet_and_nutrition.breakfast); setValue('lunch', jsonData.diet_and_nutrition.lunch); setValue('dinner', jsonData.diet_and_nutrition.dinner); }
+        if (jsonData.diet_and_nutrition) { 
+            setValue('breakfast', jsonData.diet_and_nutrition.breakfast); 
+            setValue('lunch', jsonData.diet_and_nutrition.lunch); 
+            setValue('dinner', jsonData.diet_and_nutrition.dinner); 
+            setValue('additionalItems', jsonData.diet_and_nutrition.additional_items);
+        }
         if (jsonData.activities_and_productivity) { setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english); setValue('travelDestination', jsonData.activities_and_productivity.travel_destination); setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr); }
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
+
+        // Update all slider displays after populating
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
+        if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
+        if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
     }
 
@@ -483,52 +516,49 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(a.href);
     }
 
-    // --- START: Core Save Operation ---
     function performSaveOperation(isSilent = false) {
         try {
-            saveAllSuggestions(); // Save input field suggestions first
+            saveAllSuggestions(); 
             const currentFormDate = dateInput.value;
             if (!currentFormDate) {
                 if (!isSilent) {
                     showToast('Please select a date first to save.', 'error');
                 }
-                return false; // Indicate failure or inability to save
+                return false; 
             }
 
             const formDataToSave = {};
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
-                if (element.id) { // Ensure element has an ID
-                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+                if (element.id) { 
+                   formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                 }
             });
-
+            
             let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-            allSavedData[currentFormDate] = formDataToSave; // Store data under the specific date
+            allSavedData[currentFormDate] = formDataToSave; 
 
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
             if (!isSilent) {
                 showToast('Form data saved locally for this date!', 'success');
             }
-            return true; // Indicate success
+            return true; 
         } catch (e) {
             console.error("Error saving to localStorage:", e);
             if (!isSilent) {
                 showToast('Failed to save form data. Storage might be full.', 'error');
             }
-            return false; // Indicate failure
+            return false; 
         }
     }
-    // --- END: Core Save Operation ---
 
     if (saveFormButton) {
         saveFormButton.addEventListener('click', () => {
             const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
             setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
-            // Use a minimal timeout to allow UI to update with spinner before synchronous save
             setTimeout(() => {
-                performSaveOperation(false); // false means not silent, toasts will show
+                performSaveOperation(false); 
                 setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
-            }, 10); // Small delay for UI render cycle
+            }, 10); 
         });
     }
 
@@ -536,21 +566,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
             diaryForm.reset();
-            initializeForm(true);
+            initializeForm(true); // Reset with new defaults
             return;
         }
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
-        diaryForm.reset();
-        initializeForm(true);
+        diaryForm.reset(); // Reset form elements to their HTML defaults first
+        initializeForm(true); // Apply JS defaults (including slider visual updates)
+
         if (formDataForDate) {
             try {
                 Object.keys(formDataForDate).forEach(elementId => {
-                    if (elementId === 'date' && formDataForDate[elementId] === currentFormDate) { /* Date already set */ }
-                    else { setValue(elementId, formDataForDate[elementId]); }
+                    // Don't try to set value for a non-existent element (e.g., removed 'otherThoughtsDetailedEntry')
+                    if (document.getElementById(elementId)) { 
+                        if (elementId === 'date' && formDataForDate[elementId] === currentFormDate) { /* Date already set */ } 
+                        else { setValue(elementId, formDataForDate[elementId]); }
+                    }
                 });
                 updateCurrentDateDisplay(currentFormDate);
-                if (!document.hidden) { // Only show toast if page is visible (avoid on initial load if tab was backgrounded)
+                if (!document.hidden) { 
                     showToast('Previously saved data for this date loaded.', 'info');
                 }
             } catch (e) {
@@ -558,17 +592,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
         } else {
-            updateCurrentDateDisplay(currentFormDate);
+             updateCurrentDateDisplay(currentFormDate);
         }
+        // Ensure all slider displays are correct after loading potentially saved values
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
+        if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
+        if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
     }
-
-    // --- START: Auto-save on page hide ---
+    
     function autoSaveOnPageHide() {
         console.log('Page is being hidden, attempting auto-save...');
-        const success = performSaveOperation(true); // true for silent save
+        const success = performSaveOperation(true); 
         if (success) {
             console.log('Auto-save successful on page hide.');
         } else {
@@ -576,19 +612,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     window.addEventListener('pagehide', autoSaveOnPageHide);
-    // --- END: Auto-save on page hide ---
-
-
 
     initializeForm();
 
-    // Service Worker Registration
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            // CORRECTED PATH: Use a relative path or one that includes the repo name.
-            // 'sw.js' is relative to the current script's location.
-            // If script.js is at /Diary/script.js, this will register /Diary/sw.js
-            navigator.serviceWorker.register('sw.js')
+            navigator.serviceWorker.register('sw.js') 
                 .then(registration => {
                     console.log('ServiceWorker registration successful with scope: ', registration.scope);
                 })
