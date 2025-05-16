@@ -15,7 +15,7 @@
     --border-radius-sm: 6px;
     --border-radius-md: 10px;
     --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    --input-padding-y: 10px;
+    --input-padding-y: 10px; /* Slightly reduced for mobile */
     --input-padding-x: 14px;
     --button-padding-y: 10px;
     --button-padding-x: 16px;
@@ -25,11 +25,11 @@
 
 *, *::before, *::after {
     box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
 }
 
 html {
-    font-size: 16px;
+    font-size: 16px; /* Base font size for rem units */
 }
 
 body {
@@ -37,12 +37,13 @@ body {
     background-color: var(--primary-bg);
     color: var(--text-primary);
     margin: 0;
-    display: flex;
+    display: flex; /* For centering container if needed, but container is full width now */
+    /* justify-content: center; align-items: flex-start; */
     min-height: 100vh;
-    font-size: 0.95rem;
+    font-size: 0.95rem; /* Default mobile font size */
     line-height: 1.6;
-    overflow: hidden;
-    -webkit-font-smoothing: antialiased;
+    overflow: hidden; /* Prevent body scroll, individual panels will scroll */
+    -webkit-font-smoothing: antialiased; /* Smoother fonts on mobile */
     -moz-osx-font-smoothing: grayscale;
 }
 
@@ -51,7 +52,7 @@ body {
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: var(--primary-bg);
+    background-color: var(--primary-bg); /* Match body if container edges are visible */
 }
 
 /* --- Top Bar --- */
@@ -64,7 +65,7 @@ body {
     align-items: center;
     justify-content: space-between;
     box-shadow: var(--box-shadow);
-    position: fixed;
+    position: fixed; /* Fixed at the top */
     top: 0;
     left: 0;
     right: 0;
@@ -113,7 +114,7 @@ body {
 .top-bar .top-action-btn:active {
     background-color: rgba(255,255,255,0.15);
 }
-.top-bar #date {
+.top-bar #date { /* Hide actual date input, use JS to update */
     display: none;
 }
 .top-bar .top-actions {
@@ -124,13 +125,13 @@ body {
 
 
 /* --- Main Content Area (Swipeable) --- */
-#diaryForm {
+#diaryForm { /* Renamed from .container to .app-container for body structure */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden; 
-    padding-top: var(--top-bar-height);
-    padding-bottom: var(--bottom-nav-height);
+    padding-top: var(--top-bar-height); /* Space for fixed top bar */
+    padding-bottom: var(--bottom-nav-height); /* Space for fixed bottom nav */
 }
 
 #tabViewPort {
@@ -143,6 +144,7 @@ body {
 #tabPanelsSlider {
     display: flex;
     height: 100%;
+    /* transition is handled by JS for swipe */
 }
 
 .tab-panel {
@@ -150,9 +152,17 @@ body {
     flex-shrink: 0;
     overflow-y: auto;
     height: 100%;
-    padding: 15px;
-    background-color: var(--primary-bg);
+    padding: 15px; /* Padding inside each panel */
+    background-color: var(--primary-bg); /* Panels have main bg color */
 }
+/* Remove two-column layout, all fieldsets stack */
+.tab-panel-content {
+    /* No flex needed, fieldsets will stack by default */
+}
+.tab-panel-column {
+    /* Not used in mobile-only single column */
+}
+
 
 /* --- Bottom Navigation --- */
 .bottom-nav {
@@ -162,7 +172,7 @@ body {
     background-color: var(--secondary-bg);
     height: var(--bottom-nav-height);
     box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
-    position: fixed;
+    position: fixed; /* Fixed at the bottom */
     bottom: 0;
     left: 0;
     right: 0;
@@ -276,9 +286,9 @@ datalist {} datalist option {}
 .form-actions {
     text-align: center;
     margin-top: 20px;
-    padding-top: 10px;
-    border-top: 1px solid var(--tertiary-bg);
-    display: grid;
+    padding-top: 10px; /* Space above buttons */
+    border-top: 1px solid var(--tertiary-bg); /* Separator line */
+    display: grid; /* Use grid for more flexible button layout */
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Smaller min for more buttons on small screens */
     gap: 10px;
 }
@@ -287,7 +297,7 @@ datalist {} datalist option {}
     display: none;
 }
 
-
+/* Styles for Download, Save, Import buttons specifically */
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex; align-items: center; justify-content: center;
     gap: 8px;
@@ -306,9 +316,7 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):activ
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i { font-size: 1em; transition: none; }
 button:disabled { cursor: not-allowed; opacity: 0.7; }
 
-.btn-text { 
-    /* For mobile, button text might be too long. Consider hiding on very small screens or using shorter text. */
-}
+.btn-text { }
 
 button[type="submit"] { background-color: var(--accent-color); color: var(--primary-bg); }
 button[type="submit"]:hover:not(:disabled) { background-color: var(--accent-hover); }
@@ -316,13 +324,11 @@ button#saveFormButton { background-color: var(--success-color); color: white; }
 button#saveFormButton:hover:not(:disabled) { background-color: #16a34a; }
 button#importJsonButton { background-color: var(--info-color); color: white; }
 button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
-/* button#clearForm is now hidden */
-
 
 /* --- Toast Notifications --- */
 #toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
 .toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow-lg); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px); 
-    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.2s forwards; /* slideUp 0.1s, visible 0.2s, fadeOut 0.3s = total 0.6s interaction before JS remove */
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 0.2s forwards;
     display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
 .toast i { font-size: 1em; }
 .toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
@@ -331,7 +337,7 @@ button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
 @keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeOutToastGeneral { 
     from { opacity: 1; transform: translateY(0); } 
-    to { opacity: 0; transform: translateY(10px); } /* Less dramatic translate on fade out */
+    to { opacity: 0; transform: translateY(10px); }
 }
 
 /* Minor adjustments for larger "mobile" screens if needed */
@@ -346,6 +352,6 @@ button#importJsonButton:hover:not(:disabled) { background-color: #2563eb; }
         font-size: 0.7rem;
     }
      .form-actions {
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); /* Allow more space for buttons */
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     }
 }
