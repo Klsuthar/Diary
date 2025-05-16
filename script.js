@@ -30,9 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryCountsDisplay = document.getElementById('summaryCounts');
 
     // History Tab Elements
-    const historyTabPanel = document.getElementById('tab-history'); // Used to check active tab
     const historyListContainer = document.getElementById('historyListContainer');
-    const noHistoryMessage = historyListContainer?.querySelector('.no-history-message'); // Add ? for safety
+    // const noHistoryMessage = historyListContainer?.querySelector('.no-history-message'); // We'll get this inside renderHistoryList
 
     // Multi-Select Top Bar Elements
     const topBar = document.querySelector('.top-bar');
@@ -166,8 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentDateDisplay) {
             if (dateStr) {
                 try {
-                    const [year, month, day] = dateStr.split('-').map(Number);
-                    const dateObj = new Date(year, month - 1, day);
+                    // Ensure parsing as local date by providing a neutral time part
+                    const dateObj = new Date(dateStr + 'T00:00:00');
                     if (isNaN(dateObj.getTime())) {
                         currentDateDisplay.innerHTML = `Invalid Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     } else {
@@ -185,6 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function changeDate(days) {
         let currentDateValue;
         if (dateInput.value) {
+            // Ensure parsing as local date
             const [year, month, day] = dateInput.value.split('-').map(Number);
             currentDateValue = new Date(year, month - 1, day);
         } else {
@@ -256,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (inputElement && inputElement.value.trim() !== '') {
                     const newValue = inputElement.value.trim();
                     suggestionsData[fieldId] = suggestionsData[fieldId] || [];
-                    // Remove if exists, then add to front
                     suggestionsData[fieldId] = suggestionsData[fieldId].filter(s => s.toLowerCase() !== newValue.toLowerCase());
                     suggestionsData[fieldId].unshift(newValue);
                     if (suggestionsData[fieldId].length > MAX_SUGGESTIONS_PER_FIELD) {
@@ -277,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (allSavedData[currentFormDate]) {
                     delete allSavedData[currentFormDate];
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
+                    // If history tab is active, re-render it
                     if (tabPanels[currentTabIndex]?.id === 'tab-history') {
                         renderHistoryList();
                     }
@@ -284,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             initializeForm(true);
             showToast("Form cleared for current date.", "info");
-            slideToPanel(0);
+            slideToPanel(0); // Go to first tab
         }
     }
     if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm);
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (id === 'sleepHours') el.value = "8";
                     else if (id === 'medicationsTaken') el.value = "Na";
                     else if (id === 'skincareRoutine') el.value = "Na";
-                    else el.value = ''; // Default clear for others
+                    else el.value = '';
                 }
             });
             if (energyLevelSlider) energyLevelSlider.value = 5;
@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
             loadFormFromLocalStorage();
         }
         updateSummaryCounts();
-        slideToPanel(currentTabIndex, false); // Ensure correct tab is shown without animation on init
+        // slideToPanel is called later in DOMContentLoaded after all initializations
         updateKeyboardStatus();
     }
 
@@ -381,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bottomNavButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
 
         if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
-            renderHistoryList();
+            renderHistoryList(); // Render/update history list when navigating to it
         }
     }
 
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabViewPort) {
         let swipeInProgress = false;
         tabViewPort.addEventListener('touchstart', (e) => {
-            if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history') {
+            if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
                 swipeInProgress = false; return;
             }
             swipeInProgress = true;
@@ -427,12 +427,11 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const data = {};
                 const selectedDateStr = getValue('date');
-                if (!selectedDateStr) {
+                 if (!selectedDateStr) {
                      showToast('Please select a date for the entry.', 'error');
                      setButtonLoadingState(downloadButton, false, originalDownloadIconHTML);
                      return;
                 }
-
                 data.date = selectedDateStr;
                 data.day_id = calculateDaysSince(REFERENCE_START_DATE, selectedDateStr);
 
@@ -469,13 +468,14 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    populateFormWithJson(importedData);
+                    populateFormWithJson(importedData); // This sets dateInput.value
                     if (importedData.date) {
-                        performSaveOperation(true);
+                        performSaveOperation(true); // Save silently using the date from importedData (now in dateInput)
                     }
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
-                    for (let i = 0; i < tabPanels.length -1; i++) { // -1 to exclude history tab
+                     // -1 to exclude history tab from being the target after import
+                    for (let i = 0; i < tabPanels.length - 1; i++) {
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea');
                         let hasData = false;
                         for (const input of panelInputs) { if (input.value && input.value.trim() !== '' && input.value.trim() !== 'Na' && input.value.trim() !== '0') { hasData = true; break; } }
@@ -497,8 +497,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateFormWithJson(jsonData) {
         diaryForm.reset();
         initializeForm(true); // Resets to default values and clears form
+        
+        // Set date first, as initializeForm might reset it
         setValue('date', jsonData.date);
-        updateCurrentDateDisplay(jsonData.date);
+        updateCurrentDateDisplay(jsonData.date); // Crucial to update display
 
         if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'}[k], jsonData.environment[k]));
         if (jsonData.body_measurements) Object.keys(jsonData.body_measurements).forEach(k => setValue({weight_kg:'weightKg', height_cm:'heightCm', chest:'chest', belly:'belly'}[k], jsonData.body_measurements[k]));
@@ -510,6 +512,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
 
+        // Ensure sliders reflect imported values
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
@@ -531,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function performSaveOperation(isSilent = false) {
         try {
             saveAllSuggestions();
-            const currentFormDate = dateInput.value;
+            const currentFormDate = dateInput.value; // This is the YYYY-MM-DD string
             if (!currentFormDate) {
                 if (!isSilent) showToast('Please select a date first to save.', 'error');
                 return false;
@@ -539,10 +542,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formDataToSave = {};
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
-                if (element.id) {
+                if (element.id) { // Ensure element has an ID
                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                 }
             });
+            // Crucially, ensure the 'date' field in the saved data matches currentFormDate
+            formDataToSave.date = currentFormDate;
+
 
             let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
             allSavedData[currentFormDate] = formDataToSave;
@@ -550,6 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
             if (!isSilent) showToast('Form data saved locally for this date!', 'success');
 
+            // If history tab is currently active, re-render it to show changes
             if (tabPanels[currentTabIndex]?.id === 'tab-history') {
                 renderHistoryList();
             }
@@ -565,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveFormButton.addEventListener('click', () => {
             const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
             setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
-            setTimeout(() => {
+            setTimeout(() => { // Short delay to allow UI to update
                 performSaveOperation(false);
                 setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
             }, 10);
@@ -576,33 +583,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
             diaryForm.reset();
-            initializeForm(true);
+            initializeForm(true); // Reset and set to today
             return;
         }
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
-        diaryForm.reset();
-        initializeForm(true); // Clears and sets defaults
+        
+        diaryForm.reset(); // Reset form elements to default browser state or HTML value attributes
+        initializeForm(true); // Clears form and sets defaults (like today's date if needed, specific field values)
+
+        // AFTER initializeForm(true) which might set dateInput.value to today,
+        // we must ensure we're actually trying to load for currentFormDate
+        setValue('date', currentFormDate); // Set date input to the date we are loading for
+        updateCurrentDateDisplay(currentFormDate); // Update display for this date
 
         if (formDataForDate) {
             try {
                 Object.keys(formDataForDate).forEach(elementId => {
-                    if (document.getElementById(elementId)) {
-                        if (elementId === 'date' && formDataForDate[elementId] === currentFormDate) { /* Date already set by initializeForm */ }
-                        else { setValue(elementId, formDataForDate[elementId]); }
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        // dateInput.value is already set to currentFormDate above, so skip re-setting it from formDataForDate.date
+                        if (elementId !== 'date') {
+                           setValue(elementId, formDataForDate[elementId]);
+                        }
                     }
                 });
-                updateCurrentDateDisplay(currentFormDate); // Ensure display is for the loaded date
-                if (!document.hidden && !isMultiSelectModeActive) { // Don't toast if app is hidden or in multi-select
+                // updateCurrentDateDisplay(currentFormDate); // Already called
+                if (!document.hidden && !isMultiSelectModeActive) {
                     showToast('Previously saved data for this date loaded.', 'info');
                 }
             } catch (e) {
                 console.error("Error loading from localStorage for date:", e);
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
-        } else {
-             updateCurrentDateDisplay(currentFormDate); // Update display even if no data
         }
+        // else { // No data for this date, initializeForm(true) already set defaults
+        //    updateCurrentDateDisplay(currentFormDate); // Ensure display matches
+        // }
+
         // Update sliders and counts after potentially loading data
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -612,114 +630,110 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function autoSaveOnPageHide() {
-        if (isMultiSelectModeActive) return; // Don't auto-save if in multi-select mode
+        if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return; // Don't auto-save if in multi-select or history tab is active
         const success = performSaveOperation(true);
         if (success) {
             console.log('Auto-save successful on page hide.');
         } else {
-            console.warn('Auto-save failed or no date selected on page hide.');
+            // console.warn('Auto-save failed or no date selected on page hide.'); // Can be noisy
         }
     }
     window.addEventListener('pagehide', autoSaveOnPageHide);
 
     // --- History Tab Functionality ---
     function renderHistoryList() {
-        if (!historyListContainer || !noHistoryMessage) return;
-        
-        // Preserve the noHistoryMessage element by finding it or creating it if it was somehow removed
-        let currentNoHistoryMsg = historyListContainer.querySelector('.no-history-message');
-        historyListContainer.innerHTML = ''; // Clear previous items
+        if (!historyListContainer) return;
+        const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
 
-        if (!currentNoHistoryMsg) { // Recreate if it got wiped (shouldn't happen with careful clearing)
-            currentNoHistoryMsg = document.createElement('p');
-            currentNoHistoryMsg.classList.add('no-history-message');
-            currentNoHistoryMsg.style.display = 'none';
-            currentNoHistoryMsg.style.textAlign = 'center';
-            currentNoHistoryMsg.style.marginTop = '20px';
-            currentNoHistoryMsg.style.color = 'var(--text-secondary)';
-            currentNoHistoryMsg.textContent = 'No diary entries found.';
-        }
-        historyListContainer.appendChild(currentNoHistoryMsg);
-
+        // Remove only .history-item elements
+        const existingItems = historyListContainer.querySelectorAll('.history-item');
+        existingItems.forEach(item => item.remove());
 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const dates = Object.keys(allSavedData).sort((a, b) => new Date(b) - new Date(a)); // Sort newest first
+        // Sort by date, newest first. Ensure date strings are parsed correctly.
+        const dates = Object.keys(allSavedData).sort((a, b) => new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00'));
 
         if (dates.length === 0) {
-            currentNoHistoryMsg.style.display = 'block';
-            return;
-        }
-        currentNoHistoryMsg.style.display = 'none';
+            if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'block';
+        } else {
+            if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'none';
+            dates.forEach(dateStr => {
+                const entryData = allSavedData[dateStr];
+                if (!entryData) return; // Should not happen if key exists
 
-        dates.forEach(dateStr => {
-            const entryData = allSavedData[dateStr];
-            const listItem = document.createElement('div');
-            listItem.classList.add('history-item');
-            listItem.dataset.date = dateStr;
+                const listItem = document.createElement('div');
+                listItem.classList.add('history-item');
+                listItem.dataset.date = dateStr;
 
-            if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) {
-                listItem.classList.add('selected');
-            }
-            if (isMultiSelectModeActive) {
-                listItem.classList.add('multi-select-active');
-            }
+                if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) {
+                    listItem.classList.add('selected');
+                }
+                if (isMultiSelectModeActive) {
+                    listItem.classList.add('multi-select-active');
+                }
 
-            const details = document.createElement('div');
-            details.classList.add('history-item-details');
+                const details = document.createElement('div');
+                details.classList.add('history-item-details');
 
-            const itemDate = document.createElement('div');
-            itemDate.classList.add('history-item-date');
-            try {
-                const d = new Date(dateStr + 'T00:00:00'); // Ensure parsing as local by adding time
-                itemDate.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-            } catch (e) { itemDate.textContent = dateStr; }
+                const itemDate = document.createElement('div');
+                itemDate.classList.add('history-item-date');
+                try {
+                    const d = new Date(dateStr + 'T00:00:00'); // Ensure parsing as local
+                    itemDate.textContent = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+                } catch (e) { itemDate.textContent = dateStr; }
 
-            const preview = document.createElement('div');
-            preview.classList.add('history-item-preview');
-            const summary = entryData.dailyActivitySummary || entryData.keyEvents || 'No summary or key events';
-            preview.textContent = summary.substring(0, 50) + (summary.length > 50 ? '...' : '');
+                const preview = document.createElement('div');
+                preview.classList.add('history-item-preview');
+                const summary = entryData.dailyActivitySummary || entryData.keyEvents || 'No summary or key events';
+                preview.textContent = summary.substring(0, 50) + (summary.length > 50 ? '...' : '');
 
-            details.appendChild(itemDate);
-            details.appendChild(preview);
+                details.appendChild(itemDate);
+                details.appendChild(preview);
 
-            const actions = document.createElement('div');
-            actions.classList.add('history-item-actions');
+                const actions = document.createElement('div');
+                actions.classList.add('history-item-actions');
 
-            const editBtn = document.createElement('button');
-            editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = 'Edit Entry'; editBtn.classList.add('action-edit');
-            editBtn.addEventListener('click', (e) => { e.stopPropagation(); handleEditEntry(dateStr); });
+                const editBtn = document.createElement('button');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = 'Edit Entry'; editBtn.classList.add('action-edit');
+                editBtn.addEventListener('click', (e) => { e.stopPropagation(); handleEditEntry(dateStr); });
 
-            const exportBtn = document.createElement('button');
-            exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
-            exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
+                const exportBtn = document.createElement('button');
+                exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
+                exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
 
-            const deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
-            deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
+                const deleteBtn = document.createElement('button');
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
+                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
 
-            actions.appendChild(editBtn);
-            actions.appendChild(exportBtn);
-            actions.appendChild(deleteBtn);
+                actions.appendChild(editBtn);
+                actions.appendChild(exportBtn);
+                actions.appendChild(deleteBtn);
 
-            listItem.appendChild(details);
-            listItem.appendChild(actions);
+                listItem.appendChild(details);
+                listItem.appendChild(actions);
 
-            listItem.addEventListener('click', () => handleHistoryItemClick(dateStr, listItem));
-            listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
-            listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
-            listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
-            listItem.addEventListener('contextmenu', (e) => {
-                e.preventDefault();
-                if (!isMultiSelectModeActive) enableMultiSelectMode();
-                toggleMultiSelectEntry(dateStr, listItem);
+                listItem.addEventListener('click', () => handleHistoryItemClick(dateStr, listItem));
+                listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
+                listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
+                listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
+                listItem.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    if (!isMultiSelectModeActive) enableMultiSelectMode();
+                    toggleMultiSelectEntry(dateStr, listItem);
+                });
+
+                if (noHistoryMsgElement) {
+                    historyListContainer.insertBefore(listItem, noHistoryMsgElement);
+                } else {
+                    historyListContainer.appendChild(listItem);
+                }
             });
-
-            historyListContainer.appendChild(listItem);
-        });
+        }
     }
 
+
     function handleHistoryItemTouchStart(event, dateStr, listItem) {
-        if (event.target.closest('.history-item-actions button')) return; // Ignore if tap on button
+        if (event.target.closest('.history-item-actions button')) return;
         itemTouchStartX = event.touches[0].clientX;
         itemTouchStartY = event.touches[0].clientY;
         clearTimeout(longPressTimer);
@@ -765,13 +779,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
             diaryForm.reset();
-            initializeForm(true); // Clears form and sets defaults like date, then populates
+            initializeForm(true); // Clears form and sets defaults
+
+            // Set date first to ensure it's for the entry being edited
+            setValue('date', dateStr); // entryFormData.date should be same as dateStr
+            updateCurrentDateDisplay(dateStr);
 
             Object.keys(entryFormData).forEach(elementId => {
-                setValue(elementId, entryFormData[elementId]);
+                // Date is already handled
+                if (elementId !== 'date') {
+                    setValue(elementId, entryFormData[elementId]);
+                }
             });
-            // Date is already set by entryFormData if it exists, and display updated
-            updateCurrentDateDisplay(entryFormData.date || dateStr);
 
             if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
             if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -779,7 +798,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
             updateSummaryCounts();
 
-            showToast(`Editing entry for ${new Date((entryFormData.date || dateStr) + 'T00:00:00').toLocaleDateString()}.`, 'info');
+            showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
             slideToPanel(0); // Go to the first tab for editing
         } else {
             showToast('Could not find entry data to edit.', 'error');
@@ -788,12 +807,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getFullEntryDataForExport(entryFormData, dateKey) {
         const exportData = {};
-        exportData.date = entryFormData.date || dateKey;
+        exportData.date = entryFormData.date || dateKey; // Use date from data if available, else key
         exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
 
-        // Helper to parse or return null
-        const pFloat = val => val ? parseFloat(val) : null;
-        const pInt = val => val ? parseInt(val) : null;
+        const pFloat = val => (val !== null && val !== undefined && val !== "") ? parseFloat(val) : null;
+        const pInt = val => (val !== null && val !== undefined && val !== "") ? parseInt(val) : null;
 
         exportData.environment = { temperature_c: entryFormData.temperatureC || '', air_quality_index: pInt(entryFormData.airQualityIndex), humidity_percent: pInt(entryFormData.humidityPercent), uv_index: pInt(entryFormData.uvIndex), weather_condition: entryFormData.weatherCondition || '' };
         exportData.body_measurements = { weight_kg: pFloat(entryFormData.weightKg), height_cm: pInt(entryFormData.heightCm), chest: pInt(entryFormData.chest), belly: pInt(entryFormData.belly) };
@@ -807,10 +825,9 @@ document.addEventListener('DOMContentLoaded', () => {
         return exportData;
     }
 
-
     function handleExportEntry(dateStr) {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const entryFormData = allSavedData[dateStr]; // This is the raw form data
+        const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
             const exportData = getFullEntryDataForExport(entryFormData, dateStr);
             const jsonString = JSON.stringify(exportData, null, 2);
@@ -821,7 +838,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     function handleDeleteEntry(dateStr, isPartOfMulti = false) {
         const confirmed = isPartOfMulti ? true : confirm(`Are you sure you want to delete the entry for ${new Date(dateStr+'T00:00:00').toLocaleDateString()}? This action cannot be undone.`);
         if (confirmed) {
@@ -831,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 if (!isPartOfMulti) {
                     showToast('Entry deleted.', 'success');
-                    renderHistoryList();
+                    renderHistoryList(); // Re-render if it's a single delete and history tab might be active
                 }
                 return true;
             } else {
@@ -847,7 +863,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = true;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(true);
-        renderHistoryList(); // Re-render to apply .multi-select-active to items
+        renderHistoryList();
         showToast('Multi-select enabled. Tap items to select.', 'info');
     }
 
@@ -855,7 +871,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = false;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(false);
-        renderHistoryList(); // Re-render to remove .multi-select-active and .selected
+        renderHistoryList();
     }
 
     function toggleMultiSelectEntry(dateStr, listItemElement) {
@@ -881,11 +897,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!topBar) return;
         if (isActive) {
             topBar.classList.add('multi-select-mode');
-            updateMultiSelectCount(); // Set initial count (usually 0 or 1)
+            updateMultiSelectCount();
         } else {
             topBar.classList.remove('multi-select-mode');
         }
-        // CSS handles actual button visibility based on .multi-select-mode class
     }
 
     if (cancelMultiSelectButton) cancelMultiSelectButton.addEventListener('click', disableMultiSelectMode);
@@ -934,8 +949,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Initial setup
-    updateTopBarForMultiSelectView(false); // Ensure correct top bar on load
-    initializeForm(); // Initialize form and load data for today (or last used date)
+    updateTopBarForMultiSelectView(false);
+    initializeForm(); // Initialize form, load data for today/last used, set defaults
+    slideToPanel(0, false); // Show the first tab initially without animation
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
