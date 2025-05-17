@@ -59,15 +59,16 @@ document.addEventListener('DOMContentLoaded', () => {
         { key: 'myPersonalDiaryDietSuggestions', fieldIds: ['breakfast', 'lunch', 'dinner', 'additionalItems'] }
     ];
 
+    // This map defines which input fields are considered for the "completeness" check of each tab.
     const tabInputMap = {
         'tab-basic': ['temperatureC', 'airQualityIndex', 'weatherCondition'],
         'tab-body': ['weightKg', 'heightCm', 'chest', 'belly', 'sleepHours', 'stepsCount', 'stepsDistanceKm', 'kilocalorie', 'waterIntakeLiters', 'medicationsTaken', 'physicalSymptoms'],
         'tab-mental': ['mentalState', 'meditationStatus', 'meditationDurationMin', 'faceProductName', 'faceProductBrand', 'hairProductName', 'hairProductBrand', 'hairOil', 'skincareRoutine'],
         'tab-diet': ['breakfast', 'lunch', 'dinner', 'additionalItems', 'tasksTodayEnglish', 'travelDestination', 'phoneScreenOnHr'],
-        'tab-summary': ['keyEvents', 'dailyActivitySummary']
+        'tab-summary': ['keyEvents', 'dailyActivitySummary'] // Note: dailyActivitySummary is a textarea
     };
 
-    // --- Utility Functions ---
+    // --- Utility Functions (Mostly Unchanged) ---
     function isPotentiallyFocusableForKeyboard(element) {
         if (!element) return false;
         const tagName = element.tagName;
@@ -164,15 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const [year, month, day] = dateInput.value.split('-').map(Number);
             currentDateValue = new Date(year, month - 1, day);
         } else {
-            currentDateValue = new Date();
+            currentDateValue = new Date(); 
         }
 
         if (!isNaN(currentDateValue.getTime())) {
             currentDateValue.setDate(currentDateValue.getDate() + days);
             dateInput.value = formatDate(currentDateValue);
             updateCurrentDateDisplay(dateInput.value);
-            loadFormFromLocalStorage();
-        } else {
+            loadFormFromLocalStorage(); 
+        } else { 
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
@@ -193,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
-        const value = element.value.trim();
+        const value = element.value.trim(); // .trim() is good for getValue
         if (type === 'range') return element.value === '' ? null : parseFloat(element.value);
         if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
@@ -210,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    function calculateDaysSince(startDate, endDateStr) {
+    function calculateDaysSince(startDate, endDateStr) { /* Unchanged */
         if (!endDateStr) return null;
         const [year, month, day] = endDateStr.split('-').map(Number);
         const endDate = new Date(Date.UTC(year, month - 1, day));
@@ -221,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         return diffDays + 1;
     }
-    function downloadJSON(content, fileName) {
+    function downloadJSON(content, fileName) { /* Unchanged */
         const a = document.createElement('a');
         const file = new Blob([content], { type: 'application/json' });
         a.href = URL.createObjectURL(file);
@@ -232,56 +233,55 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(a.href);
     }
 
-    // --- Tab Indicators ---
-    function updateTabIndicators() {
-        // console.log("--- Updating Tab Indicators ---"); // Uncomment for debugging
+    // --- Tab Indicators (NEW APPROACH) ---
+    function updateTabIndicators(source = "unknown") {
+        // console.log(`--- Updating Tab Indicators (called from: ${source}) ---`);
         bottomNavButtons.forEach(button => {
             const targetPanelId = button.dataset.tabTarget;
-            // console.log(`Checking tab: ${targetPanelId}`); // Uncomment for debugging
             if (targetPanelId === 'tab-history') {
                 button.classList.remove('has-empty-fields');
-                return; 
+                return;
             }
 
-            const inputIds = tabInputMap[targetPanelId];
-            if (!inputIds) {
-                // console.log(`No input IDs for ${targetPanelId}`); // Uncomment for debugging
-                button.classList.remove('has-empty-fields');
-                return; 
+            const inputIdsForTab = tabInputMap[targetPanelId];
+            if (!inputIdsForTab || inputIdsForTab.length === 0) {
+                button.classList.remove('has-empty-fields'); // No fields to check for this tab
+                // console.log(`No input IDs for ${targetPanelId} or empty list.`);
+                return;
             }
 
-            let hasEmptyField = false;
-            // console.log(`Inputs for ${targetPanelId}:`, inputIds); // Uncomment for debugging
-            for (const inputId of inputIds) {
+            let filledFieldsCount = 0;
+            // console.log(`Checking tab: ${targetPanelId} (expected ${inputIdsForTab.length} fields)`);
+            for (const inputId of inputIdsForTab) {
                 const element = document.getElementById(inputId);
                 if (element) {
-                    const value = element.value;
-                    const trimmedValue = value.trim();
-                    // console.log(`  ${inputId}: value='${value}', trimmed='${trimmedValue}', isEmpty=${trimmedValue === ''}`); // Uncomment for debugging
-                    if (trimmedValue === '') {
-                        hasEmptyField = true;
-                        // console.log(`  Found empty field in ${targetPanelId}: ${inputId}`); // Uncomment for debugging
-                        break; 
+                    // We use element.value directly here, then trim for the check.
+                    // This is important if a field might contain only whitespace but is not truly "empty".
+                    if (element.value.trim() !== '') {
+                        filledFieldsCount++;
+                        // console.log(`  Field ${inputId} is FILLED. Current count: ${filledFieldsCount}`);
+                    } else {
+                        // console.log(`  Field ${inputId} is EMPTY.`);
                     }
                 } else {
                      console.warn(`Element with ID ${inputId} not found for tab ${targetPanelId} during indicator check.`);
                 }
             }
             
-            // console.log(`Tab ${targetPanelId} - hasEmptyField: ${hasEmptyField}`); // Uncomment for debugging
-            if (hasEmptyField) {
-                button.classList.add('has-empty-fields');
-                // console.log(`Added .has-empty-fields to ${targetPanelId}`); // Uncomment for debugging
-            } else {
+            // console.log(`Tab ${targetPanelId}: Filled fields = ${filledFieldsCount}, Total fields = ${inputIdsForTab.length}`);
+            if (filledFieldsCount === inputIdsForTab.length) {
                 button.classList.remove('has-empty-fields');
-                // console.log(`Removed .has-empty-fields from ${targetPanelId}`); // Uncomment for debugging
+                // console.log(`  ${targetPanelId} is COMPLETE. Dot removed.`);
+            } else {
+                button.classList.add('has-empty-fields');
+                // console.log(`  ${targetPanelId} is INCOMPLETE. Dot added/kept.`);
             }
         });
     }
 
 
-    // --- Suggestion Logic ---
-    function loadAllSuggestions() {
+    // --- Suggestion Logic (Unchanged) ---
+    function loadAllSuggestions() { /* Unchanged */ 
         suggestionConfigs.forEach(config => {
             const suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
             config.fieldIds.forEach(fieldId => {
@@ -297,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    function saveAllSuggestions() {
+    function saveAllSuggestions() { /* Unchanged */ 
         suggestionConfigs.forEach(config => {
             let suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
             config.fieldIds.forEach(fieldId => {
@@ -317,13 +317,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Form Management ---
+    function applyAppDefaults() {
+        // console.log("Applying app defaults");
+        ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus',
+         'meditationDurationMin', 'sleepHours', 'medicationsTaken', 'skincareRoutine'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (id === 'weightKg') el.value = "72";
+                else if (id === 'heightCm') el.value = "178";
+                else if (id === 'chest') el.value = "90";
+                else if (id === 'belly') el.value = "89";
+                else if (id === 'meditationStatus') el.value = "Na";
+                else if (id === 'meditationDurationMin') el.value = "0";
+                else if (id === 'sleepHours') el.value = "8"; 
+                else if (id === 'medicationsTaken') el.value = "Na";
+                else if (id === 'skincareRoutine') el.value = "Na";
+            }
+        });
+        if (energyLevelSlider) energyLevelSlider.value = 5;
+        if (stressLevelSlider) stressLevelSlider.value = 5;
+        if (humidityPercentSlider) humidityPercentSlider.value = 10;
+        if (uvIndexSlider) uvIndexSlider.value = 9;
+
+        // No need to call updateSliderDisplay here, setValue in load/populate will do it
+        // or it's part of the main updateUIElements flow.
+    }
+
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            const currentFormDate = dateInput.value; // Get date before reset
+            const currentFormDate = dateInput.value; 
             
-            diaryForm.reset(); // Reset first to clear all fields to HTML defaults
+            diaryForm.reset(); // 1. Reset to HTML defaults (empty for most)
+            applyAppDefaults(); // 2. Apply our specific default values
 
-            if (currentFormDate) { // Remove saved data for this date
+            if (currentFormDate) { 
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
                 if (allSavedData[currentFormDate]) {
                     delete allSavedData[currentFormDate];
@@ -333,74 +360,38 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            initializeForm(true); // Now apply app-specific defaults and update UI
-            showToast("Form cleared for current date.", "info");
+            
+            if (!dateInput.value) { // Ensure date is set if it became empty
+                const today = new Date();
+                dateInput.value = formatDate(today);
+            }
+            updateCurrentDateDisplay(dateInput.value); // Reflect date change
+
+            loadAllSuggestions(); // Suggestions are not date-specific
+            updateAllUIElements("clearDiaryForm"); // Single call to update all UI
+            showToast("Form cleared. Displaying defaults for current date.", "info");
             slideToPanel(0);
         }
     }
-
-    function initializeForm(isClearingOrInitialDefaults = false) {
-        if (!dateInput.value || isClearingOrInitialDefaults) {
-            const today = new Date();
-            dateInput.value = formatDate(today);
-        }
-        updateCurrentDateDisplay(dateInput.value);
-
-        if (isClearingOrInitialDefaults) {
-            // diaryForm.reset() should ideally be called by the function that *needs* a full clear,
-            // like clearDiaryForm() or at the beginning of loadFormFromLocalStorage().
-            // This initializeForm then just applies specific defaults ON TOP of a reset state.
-            // If called from clearDiaryForm, reset was already done.
-            // If called from loadFormFromLocalStorage, reset was done there too.
-            // If called initially (isClearingOrInitialDefaults=true), we need a reset here.
-            if(isClearingOrInitialDefaults && !document.getElementById('weightKg').value) { // Heuristic: if weight is empty, assume a full reset is needed
-                diaryForm.reset(); // Ensure clean slate if this is a true "init with defaults"
-            }
-
-            ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus',
-             'meditationDurationMin', 'sleepHours', 'medicationsTaken', 'skincareRoutine'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (id === 'weightKg') el.value = "72";
-                    else if (id === 'heightCm') el.value = "178";
-                    else if (id === 'chest') el.value = "90";
-                    else if (id === 'belly') el.value = "89";
-                    else if (id === 'meditationStatus') el.value = "Na";
-                    else if (id === 'meditationDurationMin') el.value = "0";
-                    else if (id === 'sleepHours') el.value = "8"; 
-                    else if (id === 'medicationsTaken') el.value = "Na";
-                    else if (id === 'skincareRoutine') el.value = "Na";
-                    // Fields not in this list would be "" if diaryForm.reset() was called prior
-                }
-            });
-            if (energyLevelSlider) energyLevelSlider.value = 5;
-            if (stressLevelSlider) stressLevelSlider.value = 5;
-            if (humidityPercentSlider) humidityPercentSlider.value = 10;
-            if (uvIndexSlider) uvIndexSlider.value = 9;
-        }
-
-        if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
-        if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-        if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
-        if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
-
-        loadAllSuggestions();
-        
-        // If not clearing (i.e., initial page load), loadFormFromLocalStorage will be called by the main setup.
-        // If clearing, or called from loadFormFromLocalStorage after its own reset, then update indicators.
-        if (isClearingOrInitialDefaults) {
-            updateTabIndicators(); 
-        }
+    
+    function updateAllUIElements(source = "unknown") {
+        // console.log(`Updating ALL UI Elements from: ${source}`);
+        updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
+        updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
+        updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
+        updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
         updateKeyboardStatus();
+        updateTabIndicators(`updateAllUIElements_from_${source}`);
     }
 
+
     function populateFormWithJson(jsonData) {
-        diaryForm.reset(); // Start fresh
-        initializeForm(true); // Apply defaults and initial indicator state
+        diaryForm.reset(); 
+        applyAppDefaults(); // Set defaults first
         
-        setValue('date', jsonData.date);
-        updateCurrentDateDisplay(jsonData.date);
+        setValue('date', jsonData.date); // Set date from JSON
+        updateCurrentDateDisplay(jsonData.date); // Update display
 
         // Populate all fields from JSON
         if (jsonData.environment) Object.keys(jsonData.environment).forEach(k => setValue({temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'}[k], jsonData.environment[k]));
@@ -413,13 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
 
-        // Update UI elements after populating
-        if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
-        if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-        if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
-        if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
-        updateSummaryCounts();
-        updateTabIndicators(); // Final indicator update after JSON data is applied
+        updateAllUIElements("populateFormWithJson"); 
     }
 
     function performSaveOperation(isSilent = false) {
@@ -448,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tabPanels[currentTabIndex]?.id === 'tab-history') {
                 renderHistoryList();
             }
-            updateTabIndicators(); 
+            updateTabIndicators("performSaveOperation"); // Only tab indicators needed after save
             return true;
         } catch (e) {
             console.error("Error saving to localStorage:", e);
@@ -458,24 +443,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadFormFromLocalStorage() {
-        const currentFormDate = dateInput.value;
-        if (!currentFormDate) { // Should not happen if date is always set
-            diaryForm.reset();
-            initializeForm(true); // Set to today's date and defaults
-            return;
+        if (!dateInput.value) { // 1. Ensure date is set
+            const today = new Date();
+            dateInput.value = formatDate(today);
         }
-        
-        diaryForm.reset(); // 1. Clear all fields to HTML defaults (empty strings)
-        initializeForm(true); // 2. Apply app-specific defaults (like "72", "Na") and update tab indicators for this default state. Date is also set here.
+        updateCurrentDateDisplay(dateInput.value);
+        const currentFormDate = dateInput.value;
+
+        diaryForm.reset(); // 2. Reset form to HTML defaults
+        applyAppDefaults(); // 3. Apply app-specific defaults
+        // console.log("Form reset and app defaults applied in loadFormFromLocalStorage.");
+
+        loadAllSuggestions(); // 4. Load suggestions
 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
 
-        if (formDataForDate) { // 3. If data exists for this date, load it, overwriting defaults
+        if (formDataForDate) { // 5. Load data for the current date, if it exists
+            // console.log("Loading data from localStorage for date:", currentFormDate);
             try {
                 Object.keys(formDataForDate).forEach(elementId => {
-                    // Date is already set by initializeForm, so skip re-setting it from formDataForDate
-                    // unless you want to be absolutely sure it matches (it should).
                     if (elementId !== 'date') { 
                         setValue(elementId, formDataForDate[elementId]);
                     }
@@ -487,19 +474,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error loading from localStorage for date:", e);
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
+        } else {
+            // console.log("No saved data found for date:", currentFormDate, ". Using defaults.");
         }
-        // Else: No data for this date, form remains with defaults set by initializeForm(true)
 
-        // 4. Final UI updates after potential data load
-        if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
-        if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-        if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
-        if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
-        updateSummaryCounts();
-        updateTabIndicators(); // Crucial: update indicators AFTER populating with specific date's data (or defaults if no data)
+        updateAllUIElements("loadFormFromLocalStorage_end"); // 6. Final UI updates
     }
 
-    function autoSaveOnPageHide() {
+    function autoSaveOnPageHide() { /* Unchanged */
         if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return;
         const success = performSaveOperation(true);
         if (success) {
@@ -507,8 +489,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Tab Navigation ---
-    function slideToPanel(index, animate = true) {
+    // --- Tab Navigation (Unchanged) ---
+    function slideToPanel(index, animate = true) { /* Unchanged */ 
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
         if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
@@ -526,8 +508,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- History Tab & Multi-Select Functionality (omitted for brevity, same as previous correct version) ---
-    function renderHistoryList() {
+    // --- History Tab & Multi-Select Functionality (Mostly Unchanged, ensure UI updates on delete) ---
+    function renderHistoryList() { /* Unchanged */ 
         if (!historyListContainer) return;
         const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
 
@@ -619,7 +601,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     }
-    function handleHistoryItemTouchStart(event, dateStr, listItem) {
+    function handleHistoryItemTouchStart(event, dateStr, listItem) { /* Unchanged */ 
         if (event.target.closest('.history-item-actions button') || event.target.closest('.history-item-checkbox')) return;
         itemTouchStartX = event.touches[0].clientX;
         itemTouchStartY = event.touches[0].clientY;
@@ -640,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navigator.vibrate) navigator.vibrate(50);
         }, LONG_PRESS_DURATION);
     }
-    function handleHistoryItemTouchMove(event) {
+    function handleHistoryItemTouchMove(event) { /* Unchanged */ 
         if (longPressTimer) {
             const deltaX = Math.abs(event.touches[0].clientX - itemTouchStartX);
             const deltaY = Math.abs(event.touches[0].clientY - itemTouchStartY);
@@ -650,14 +632,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    function handleHistoryItemTouchEnd(dateStr, listItem) {
+    function handleHistoryItemTouchEnd(dateStr, listItem) { /* Unchanged */ 
         if (longPressTimer) { 
             clearTimeout(longPressTimer);
             longPressTimer = null;
             handleHistoryItemClick(null, dateStr, listItem); 
         }
     }
-    function handleHistoryItemClick(event, dateStr, listItem) {
+    function handleHistoryItemClick(event, dateStr, listItem) { /* Unchanged */ 
         if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) {
             return;
         }
@@ -668,16 +650,16 @@ document.addEventListener('DOMContentLoaded', () => {
             handleEditEntry(dateStr);
         }
     }
-    function handleEditEntry(dateStr) {
+    function handleEditEntry(dateStr) { 
         if (isMultiSelectModeActive) disableMultiSelectMode();
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entryFormData = allSavedData[dateStr];
 
         if (entryFormData) {
-            diaryForm.reset(); // Clear to HTML defaults
-            initializeForm(true); // Apply app defaults, set date, update indicators based on defaults
+            diaryForm.reset(); 
+            applyAppDefaults(); 
 
-            setValue('date', dateStr); // Ensure correct date is displayed
+            setValue('date', dateStr); 
             updateCurrentDateDisplay(dateStr);
 
             Object.keys(entryFormData).forEach(elementId => {
@@ -685,13 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     setValue(elementId, entryFormData[elementId]);
                 }
             });
-
-            if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
-            if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
-            if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
-            if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
-            updateSummaryCounts();
-            updateTabIndicators(); // Final update after populating for edit
+            updateAllUIElements("handleEditEntry"); 
 
             showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
             slideToPanel(0);
@@ -699,7 +675,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Could not find entry data to edit.', 'error');
         }
     }
-    function getFullEntryDataForExport(entryFormData, dateKey) {
+    function getFullEntryDataForExport(entryFormData, dateKey) { /* Unchanged */ 
         const exportData = {};
         exportData.date = entryFormData.date || dateKey;
         exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
@@ -716,7 +692,7 @@ document.addEventListener('DOMContentLoaded', () => {
         exportData.daily_activity_summary = entryFormData.dailyActivitySummary || '';
         return exportData;
     }
-    function handleExportEntry(dateStr) { /* Same as previous */ 
+    function handleExportEntry(dateStr) { /* Unchanged */  
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
@@ -728,7 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Could not find entry data to export.', 'error');
         }
     }
-    function handleDeleteEntry(dateStr, isPartOfMulti = false) { /* Same as previous, but ensure initializeForm or updateTabIndicators is called appropriately */
+    function handleDeleteEntry(dateStr, isPartOfMulti = false) { 
         const confirmed = isPartOfMulti ? true : confirm(`Are you sure you want to delete the entry for ${new Date(dateStr+'T00:00:00').toLocaleDateString()}? This action cannot be undone.`);
         if (confirmed) {
             const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -737,14 +713,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 if (!isPartOfMulti) {
                     showToast('Entry deleted.', 'success');
-                    renderHistoryList(); // Re-render history view
+                    renderHistoryList(); 
                 }
-                // If the currently displayed form date was the one deleted
+                
                 if (dateInput.value === dateStr && !isPartOfMulti) {
-                     diaryForm.reset(); // Clear the form
-                     initializeForm(true); // Re-initialize with defaults for today (or new selected date)
+                     diaryForm.reset(); 
+                     applyAppDefaults();
+                     if (!dateInput.value) { 
+                        const today = new Date();
+                        dateInput.value = formatDate(today);
+                     }
+                     updateCurrentDateDisplay(dateInput.value);
+                     updateAllUIElements("handleDeleteEntry_currentDate");
                 } else if (!isPartOfMulti) {
-                     updateTabIndicators(); // Update indicators for the currently visible date
+                     updateTabIndicators("handleDeleteEntry_otherDate"); 
                 }
                 return true;
             } else {
@@ -754,7 +736,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return false;
     }
-    function enableMultiSelectMode() { /* Same as previous */ 
+    function enableMultiSelectMode() { /* Unchanged */  
         if (isMultiSelectModeActive) return;
         isMultiSelectModeActive = true;
         selectedEntriesForMultiAction = [];
@@ -762,14 +744,14 @@ document.addEventListener('DOMContentLoaded', () => {
         renderHistoryList();
         showToast('Multi-select enabled. Tap items to select.', 'info');
     }
-    function disableMultiSelectMode() { /* Same as previous */ 
+    function disableMultiSelectMode() { /* Unchanged */  
         if (!isMultiSelectModeActive) return;
         isMultiSelectModeActive = false;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(false);
         renderHistoryList();
     }
-    function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) { /* Same as previous */ 
+    function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) { /* Unchanged */  
         const index = selectedEntriesForMultiAction.indexOf(dateStr);
         const actualCheckbox = checkboxElement || listItemElement.querySelector('.history-item-checkbox');
 
@@ -784,13 +766,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         updateMultiSelectCount();
     }
-    function updateMultiSelectCount() { /* Same as previous */ 
+    function updateMultiSelectCount() { /* Unchanged */  
         if (multiSelectCountSpan) multiSelectCountSpan.textContent = `${selectedEntriesForMultiAction.length} selected`;
         const hasSelection = selectedEntriesForMultiAction.length > 0;
         if (deleteSelectedButton) deleteSelectedButton.disabled = !hasSelection;
         if (exportSelectedButton) exportSelectedButton.disabled = !hasSelection;
     }
-    function updateTopBarForMultiSelectView(isActive) { /* Same as previous */
+    function updateTopBarForMultiSelectView(isActive) { /* Unchanged */ 
         if (!topBar) return;
         if (isActive) {
             topBar.classList.add('multi-select-mode');
@@ -799,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
             topBar.classList.remove('multi-select-mode');
         }
     }
-    function handleDeleteSelectedEntries() { /* Same as previous, but ensure initializeForm or updateTabIndicators is called */
+    function handleDeleteSelectedEntries() { 
         if (selectedEntriesForMultiAction.length === 0) {
             showToast('No entries selected for deletion.', 'info');
             return;
@@ -815,17 +797,18 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (currentFormDateWasDeleted) {
                 diaryForm.reset();
-                initializeForm(true); // Re-initialize form if current date was deleted
+                applyAppDefaults();
+                if (!dateInput.value) { 
+                    const today = new Date();
+                    dateInput.value = formatDate(today);
+                }
+                updateCurrentDateDisplay(dateInput.value);
             }
-            // disableMultiSelectMode calls renderHistoryList, which is good.
-            // If current form wasn't deleted, its indicators might still need an update if other tabs were affected,
-            // but the main `input` listener or subsequent actions usually handle this.
-            // A specific call to updateTabIndicators() here might be redundant but harmless.
-            updateTabIndicators(); 
+            updateAllUIElements("handleDeleteSelectedEntries"); 
             disableMultiSelectMode(); 
         }
     }
-    function handleExportSelectedEntries() { /* Same as previous */ 
+    function handleExportSelectedEntries() { /* Unchanged */ 
         if (selectedEntriesForMultiAction.length === 0) {
             showToast('No entries selected for export.', 'info');
             return;
@@ -850,7 +833,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
     // --- Event Listeners & Initialization ---
     window.addEventListener('resize', updateKeyboardStatus);
     diaryForm.addEventListener('focusin', (event) => {
@@ -859,21 +841,39 @@ document.addEventListener('DOMContentLoaded', () => {
     diaryForm.addEventListener('focusout', (event) => {
         if (isPotentiallyFocusableForKeyboard(event.target)) setTimeout(() => { isKeyboardOpen = false; viewportHeightBeforeKeyboard = window.innerHeight; updateKeyboardStatus(); }, 100);
     });
-    if (dateInput) dateInput.addEventListener('change', () => { updateCurrentDateDisplay(dateInput.value); loadFormFromLocalStorage(); });
+    if (dateInput) dateInput.addEventListener('change', () => { loadFormFromLocalStorage(); }); 
     if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
     if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
+    
     if (energyLevelSlider) energyLevelSlider.addEventListener('input', () => updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay));
     if (stressLevelSlider) stressLevelSlider.addEventListener('input', () => updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay));
     if (humidityPercentSlider) humidityPercentSlider.addEventListener('input', () => updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay));
     if (uvIndexSlider) uvIndexSlider.addEventListener('input', () => updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay));
-    if (dailyActivitySummaryTextarea) dailyActivitySummaryTextarea.addEventListener('input', updateSummaryCounts);
+    if (dailyActivitySummaryTextarea) {
+        dailyActivitySummaryTextarea.addEventListener('input', () => {
+            updateSummaryCounts();
+            updateTabIndicators(`summaryTextarea_input`); // Also trigger tab indicator check
+        });
+    }
+    
     if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm); 
 
-    diaryForm.addEventListener('input', () => {
-        updateTabIndicators();
+    diaryForm.addEventListener('input', (event) => {
+        // Check if the event target is one of the input fields we care about for tab indicators
+        const targetId = event.target.id;
+        let isRelevantInput = false;
+        for (const panelId in tabInputMap) {
+            if (tabInputMap[panelId].includes(targetId)) {
+                isRelevantInput = true;
+                break;
+            }
+        }
+        if (isRelevantInput) {
+            updateTabIndicators(`form_input_on_${targetId}`);
+        }
     });
     
-    diaryForm.addEventListener('submit', function(event) { /* Same as previous */ 
+    diaryForm.addEventListener('submit', function(event) { /* Unchanged */ 
         event.preventDefault();
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
@@ -910,7 +910,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     });
     if (importJsonButton) importJsonButton.addEventListener('click', () => jsonFileInput.click());
-    jsonFileInput.addEventListener('change', function(event) { /* Same as previous, ensure populateFormWithJson is used */ 
+    jsonFileInput.addEventListener('change', function(event) { /* Unchanged */  
         const file = event.target.files[0];
         if (file && importJsonButton) {
             const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
@@ -953,7 +953,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsText(file);
         }
     });
-    if (saveFormButton) saveFormButton.addEventListener('click', () => { /* Same as previous, ensure performSaveOperation is used */ 
+    if (saveFormButton) saveFormButton.addEventListener('click', () => { /* Unchanged */  
         const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
         setTimeout(() => {
@@ -962,7 +962,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 10);
     });
     bottomNavButtons.forEach((button, index) => button.addEventListener('click', () => slideToPanel(index)));
-    if (tabViewPort) { /* Same swipe logic as previous */ 
+    if (tabViewPort) { /* Unchanged swipe logic */  
         let swipeInProgress = false;
         tabViewPort.addEventListener('touchstart', (e) => {
             if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
@@ -997,11 +997,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial Setup
     updateTopBarForMultiSelectView(false);
-    // Call loadFormFromLocalStorage directly. It will handle setting the date,
-    // applying defaults (via initializeForm(true)), loading stored data, and updating indicators.
-    loadFormFromLocalStorage(); 
+    loadFormFromLocalStorage(); // This now handles the full sequence: date, reset, defaults, load specific, UI updates.
     slideToPanel(0, false);
-
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
