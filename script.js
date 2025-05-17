@@ -639,8 +639,9 @@ document.addEventListener('DOMContentLoaded', () => {
         exportData.date = entryFormData.date || dateKey;
         exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
 
-        const pFloat = val => (val !== null && val !== undefined && val !== "") ? parseFloat(val) : null;
-        const pInt = val => (val !== null && val !== undefined && val !== "") ? parseInt(val) : null;
+        const pFloat = val => (val !== null && val !== undefined && val !== "" && !isNaN(parseFloat(val))) ? parseFloat(val) : null;
+        const pInt = val => (val !== null && val !== undefined && val !== "" && !isNaN(parseInt(val))) ? parseInt(val) : null;
+
 
         exportData.environment = { temperature_c: entryFormData.temperatureC || '', air_quality_index: pInt(entryFormData.airQualityIndex), humidity_percent: pInt(entryFormData.humidityPercent), uv_index: pInt(entryFormData.uvIndex), weather_condition: entryFormData.weatherCondition || '' };
         exportData.body_measurements = { weight_kg: pFloat(entryFormData.weightKg), height_cm: pInt(entryFormData.heightCm), chest: pInt(entryFormData.chest), belly: pInt(entryFormData.belly) };
@@ -797,6 +798,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
+        
+        // Helper for parsing that returns null if NaN, used in getFullEntryDataForExport and here
+        const pFloatLocal = valStr => {
+            if (valStr === null || valStr === undefined || valStr.trim() === "") return null;
+            const num = parseFloat(valStr);
+            return isNaN(num) ? null : num;
+        };
+        const pIntLocal = valStr => {
+            if (valStr === null || valStr === undefined || valStr.trim() === "") return null;
+            const num = parseInt(valStr, 10);
+            return isNaN(num) ? null : num;
+        };
+
         setTimeout(() => {
             try {
                 const data = {};
@@ -809,13 +823,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.date = selectedDateStr;
                 data.day_id = calculateDaysSince(REFERENCE_START_DATE, selectedDateStr);
 
-                data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: getValue('airQualityIndex', 'number'), humidity_percent: getValue('humidityPercent', 'range'), uv_index: getValue('uvIndex', 'range'), weather_condition: getValue('weatherCondition') };
-                data.body_measurements = { weight_kg: getValue('weightKg', 'number'), height_cm: getValue('heightCm', 'number'), chest: getValue('chest', 'number'), belly: getValue('belly', 'number') };
-                data.health_and_fitness = { sleep_hours: getValue('sleepHours', 'number'), steps_count: getValue('stepsCount', 'number'), steps_distance_km: getValue('stepsDistanceKm', 'number'), kilocalorie: getValue('kilocalorie', 'number'), water_intake_liters: getValue('waterIntakeLiters', 'number'), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
-                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number') };
+                data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: pIntLocal(getValue('airQualityIndex')), humidity_percent: getValue('humidityPercent', 'range'), uv_index: getValue('uvIndex', 'range'), weather_condition: getValue('weatherCondition') };
+                data.body_measurements = { weight_kg: pFloatLocal(getValue('weightKg')), height_cm: pIntLocal(getValue('heightCm')), chest: pIntLocal(getValue('chest')), belly: pIntLocal(getValue('belly')) };
+                data.health_and_fitness = { sleep_hours: pFloatLocal(getValue('sleepHours')), steps_count: pIntLocal(getValue('stepsCount')), steps_distance_km: pFloatLocal(getValue('stepsDistanceKm')), kilocalorie: pIntLocal(getValue('kilocalorie')), water_intake_liters: pFloatLocal(getValue('waterIntakeLiters')), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
+                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: pIntLocal(getValue('meditationDurationMin')) };
                 data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
                 data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
-                data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: getValue('phoneScreenOnHr', 'number') };
+                data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: pFloatLocal(getValue('phoneScreenOnHr')) };
                 data.additional_notes = { key_events: getValue('keyEvents') };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
