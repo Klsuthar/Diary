@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'submit', 'reset', 'file', 'date', 'color'].includes(type)) {
             return true;
         }
-        // SELECT is no longer used for this field, but keeping the check for other potential SELECTs
         if (tagName === 'SELECT') return true; 
         return false;
     }
@@ -187,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
-        const value = element.value.trim(); // For input type="text", this is correct
+        const value = element.value.trim();
         if (type === 'range') return element.value === '' ? null : parseFloat(element.value);
         if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
@@ -265,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Form Management ---
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset(); // This will reset text input otherNoteStatus to its HTML value attribute "No"
+            diaryForm.reset();
             const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -277,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            initializeForm(true); // This will also explicitly set otherNoteStatus.value to "No"
+            initializeForm(true);
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -306,7 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else el.value = '';
                 }
             });
-            setValue('otherNoteStatus', 'No'); // Set default value for the text input
+            setValue('otherNoteStatus', 'No');
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
             if (humidityPercentSlider) humidityPercentSlider.value = 10;
@@ -326,8 +325,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateKeyboardStatus();
     }
     function populateFormWithJson(jsonData) {
-        diaryForm.reset(); // Resets to HTML defaults including otherNoteStatus.value = "No"
-        initializeForm(true); // Resets to script defaults including otherNoteStatus.value = "No"
+        diaryForm.reset(); 
+        initializeForm(true); 
         
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
@@ -356,7 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function performSaveOperation(isSilent = false) {
         try {
-            saveAllSuggestions(); // This function is generic and should still work
+            saveAllSuggestions();
             const currentFormDate = dateInput.value;
             if (!currentFormDate) {
                 if (!isSilent) showToast('Please select a date first to save.', 'error');
@@ -364,7 +363,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const formDataToSave = {};
-            // QuerySelectorAll will include the text input otherNoteStatus
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
                 if (element.id) {
                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
@@ -392,8 +390,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadFormFromLocalStorage() {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
-            diaryForm.reset(); // Resets otherNoteStatus text input to HTML value="No"
-            initializeForm(true); // Sets script defaults including otherNoteStatus.value = "No"
+            diaryForm.reset(); 
+            initializeForm(true); 
             return;
         }
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -415,7 +413,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 });
-                // Ensure otherNoteStatus text input is explicitly set from loaded data if available
                 setValue('otherNoteStatus', formDataForDate.otherNoteStatus || 'No');
 
 
@@ -429,7 +426,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             setValue('otherNoteStatus', 'No');
         }
-
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -487,12 +483,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 listItem.classList.add('history-item');
                 listItem.dataset.date = dateStr;
 
+                const mainContent = document.createElement('div');
+                mainContent.classList.add('history-item-main-content');
+
                 if (isMultiSelectModeActive) {
                     listItem.classList.add('multi-select-active');
+                    mainContent.classList.add('multi-select-active');
                 }
                 if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) {
                     listItem.classList.add('selected');
                 }
+
+                const expandJsonBtn = document.createElement('button');
+                expandJsonBtn.classList.add('history-item-expand-json');
+                expandJsonBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                expandJsonBtn.title = 'Show/Hide JSON Data';
+                expandJsonBtn.setAttribute('aria-expanded', 'false');
+                mainContent.appendChild(expandJsonBtn);
 
                 const checkboxContainer = document.createElement('div');
                 checkboxContainer.classList.add('history-item-checkbox-container');
@@ -501,12 +508,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.classList.add('history-item-checkbox');
                 checkbox.dataset.date = dateStr;
                 checkbox.checked = isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr);
+                // Event listener for checkbox is now specific to its action
                 checkbox.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    e.stopPropagation(); // Prevent mainContent click
                     toggleMultiSelectEntry(dateStr, listItem, checkbox);
                 });
                 checkboxContainer.appendChild(checkbox);
-                listItem.appendChild(checkboxContainer);
+                mainContent.appendChild(checkboxContainer);
 
                 const details = document.createElement('div');
                 details.classList.add('history-item-details');
@@ -521,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 preview.textContent = summary.substring(0, 50) + (summary.length > 50 ? '...' : '');
                 details.appendChild(itemDate);
                 details.appendChild(preview);
-                listItem.appendChild(details);
+                mainContent.appendChild(details);
 
                 const actions = document.createElement('div');
                 actions.classList.add('history-item-actions');
@@ -536,14 +544,51 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 actions.appendChild(exportBtn);
                 actions.appendChild(deleteBtn);
-                listItem.appendChild(actions);
+                mainContent.appendChild(actions);
+                
+                listItem.appendChild(mainContent);
 
-                listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem));
+                const jsonView = document.createElement('pre');
+                jsonView.classList.add('history-item-json-view');
+                listItem.appendChild(jsonView);
+
+                expandJsonBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    const isExpanded = expandJsonBtn.getAttribute('aria-expanded') === 'true';
+                    if (isExpanded) {
+                        jsonView.style.display = 'none';
+                        jsonView.textContent = ''; 
+                        expandJsonBtn.setAttribute('aria-expanded', 'false');
+                        expandJsonBtn.classList.remove('expanded');
+                    } else {
+                        const fullEntryData = getFullEntryDataForExport(entryData, dateStr);
+                        jsonView.textContent = JSON.stringify(fullEntryData, null, 2);
+                        jsonView.style.display = 'block';
+                        expandJsonBtn.setAttribute('aria-expanded', 'true');
+                        expandJsonBtn.classList.add('expanded');
+                    }
+                });
+
+                // Attach the main click listener to mainContent
+                mainContent.addEventListener('click', (event) => {
+                    // IMPORTANT: Check if the click was on the mainContent itself,
+                    // or on its children that DON'T have their own specific click handlers (like details, preview, date).
+                    // Clicks on expandJsonBtn, checkbox, or action buttons should be handled by their own listeners.
+                    if (event.target.closest('.history-item-expand-json') ||
+                        event.target.closest('.history-item-checkbox') ||
+                        event.target.closest('.history-item-actions button')) {
+                        return; // Let specific handlers do their job
+                    }
+                    handleHistoryItemClick(event, dateStr, listItem);
+                });
+                
+                // Touch and context menu listeners remain on listItem for broader interaction like long press
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
                 listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
-                listItem.addEventListener('contextmenu', (e) => {
+                listItem.addEventListener('contextmenu', (e) => { 
                     e.preventDefault();
+                    if (e.target.closest('.history-item-expand-json') || e.target.closest('.history-item-actions button')) return;
                     if (!isMultiSelectModeActive) enableMultiSelectMode();
                     const currentCheckbox = listItem.querySelector('.history-item-checkbox');
                     toggleMultiSelectEntry(dateStr, listItem, currentCheckbox);
@@ -559,7 +604,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleHistoryItemTouchStart(event, dateStr, listItem) {
-        if (event.target.closest('.history-item-actions button') || event.target.closest('.history-item-checkbox')) return;
+        if (event.target.closest('.history-item-expand-json') || event.target.closest('.history-item-actions button') || event.target.closest('.history-item-checkbox')) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+            return;
+        }
         itemTouchStartX = event.touches[0].clientX;
         itemTouchStartY = event.touches[0].clientY;
         clearTimeout(longPressTimer);
@@ -592,17 +641,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleHistoryItemTouchEnd(dateStr, listItem) {
-        if (longPressTimer) { // Was a short tap
+        if (longPressTimer) { 
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            handleHistoryItemClick(null, dateStr, listItem); 
+            // Call handleHistoryItemClick only if it was a short tap on a non-interactive part
+            // The mainContent click listener already has checks for interactive children.
+            // This ensures that short taps on the general area still trigger edit/select.
+             handleHistoryItemClick(null, dateStr, listItem);
         }
     }
 
+    // This function is now called by the event listener on `mainContent`
     function handleHistoryItemClick(event, dateStr, listItem) {
-        if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) {
-            return;
-        }
+        // The checks for specific interactive elements are now done in the event listener itself in renderHistoryList.
+        // So, if this function is called, it means the click was on a non-button area of mainContent.
         if (isMultiSelectModeActive) {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
@@ -610,6 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
             handleEditEntry(dateStr);
         }
     }
+
 
     function handleEditEntry(dateStr) {
         if (isMultiSelectModeActive) disableMultiSelectMode();
@@ -629,7 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             setValue('otherNoteStatus', entryFormData.otherNoteStatus || 'No');
-
 
             if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
             if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -651,7 +703,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const pFloat = val => (val !== null && val !== undefined && val !== "" && !isNaN(parseFloat(val))) ? parseFloat(val) : null;
         const pInt = val => (val !== null && val !== undefined && val !== "" && !isNaN(parseInt(val))) ? parseInt(val) : null;
-
 
         exportData.environment = { temperature_c: entryFormData.temperatureC || '', air_quality_index: pInt(entryFormData.airQualityIndex), humidity_percent: pInt(entryFormData.humidityPercent), uv_index: pInt(entryFormData.uvIndex), weather_condition: entryFormData.weatherCondition || '' };
         exportData.body_measurements = { weight_kg: pFloat(entryFormData.weightKg), height_cm: pInt(entryFormData.heightCm), chest: pInt(entryFormData.chest), belly: pInt(entryFormData.belly) };
@@ -844,7 +895,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: pFloatLocal(getValue('phoneScreenOnHr')) };
                 data.additional_notes = { 
                     key_events: getValue('keyEvents'),
-                    other_note_status: getValue('otherNoteStatus') // Get value from the text input
+                    other_note_status: getValue('otherNoteStatus')
                 };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
@@ -875,12 +926,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
                     for (let i = 0; i < tabPanels.length - 1; i++) {
-                        // The querySelectorAll for inputs now correctly includes the text input
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea, select');
                         let hasData = false;
                         for (const input of panelInputs) { 
                             if (input.value && input.value.trim() !== '' && input.value.trim() !== 'Na' && input.value.trim() !== '0') {
-                                // For text input, only count if not default "No"
                                 if (input.id === 'otherNoteStatus' && input.value.trim().toLowerCase() === 'no') continue; 
                                 hasData = true; 
                                 break; 
@@ -943,7 +992,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportSelectedButton) exportSelectedButton.addEventListener('click', handleExportSelectedEntries);
 
     updateTopBarForMultiSelectView(false);
-    initializeForm(); // This will now set otherNoteStatus.value to 'No' by default
+    initializeForm();
     slideToPanel(0, false);
 
     if ('serviceWorker' in navigator) {
