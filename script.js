@@ -67,22 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'tab-summary': ['keyEvents', 'dailyActivitySummary']
     };
 
-    // --- Utility Functions (Mostly Unchanged) ---
-    function isPotentiallyFocusableForKeyboard(element) { /* ... */ return false;} // Simplified for brevity
-    function updateKeyboardStatus() { /* ... */ }
-    function setButtonLoadingState(button, isLoading, originalIconHTML = null) { /* ... */ }
-    function showToast(message, type = 'info') { /* ... */ }
-    function formatDate(date) { /* ... */ return "";}
-    function updateCurrentDateDisplay(dateStr) { /* ... */ }
-    function changeDate(days) { /* ... */ }
-    function updateSliderDisplay(slider, displayElement) { if (slider && displayElement) displayElement.textContent = slider.value; }
-    function updateSummaryCounts() { /* ... */ }
-    function getValue(elementId, type = 'text') { /* ... */ return "";}
-    function setValue(elementId, value) { /* ... */ }
-    function calculateDaysSince(startDate, endDateStr) { /* ... */ return null;}
-    function downloadJSON(content, fileName) { /* ... */ }
-
-    isPotentiallyFocusableForKeyboard = (element) => {
+    function isPotentiallyFocusableForKeyboard(element) {
         if (!element) return false;
         const tagName = element.tagName;
         const type = element.type;
@@ -92,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return false;
     };
-    updateKeyboardStatus = () => {
+    function updateKeyboardStatus() {
         const currentWindowHeight = window.innerHeight;
         const activeElement = document.activeElement;
         const isTextInputActive = isPotentiallyFocusableForKeyboard(activeElement);
@@ -109,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
             viewportHeightBeforeKeyboard = currentWindowHeight;
         }
     };
-    setButtonLoadingState = (button, isLoading, originalIconHTML = null) => {
+    function setButtonLoadingState(button, isLoading, originalIconHTML = null) {
         if (!button) return;
         const iconElement = button.querySelector('i');
         if (isLoading) {
@@ -132,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    showToast = (message, type = 'info') => {
+    function showToast(message, type = 'info') {
         if (!toastContainer) return;
         const toast = document.createElement('div');
         toast.classList.add('toast', type);
@@ -148,17 +133,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         setTimeout(() => { toast.remove(); }, 3000);
     };
-    formatDate = (date) => {
+    function formatDate(date) {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     };
-    updateCurrentDateDisplay = (dateStr) => {
+    function updateCurrentDateDisplay(dateStr) {
         if (currentDateDisplay) {
             if (dateStr) {
                 try {
-                    const dateObj = new Date(dateStr + 'T00:00:00'); // Ensure correct parsing by adding time
+                    const dateObj = new Date(dateStr + 'T00:00:00'); 
                     if (isNaN(dateObj.getTime())) {
                         currentDateDisplay.innerHTML = `Invalid Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     } else {
@@ -172,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    changeDate = (days) => {
+    function changeDate(days) {
         let currentDateValue;
         if (dateInput.value) {
             const [year, month, day] = dateInput.value.split('-').map(Number);
@@ -184,16 +169,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isNaN(currentDateValue.getTime())) {
             currentDateValue.setDate(currentDateValue.getDate() + days);
             dateInput.value = formatDate(currentDateValue);
-            // updateCurrentDateDisplay(dateInput.value); // loadFormFromLocalStorage will call this
             loadFormFromLocalStorage(); 
         } else { 
             const today = new Date();
             dateInput.value = formatDate(today);
-            // updateCurrentDateDisplay(dateInput.value); // loadFormFromLocalStorage will call this
             loadFormFromLocalStorage();
         }
     };
-    updateSummaryCounts = () => {
+    function updateSliderDisplay(slider, displayElement) { if (slider && displayElement) displayElement.textContent = slider.value; }
+    function updateSummaryCounts() {
         if (dailyActivitySummaryTextarea && summaryCountsDisplay) {
             const text = dailyActivitySummaryTextarea.value;
             const charCount = text.length;
@@ -201,20 +185,19 @@ document.addEventListener('DOMContentLoaded', () => {
             summaryCountsDisplay.textContent = `Words: ${wordCount}, Chars: ${charCount}`;
         }
     };
-    getValue = (elementId, type = 'text') => {
+    function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
         const value = element.value.trim();
-        if (type === 'range') return element.value === '' ? null : parseFloat(element.value); // range doesn't trim
+        if (type === 'range') return element.value === '' ? null : parseFloat(element.value); 
         if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
     };
-    setValue = (elementId, value) => {
+    function setValue(elementId, value) {
         const element = document.getElementById(elementId);
         if (element) {
             element.value = (value === null || value === undefined) ? '' : value;
             if (element.type === 'range') {
-                // Update slider display values
                 if (element.id === 'energyLevel') updateSliderDisplay(element, energyLevelValueDisplay);
                 if (element.id === 'stressLevel') updateSliderDisplay(element, stressLevelValueDisplay);
                 if (element.id === 'humidityPercent') updateSliderDisplay(element, humidityPercentValueDisplay);
@@ -222,7 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
-    calculateDaysSince = (startDate, endDateStr) => {
+    function calculateDaysSince(startDate, endDateStr) {
         if (!endDateStr) return null;
         const [year, month, day] = endDateStr.split('-').map(Number);
         const endDate = new Date(Date.UTC(year, month - 1, day)); 
@@ -233,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         return diffDays + 1;
     };
-    downloadJSON = (content, fileName) => {
+    function downloadJSON(content, fileName) {
         const a = document.createElement('a');
         const file = new Blob([content], { type: 'application/json' });
         a.href = URL.createObjectURL(file);
@@ -244,10 +227,8 @@ document.addEventListener('DOMContentLoaded', () => {
         URL.revokeObjectURL(a.href);
     };
 
-
-    // --- Tab Indicators (Alternative Boolean Flag Approach) ---
     function updateTabIndicators(source = "unknown") {
-        console.log(`--- Updating Tab Indicators (called from: ${source}) ---`);
+        // console.log(`--- Updating Tab Indicators (called from: ${source}) ---`);
         bottomNavButtons.forEach(button => {
             const targetPanelId = button.dataset.tabTarget;
             if (targetPanelId === 'tab-history') {
@@ -258,25 +239,25 @@ document.addEventListener('DOMContentLoaded', () => {
             const inputIdsForTab = tabInputMap[targetPanelId];
             if (!inputIdsForTab || inputIdsForTab.length === 0) {
                 button.classList.remove('has-empty-fields');
-                console.log(`No input IDs for ${targetPanelId} or empty list.`);
+                // console.log(`No input IDs for ${targetPanelId} or empty list.`);
                 return;
             }
 
-            let isTabComplete = true; // Assume complete initially
+            let isTabComplete = true; 
             // console.log(`Checking tab: ${targetPanelId}`);
             for (const inputId of inputIdsForTab) {
                 const element = document.getElementById(inputId);
                 if (element) {
                     if (element.value.trim() === '') {
-                        isTabComplete = false; // Found an empty field
+                        isTabComplete = false; 
                         // console.log(`  Field ${inputId} is EMPTY (value: "${element.value}"). Tab ${targetPanelId} is INCOMPLETE.`);
-                        break; // No need to check further fields for this tab
+                        break; 
                     } else {
                         // console.log(`  Field ${inputId} is FILLED (value: "${element.value}").`);
                     }
                 } else {
                      console.warn(`Element with ID ${inputId} not found for tab ${targetPanelId} during indicator check.`);
-                     isTabComplete = false; // Consider tab incomplete if a mapped field is missing
+                     isTabComplete = false; 
                      break;
                 }
             }
@@ -292,17 +273,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-    // --- Suggestion Logic (Unchanged) ---
-    function loadAllSuggestions() { /* ... */ }
-    function saveAllSuggestions() { /* ... */ }
-    loadAllSuggestions = () => {
+    function loadAllSuggestions() {
         suggestionConfigs.forEach(config => {
             const suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
             config.fieldIds.forEach(fieldId => {
                 const datalistElement = document.getElementById(`${fieldId}Suggestions`);
                 if (datalistElement && suggestionsData[fieldId] && Array.isArray(suggestionsData[fieldId])) {
-                    datalistElement.innerHTML = ''; // Clear existing options
+                    datalistElement.innerHTML = ''; 
                     suggestionsData[fieldId].forEach(suggestionText => {
                         const option = document.createElement('option');
                         option.value = suggestionText;
@@ -312,7 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
-    saveAllSuggestions = () => {
+    function saveAllSuggestions() {
         suggestionConfigs.forEach(config => {
             let suggestionsData = JSON.parse(localStorage.getItem(config.key)) || {};
             config.fieldIds.forEach(fieldId => {
@@ -320,9 +297,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (inputElement && inputElement.value.trim() !== '') {
                     const newValue = inputElement.value.trim();
                     suggestionsData[fieldId] = suggestionsData[fieldId] || [];
-                    // Remove old exact match (case-insensitive for filtering, but store as entered)
                     suggestionsData[fieldId] = suggestionsData[fieldId].filter(s => s.toLowerCase() !== newValue.toLowerCase());
-                    suggestionsData[fieldId].unshift(newValue); // Add to beginning
+                    suggestionsData[fieldId].unshift(newValue); 
                     if (suggestionsData[fieldId].length > MAX_SUGGESTIONS_PER_FIELD) {
                         suggestionsData[fieldId] = suggestionsData[fieldId].slice(0, MAX_SUGGESTIONS_PER_FIELD);
                     }
@@ -332,8 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-
-    // --- Form Management ---
     function applyAppDefaults() {
         // console.log("Applying app defaults");
         ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus',
@@ -419,10 +393,9 @@ document.addEventListener('DOMContentLoaded', () => {
         updateAllUIElements("populateFormWithJson"); 
     }
 
-    function performSaveOperation(isSilent = false) { /* ... */ return false;}
-    performSaveOperation = (isSilent = false) => {
+    function performSaveOperation(isSilent = false) {
         try {
-            saveAllSuggestions(); // Save suggestions first
+            saveAllSuggestions(); 
             const currentFormDate = dateInput.value;
             if (!currentFormDate) {
                 if (!isSilent) showToast('Please select a date first to save.', 'error');
@@ -430,26 +403,23 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const formDataToSave = {};
-            // Iterate over all relevant form elements by ID
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
-                if (element.id) { // Ensure the element has an ID
+                if (element.id) { 
                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                 }
             });
-            formDataToSave.date = currentFormDate; // Explicitly add the date
-
+            formDataToSave.date = currentFormDate; 
 
             let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-            allSavedData[currentFormDate] = formDataToSave; // Store data under the date key
+            allSavedData[currentFormDate] = formDataToSave; 
 
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
             if (!isSilent) showToast('Form data saved locally for this date!', 'success');
 
-            // If history tab is active, refresh it
             if (tabPanels[currentTabIndex]?.id === 'tab-history') {
                 renderHistoryList();
             }
-            updateTabIndicators("performSaveOperation"); // Update indicators after saving
+            updateTabIndicators("performSaveOperation"); 
             return true;
         } catch (e) {
             console.error("Error saving to localStorage:", e);
@@ -457,7 +427,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     };
-
 
     function loadFormFromLocalStorage() {
         if (!dateInput.value) { 
@@ -469,39 +438,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         diaryForm.reset(); 
         applyAppDefaults(); 
-        // console.log("Form reset and app defaults applied in loadFormFromLocalStorage.");
-
+        
         loadAllSuggestions(); 
 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
 
         if (formDataForDate) { 
-            // console.log("Loading data from localStorage for date:", currentFormDate);
             try {
                 Object.keys(formDataForDate).forEach(elementId => {
                     if (elementId !== 'date') { 
                         setValue(elementId, formDataForDate[elementId]);
                     }
                 });
-                // No toast on silent load if it's just a date change.
-                // Only show toast if manually triggered or initial page load potentially.
-                // This behavior is complex to get right without more context on when toast is desired.
-                // For now, removing toast from here to avoid spam on date change.
-                // if (!document.hidden && !isMultiSelectModeActive) {
-                //     showToast('Previously saved data for this date loaded.', 'info');
-                // }
             } catch (e) {
                 console.error("Error loading from localStorage for date:", e);
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
-        } else {
-            // console.log("No saved data found for date:", currentFormDate, ". Using defaults.");
         }
         updateAllUIElements("loadFormFromLocalStorage_end"); 
     }
 
-    function autoSaveOnPageHide() { /* Unchanged */
+    function autoSaveOnPageHide() {
         if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return;
         const success = performSaveOperation(true);
         if (success) {
@@ -509,12 +467,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Tab Navigation (Unchanged) ---
-    function slideToPanel(index, animate = true) { /* ... */ }
-    slideToPanel = (index, animate = true) => {
+    function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
-        // If switching away from history tab while multi-select is active, disable it
         if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
             disableMultiSelectMode();
         }
@@ -524,47 +479,24 @@ document.addEventListener('DOMContentLoaded', () => {
         tabPanelsSlider.style.transition = animate ? 'transform 0.35s ease-in-out' : 'none';
         tabPanelsSlider.style.transform = `translateX(${offset}%)`;
 
-        // Update active state for bottom navigation buttons
         bottomNavButtons.forEach((btn, i) => {
             btn.classList.toggle('active', i === index);
         });
 
-        // If navigating to history tab, render the list
         if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
             renderHistoryList();
         }
-        // updateTabIndicators(); // Not strictly needed on tab slide, only on data change
+        // *** NEW: Re-evaluate tab indicators when a tab is switched ***
+        updateTabIndicators(`slideToPanel_to_tab_${tabPanels[index] ? tabPanels[index].id : index}`);
     };
 
-
-    // --- History Tab & Multi-Select Functionality (Ensure UI updates on delete) ---
-    function renderHistoryList() { /* ... */ }
-    function handleHistoryItemTouchStart(event, dateStr, listItem) { /* ... */ }
-    function handleHistoryItemTouchMove(event) { /* ... */ }
-    function handleHistoryItemTouchEnd(dateStr, listItem) { /* ... */ }
-    function handleHistoryItemClick(event, dateStr, listItem) { /* ... */ }
-    function handleEditEntry(dateStr) { /* ... */ }
-    function getFullEntryDataForExport(entryFormData, dateKey) { /* ... */ return {};}
-    function handleExportEntry(dateStr) { /* ... */ }
-    function handleDeleteEntry(dateStr, isPartOfMulti = false) { /* ... */ return false;}
-    function enableMultiSelectMode() { /* ... */ }
-    function disableMultiSelectMode() { /* ... */ }
-    function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) { /* ... */ }
-    function updateMultiSelectCount() { /* ... */ }
-    function updateTopBarForMultiSelectView(isActive) { /* ... */ }
-    function handleDeleteSelectedEntries() { /* ... */ }
-    function handleExportSelectedEntries() { /* ... */ }
-
-    renderHistoryList = () => {
+    function renderHistoryList() {
         if (!historyListContainer) return;
         const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
-
-        // Clear existing items
         const existingItems = historyListContainer.querySelectorAll('.history-item');
         existingItems.forEach(item => item.remove());
-
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const dates = Object.keys(allSavedData).sort((a, b) => new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')); // Sort newest first
+        const dates = Object.keys(allSavedData).sort((a, b) => new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')); 
 
         if (dates.length === 0) {
             if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'block';
@@ -572,21 +504,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'none';
             dates.forEach(dateStr => {
                 const entryData = allSavedData[dateStr];
-                if (!entryData) return; // Skip if data is somehow null/undefined
+                if (!entryData) return; 
 
                 const listItem = document.createElement('div');
                 listItem.classList.add('history-item');
                 listItem.dataset.date = dateStr;
-
-                // Apply multi-select classes if active
-                if (isMultiSelectModeActive) {
-                    listItem.classList.add('multi-select-active');
-                }
-                if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) {
-                    listItem.classList.add('selected');
-                }
-
-                // Checkbox
+                if (isMultiSelectModeActive) listItem.classList.add('multi-select-active');
+                if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) listItem.classList.add('selected');
+                
                 const checkboxContainer = document.createElement('div');
                 checkboxContainer.classList.add('history-item-checkbox-container');
                 const checkbox = document.createElement('input');
@@ -594,544 +519,233 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.classList.add('history-item-checkbox');
                 checkbox.dataset.date = dateStr;
                 checkbox.checked = isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr);
-                checkbox.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent item click when checkbox is clicked
-                    toggleMultiSelectEntry(dateStr, listItem, checkbox);
-                });
+                checkbox.addEventListener('click', (e) => { e.stopPropagation(); toggleMultiSelectEntry(dateStr, listItem, checkbox); });
                 checkboxContainer.appendChild(checkbox);
                 listItem.appendChild(checkboxContainer);
-
-                // Details (Date & Preview)
+                
                 const details = document.createElement('div');
                 details.classList.add('history-item-details');
                 const itemDate = document.createElement('div');
                 itemDate.classList.add('history-item-date');
-                try {
-                    itemDate.textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-                } catch (e) { itemDate.textContent = dateStr; } // Fallback to raw date string on error
-                
+                try { itemDate.textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+                } catch (e) { itemDate.textContent = dateStr; } 
                 const preview = document.createElement('div');
                 preview.classList.add('history-item-preview');
                 const summary = entryData.dailyActivitySummary || entryData.keyEvents || 'No summary/events';
                 preview.textContent = summary.substring(0, 50) + (summary.length > 50 ? '...' : '');
-                
                 details.appendChild(itemDate);
                 details.appendChild(preview);
                 listItem.appendChild(details);
-
-                // Actions (Export, Delete)
+                
                 const actions = document.createElement('div');
                 actions.classList.add('history-item-actions');
-                
                 const exportBtn = document.createElement('button');
-                exportBtn.innerHTML = '<i class="fas fa-file-export"></i>';
-                exportBtn.title = 'Export Entry';
-                exportBtn.classList.add('action-export');
+                exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
                 exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
-
                 const deleteBtn = document.createElement('button');
-                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-                deleteBtn.title = 'Delete Entry';
-                deleteBtn.classList.add('action-delete');
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
                 deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
-
-                actions.appendChild(exportBtn);
-                actions.appendChild(deleteBtn);
-                listItem.appendChild(actions);
-
-                // Event listeners for the whole item (click, touch for long press)
+                actions.appendChild(exportBtn); actions.appendChild(deleteBtn); listItem.appendChild(actions);
+                
                 listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem)); 
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
                 listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
-                listItem.addEventListener('contextmenu', (e) => { // For desktop long-press simulation / right-click
-                    e.preventDefault();
-                    if (!isMultiSelectModeActive) enableMultiSelectMode();
-                    const currentCheckbox = listItem.querySelector('.history-item-checkbox');
-                    toggleMultiSelectEntry(dateStr, listItem, currentCheckbox);
-                });
-
-                // Add to container
-                if (noHistoryMsgElement) { // Insert before the "no history" message if it exists
-                    historyListContainer.insertBefore(listItem, noHistoryMsgElement);
-                } else {
-                    historyListContainer.appendChild(listItem);
-                }
+                listItem.addEventListener('contextmenu', (e) => { e.preventDefault(); if (!isMultiSelectModeActive) enableMultiSelectMode(); const cb = listItem.querySelector('.history-item-checkbox'); toggleMultiSelectEntry(dateStr, listItem, cb); });
+                
+                if (noHistoryMsgElement) { historyListContainer.insertBefore(listItem, noHistoryMsgElement); } else { historyListContainer.appendChild(listItem); }
             });
         }
     };
     handleHistoryItemTouchStart = (event, dateStr, listItem) => {
-        // Ignore if touch starts on action buttons or checkbox
         if (event.target.closest('.history-item-actions button') || event.target.closest('.history-item-checkbox')) return;
-
-        itemTouchStartX = event.touches[0].clientX;
-        itemTouchStartY = event.touches[0].clientY;
-        clearTimeout(longPressTimer); // Clear any existing timer
-
+        itemTouchStartX = event.touches[0].clientX; itemTouchStartY = event.touches[0].clientY; clearTimeout(longPressTimer); 
         longPressTimer = setTimeout(() => {
-            longPressTimer = null; // Timer has fired
+            longPressTimer = null; 
             if (!isMultiSelectModeActive) {
-                enableMultiSelectMode(); // Enable multi-select mode
-                // Need to re-find the listItem in case the DOM was re-rendered by enableMultiSelectMode
+                enableMultiSelectMode(); 
                 const freshListItem = historyListContainer.querySelector(`.history-item[data-date="${dateStr}"]`);
-                if (freshListItem) { // Ensure item still exists
-                    const checkbox = freshListItem.querySelector('.history-item-checkbox');
-                    toggleMultiSelectEntry(dateStr, freshListItem, checkbox); // Select the item
-                }
+                if (freshListItem) { const checkbox = freshListItem.querySelector('.history-item-checkbox'); toggleMultiSelectEntry(dateStr, freshListItem, checkbox); }
             } else {
-                // If already in multi-select mode, just toggle this item
-                const checkbox = listItem.querySelector('.history-item-checkbox');
-                toggleMultiSelectEntry(dateStr, listItem, checkbox);
+                const checkbox = listItem.querySelector('.history-item-checkbox'); toggleMultiSelectEntry(dateStr, listItem, checkbox);
             }
-            if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
+            if (navigator.vibrate) navigator.vibrate(50); 
         }, LONG_PRESS_DURATION);
     };
     handleHistoryItemTouchMove = (event) => {
-        if (longPressTimer) { // If a long press timer is active
-            const deltaX = Math.abs(event.touches[0].clientX - itemTouchStartX);
-            const deltaY = Math.abs(event.touches[0].clientY - itemTouchStartY);
-            // If significant movement, cancel the long press (it's a scroll)
-            if (deltaX > 10 || deltaY > 10) {
-                clearTimeout(longPressTimer);
-                longPressTimer = null;
-            }
+        if (longPressTimer) { 
+            const deltaX = Math.abs(event.touches[0].clientX - itemTouchStartX); const deltaY = Math.abs(event.touches[0].clientY - itemTouchStartY);
+            if (deltaX > 10 || deltaY > 10) { clearTimeout(longPressTimer); longPressTimer = null; }
         }
     };
     handleHistoryItemTouchEnd = (dateStr, listItem) => {
-        if (longPressTimer) { // If timer still exists, it was a short tap, not a long press
-            clearTimeout(longPressTimer);
-            longPressTimer = null;
-            // Treat as a regular click/tap
-            handleHistoryItemClick(null, dateStr, listItem); // Pass null for event if not directly available
-        }
-        // If longPressTimer is null, it means the long press already fired or was cancelled by move
+        if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; handleHistoryItemClick(null, dateStr, listItem); }
     };
     handleHistoryItemClick = (event, dateStr, listItem) => {
-        // If the click target is the checkbox itself or an action button, their own listeners handle it.
-        if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) {
-            return;
-        }
-
-        if (isMultiSelectModeActive) {
-            const checkbox = listItem.querySelector('.history-item-checkbox');
-            toggleMultiSelectEntry(dateStr, listItem, checkbox);
-        } else {
-            // Default action: edit the entry
-            handleEditEntry(dateStr);
-        }
+        if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) return;
+        if (isMultiSelectModeActive) { const checkbox = listItem.querySelector('.history-item-checkbox'); toggleMultiSelectEntry(dateStr, listItem, checkbox); } 
+        else { handleEditEntry(dateStr); }
     };
     handleEditEntry = (dateStr) => {
-        if (isMultiSelectModeActive) disableMultiSelectMode(); // Exit multi-select if active
-
+        if (isMultiSelectModeActive) disableMultiSelectMode(); 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entryFormData = allSavedData[dateStr];
-
         if (entryFormData) {
-            diaryForm.reset(); // Clear to HTML defaults
-            applyAppDefaults(); // Apply app-specific defaults (like "72", "Na")
-
-            setValue('date', dateStr); // Set date first
-            updateCurrentDateDisplay(dateStr); // Update date display
-
-            // Populate form with the specific entry's data
-            Object.keys(entryFormData).forEach(elementId => {
-                if (elementId !== 'date') { // Date is already set
-                    setValue(elementId, entryFormData[elementId]);
-                }
-            });
-
-            updateAllUIElements("handleEditEntry"); // Update sliders, counts, and tab indicators
-
+            diaryForm.reset(); applyAppDefaults(); 
+            setValue('date', dateStr); updateCurrentDateDisplay(dateStr); 
+            Object.keys(entryFormData).forEach(elementId => { if (elementId !== 'date') setValue(elementId, entryFormData[elementId]); });
+            updateAllUIElements("handleEditEntry"); 
             showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
-            slideToPanel(0); // Go to the first tab (Basic)
-        } else {
-            showToast('Could not find entry data to edit.', 'error');
-        }
+            slideToPanel(0); 
+        } else { showToast('Could not find entry data to edit.', 'error'); }
     };
     getFullEntryDataForExport = (entryFormData, dateKey) => {
-        const exportData = {};
-        exportData.date = entryFormData.date || dateKey; // Ensure date is present
-        exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
-
-        const pFloat = val => (val !== null && val !== undefined && val !== "") ? parseFloat(val) : null;
-        const pInt = val => (val !== null && val !== undefined && val !== "") ? parseInt(val) : null;
-
-        // Environment
-        exportData.environment = {
-            temperature_c: entryFormData.temperatureC || '',
-            air_quality_index: pInt(entryFormData.airQualityIndex),
-            humidity_percent: pInt(entryFormData.humidityPercent),
-            uv_index: pInt(entryFormData.uvIndex),
-            weather_condition: entryFormData.weatherCondition || ''
-        };
-        // Body Measurements
-        exportData.body_measurements = {
-            weight_kg: pFloat(entryFormData.weightKg),
-            height_cm: pInt(entryFormData.heightCm),
-            chest: pInt(entryFormData.chest),
-            belly: pInt(entryFormData.belly)
-        };
-        // Health & Fitness
-        exportData.health_and_fitness = {
-            sleep_hours: entryFormData.sleepHours || '', // Stored as text
-            steps_count: pInt(entryFormData.stepsCount),
-            steps_distance_km: entryFormData.stepsDistanceKm || '', // Stored as text
-            kilocalorie: pInt(entryFormData.kilocalorie),
-            water_intake_liters: pFloat(entryFormData.waterIntakeLiters),
-            medications_taken: entryFormData.medicationsTaken || '',
-            physical_symptoms: entryFormData.physicalSymptoms || '',
-            energy_level: pInt(entryFormData.energyLevel),
-            stress_level: pInt(entryFormData.stressLevel)
-        };
-        // Mental & Emotional Health
-        exportData.mental_and_emotional_health = {
-            mental_state: entryFormData.mentalState || '',
-            meditation_status: entryFormData.meditationStatus || '',
-            meditation_duration_min: pInt(entryFormData.meditationDurationMin)
-        };
-        // Personal Care
-        exportData.personal_care = {
-            face_product_name: entryFormData.faceProductName || '',
-            face_product_brand: entryFormData.faceProductBrand || '',
-            hair_product_name: entryFormData.hairProductName || '',
-            hair_product_brand: entryFormData.hairProductBrand || '',
-            hair_oil: entryFormData.hairOil || '',
-            skincare_routine: entryFormData.skincareRoutine || ''
-        };
-        // Diet & Nutrition
-        exportData.diet_and_nutrition = {
-            breakfast: entryFormData.breakfast || '',
-            lunch: entryFormData.lunch || '',
-            dinner: entryFormData.dinner || '',
-            additional_items: entryFormData.additionalItems || ''
-        };
-        // Activities & Productivity
-        exportData.activities_and_productivity = {
-            tasks_today_english: entryFormData.tasksTodayEnglish || '',
-            travel_destination: entryFormData.travelDestination || '',
-            phone_screen_on_hr: entryFormData.phoneScreenOnHr || '' // Stored as text
-        };
-        // Additional Notes
-        exportData.additional_notes = {
-            key_events: entryFormData.keyEvents || ''
-        };
-        // Summary
-        exportData.daily_activity_summary = entryFormData.dailyActivitySummary || '';
-
+        const exportData = {}; exportData.date = entryFormData.date || dateKey; exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
+        const pF = val => (val!=null&&val!==""&&val!==undefined)?parseFloat(val):null; const pI = val => (val!=null&&val!==""&&val!==undefined)?parseInt(val):null;
+        exportData.environment = {temperature_c:entryFormData.temperatureC||'',air_quality_index:pI(entryFormData.airQualityIndex),humidity_percent:pI(entryFormData.humidityPercent),uv_index:pI(entryFormData.uvIndex),weather_condition:entryFormData.weatherCondition||''};
+        exportData.body_measurements = {weight_kg:pF(entryFormData.weightKg),height_cm:pI(entryFormData.heightCm),chest:pI(entryFormData.chest),belly:pI(entryFormData.belly)};
+        exportData.health_and_fitness = {sleep_hours:entryFormData.sleepHours||'',steps_count:pI(entryFormData.stepsCount),steps_distance_km:entryFormData.stepsDistanceKm||'',kilocalorie:pI(entryFormData.kilocalorie),water_intake_liters:pF(entryFormData.waterIntakeLiters),medications_taken:entryFormData.medicationsTaken||'',physical_symptoms:entryFormData.physicalSymptoms||'',energy_level:pI(entryFormData.energyLevel),stress_level:pI(entryFormData.stressLevel)};
+        exportData.mental_and_emotional_health = {mental_state:entryFormData.mentalState||'',meditation_status:entryFormData.meditationStatus||'',meditation_duration_min:pI(entryFormData.meditationDurationMin)};
+        exportData.personal_care = {face_product_name:entryFormData.faceProductName||'',face_product_brand:entryFormData.faceProductBrand||'',hair_product_name:entryFormData.hairProductName||'',hair_product_brand:entryFormData.hairProductBrand||'',hair_oil:entryFormData.hairOil||'',skincare_routine:entryFormData.skincareRoutine||''};
+        exportData.diet_and_nutrition = {breakfast:entryFormData.breakfast||'',lunch:entryFormData.lunch||'',dinner:entryFormData.dinner||'',additional_items:entryFormData.additionalItems||''};
+        exportData.activities_and_productivity = {tasks_today_english:entryFormData.tasksTodayEnglish||'',travel_destination:entryFormData.travelDestination||'',phone_screen_on_hr:entryFormData.phoneScreenOnHr||''};
+        exportData.additional_notes = {key_events:entryFormData.keyEvents||''}; exportData.daily_activity_summary = entryFormData.dailyActivitySummary||'';
         return exportData;
     };
     handleExportEntry = (dateStr) => { 
-        const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const entryFormData = allSavedData[dateStr];
-        if (entryFormData) {
-            const exportData = getFullEntryDataForExport(entryFormData, dateStr);
-            const jsonString = JSON.stringify(exportData, null, 2);
-            downloadJSON(jsonString, `${exportData.date || 'diary-entry'}.json`);
-            showToast('Entry exported.', 'success');
-        } else {
-            showToast('Could not find entry data to export.', 'error');
-        }
+        const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}'); const entryFormData = allSavedData[dateStr];
+        if (entryFormData) { const exportData = getFullEntryDataForExport(entryFormData, dateStr); const jsonString = JSON.stringify(exportData, null, 2); downloadJSON(jsonString, `${exportData.date || 'diary-entry'}.json`); showToast('Entry exported.', 'success');
+        } else { showToast('Could not find entry data to export.', 'error'); }
     };
     handleDeleteEntry = (dateStr, isPartOfMulti = false) => {
         const confirmed = isPartOfMulti ? true : confirm(`Are you sure you want to delete the entry for ${new Date(dateStr+'T00:00:00').toLocaleDateString()}? This action cannot be undone.`);
         if (confirmed) {
             const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
             if (allSavedData[dateStr]) {
-                delete allSavedData[dateStr];
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
-                
-                if (!isPartOfMulti) { // Single delete
-                    showToast('Entry deleted.', 'success');
-                    renderHistoryList(); // Refresh history view
-                    // If the deleted entry was the one currently shown in the form, clear the form to defaults
-                    if (dateInput.value === dateStr) {
-                        diaryForm.reset();
-                        applyAppDefaults();
-                        // Ensure date is set (might be reset if it was initially empty or by form.reset())
-                        if (!dateInput.value) {
-                           const today = new Date();
-                           dateInput.value = formatDate(today);
-                        }
-                        updateCurrentDateDisplay(dateInput.value);
-                        updateAllUIElements("handleDeleteEntry_currentDate_single");
-                    } else {
-                        // If a different date is in the form, just update its indicators if needed
-                        updateTabIndicators("handleDeleteEntry_otherDate_single");
-                    }
-                }
-                // For multi-delete, the calling function (handleDeleteSelectedEntries) will handle UI refresh.
-                return true;
-            } else {
-                if (!isPartOfMulti) showToast('Entry not found for deletion.', 'error');
-                return false;
-            }
-        }
-        return false;
+                delete allSavedData[dateStr]; localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
+                if (!isPartOfMulti) { 
+                    showToast('Entry deleted.', 'success'); renderHistoryList(); 
+                    if (dateInput.value === dateStr) { diaryForm.reset(); applyAppDefaults(); if (!dateInput.value) { const today = new Date(); dateInput.value = formatDate(today); } updateCurrentDateDisplay(dateInput.value); updateAllUIElements("handleDeleteEntry_currentDate_single");
+                    } else { updateTabIndicators("handleDeleteEntry_otherDate_single"); }
+                } return true;
+            } else { if (!isPartOfMulti) showToast('Entry not found for deletion.', 'error'); return false; }
+        } return false;
     };
     enableMultiSelectMode = () => { 
-        if (isMultiSelectModeActive) return;
-        isMultiSelectModeActive = true;
-        selectedEntriesForMultiAction = []; // Reset selection
-        updateTopBarForMultiSelectView(true); // Update top bar UI
-        renderHistoryList(); // Re-render history items to show checkboxes
-        showToast('Multi-select enabled. Tap items to select.', 'info');
+        if (isMultiSelectModeActive) return; isMultiSelectModeActive = true; selectedEntriesForMultiAction = []; updateTopBarForMultiSelectView(true); renderHistoryList(); showToast('Multi-select enabled. Tap items to select.', 'info');
     };
     disableMultiSelectMode = () => { 
-        if (!isMultiSelectModeActive) return;
-        isMultiSelectModeActive = false;
-        selectedEntriesForMultiAction = []; // Clear selection
-        updateTopBarForMultiSelectView(false); // Update top bar UI
-        renderHistoryList(); // Re-render history items to hide checkboxes
+        if (!isMultiSelectModeActive) return; isMultiSelectModeActive = false; selectedEntriesForMultiAction = []; updateTopBarForMultiSelectView(false); renderHistoryList();
     };
     toggleMultiSelectEntry = (dateStr, listItemElement, checkboxElement = null) => {
-        const index = selectedEntriesForMultiAction.indexOf(dateStr);
-        const actualCheckbox = checkboxElement || listItemElement.querySelector('.history-item-checkbox');
-
-        if (index > -1) { // Item is currently selected, de-select it
-            selectedEntriesForMultiAction.splice(index, 1);
-            listItemElement.classList.remove('selected');
-            if (actualCheckbox) actualCheckbox.checked = false;
-        } else { // Item is not selected, select it
-            selectedEntriesForMultiAction.push(dateStr);
-            listItemElement.classList.add('selected');
-            if (actualCheckbox) actualCheckbox.checked = true;
-        }
-        updateMultiSelectCount(); // Update the "X selected" display
+        const index = selectedEntriesForMultiAction.indexOf(dateStr); const actualCheckbox = checkboxElement || listItemElement.querySelector('.history-item-checkbox');
+        if (index > -1) { selectedEntriesForMultiAction.splice(index, 1); listItemElement.classList.remove('selected'); if (actualCheckbox) actualCheckbox.checked = false;
+        } else { selectedEntriesForMultiAction.push(dateStr); listItemElement.classList.add('selected'); if (actualCheckbox) actualCheckbox.checked = true; }
+        updateMultiSelectCount(); 
     };
     updateMultiSelectCount = () => { 
-        if (multiSelectCountSpan) {
-            multiSelectCountSpan.textContent = `${selectedEntriesForMultiAction.length} selected`;
-        }
+        if (multiSelectCountSpan) multiSelectCountSpan.textContent = `${selectedEntriesForMultiAction.length} selected`;
         const hasSelection = selectedEntriesForMultiAction.length > 0;
         if (deleteSelectedButton) deleteSelectedButton.disabled = !hasSelection;
         if (exportSelectedButton) exportSelectedButton.disabled = !hasSelection;
     };
     updateTopBarForMultiSelectView = (isActive) => {
         if (!topBar) return;
-        if (isActive) {
-            topBar.classList.add('multi-select-mode');
-            updateMultiSelectCount(); // Show count and multi-select buttons
-        } else {
-            topBar.classList.remove('multi-select-mode');
-            // Hide multi-select buttons and count (done by CSS)
-        }
+        if (isActive) { topBar.classList.add('multi-select-mode'); updateMultiSelectCount(); 
+        } else { topBar.classList.remove('multi-select-mode'); }
     };
     handleDeleteSelectedEntries = () => {
-        if (selectedEntriesForMultiAction.length === 0) {
-            showToast('No entries selected for deletion.', 'info');
-            return;
-        }
+        if (selectedEntriesForMultiAction.length === 0) { showToast('No entries selected for deletion.', 'info'); return; }
         const confirmed = confirm(`Are you sure you want to delete ${selectedEntriesForMultiAction.length} selected entries? This action cannot be undone.`);
         if (confirmed) {
-            let deleteCount = 0;
-            const currentFormDateWasDeleted = selectedEntriesForMultiAction.includes(dateInput.value);
-
-            selectedEntriesForMultiAction.forEach(dateStr => {
-                // handleDeleteEntry is called with isPartOfMulti = true, so it won't show individual toasts
-                // or try to re-render history list for each item.
-                if (handleDeleteEntry(dateStr, true)) {
-                    deleteCount++;
-                }
-            });
+            let deleteCount = 0; const currentFormDateWasDeleted = selectedEntriesForMultiAction.includes(dateInput.value);
+            selectedEntriesForMultiAction.forEach(dateStr => { if (handleDeleteEntry(dateStr, true)) deleteCount++; });
             showToast(`${deleteCount} of ${selectedEntriesForMultiAction.length} entries deleted.`, 'success');
-            
-            if (currentFormDateWasDeleted) {
-                // If the date currently displayed in the form was deleted, clear the form to defaults
-                diaryForm.reset();
-                applyAppDefaults();
-                if (!dateInput.value) { // Ensure date is set
-                    const today = new Date();
-                    dateInput.value = formatDate(today);
-                }
-                updateCurrentDateDisplay(dateInput.value);
-            }
-            updateAllUIElements("handleDeleteSelectedEntries"); // Update all indicators etc.
-            disableMultiSelectMode(); // This will re-render the history list
+            if (currentFormDateWasDeleted) { diaryForm.reset(); applyAppDefaults(); if (!dateInput.value) { const today = new Date(); dateInput.value = formatDate(today); } updateCurrentDateDisplay(dateInput.value); }
+            updateAllUIElements("handleDeleteSelectedEntries"); 
+            disableMultiSelectMode(); 
         }
     };
     handleExportSelectedEntries = () => { 
-        if (selectedEntriesForMultiAction.length === 0) {
-            showToast('No entries selected for export.', 'info');
-            return;
-        }
-        const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const entriesToExport = [];
-        selectedEntriesForMultiAction.forEach(dateStr => {
-            const entryFormData = allSavedData[dateStr];
-            if (entryFormData) {
-                entriesToExport.push(getFullEntryDataForExport(entryFormData, dateStr));
-            }
-        });
-
-        if (entriesToExport.length > 0) {
-            const jsonString = JSON.stringify(entriesToExport, null, 2);
-            const timestamp = new Date().toISOString().slice(0,10).replace(/-/g,''); // YYYYMMDD
-            downloadJSON(jsonString, `diary_export_multiple_${timestamp}.json`);
-            showToast(`${entriesToExport.length} entries exported.`, 'success');
-            disableMultiSelectMode(); // Exit multi-select mode
-        } else {
-            showToast('No valid data found for selected entries.', 'error');
-        }
+        if (selectedEntriesForMultiAction.length === 0) { showToast('No entries selected for export.', 'info'); return; }
+        const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}'); const entriesToExport = [];
+        selectedEntriesForMultiAction.forEach(dateStr => { const entryFormData = allSavedData[dateStr]; if (entryFormData) entriesToExport.push(getFullEntryDataForExport(entryFormData, dateStr)); });
+        if (entriesToExport.length > 0) { const jsonString = JSON.stringify(entriesToExport, null, 2); const timestamp = new Date().toISOString().slice(0,10).replace(/-/g,''); downloadJSON(jsonString, `diary_export_multiple_${timestamp}.json`); showToast(`${entriesToExport.length} entries exported.`, 'success'); disableMultiSelectMode(); 
+        } else { showToast('No valid data found for selected entries.', 'error'); }
     };
-
 
     // --- Event Listeners & Initialization ---
     window.addEventListener('resize', updateKeyboardStatus);
-    diaryForm.addEventListener('focusin', (event) => {
-        if (isPotentiallyFocusableForKeyboard(event.target)) viewportHeightBeforeKeyboard = window.innerHeight;
-    });
-    diaryForm.addEventListener('focusout', (event) => {
-        if (isPotentiallyFocusableForKeyboard(event.target)) setTimeout(() => { isKeyboardOpen = false; viewportHeightBeforeKeyboard = window.innerHeight; updateKeyboardStatus(); }, 100);
-    });
+    diaryForm.addEventListener('focusin', (event) => { if (isPotentiallyFocusableForKeyboard(event.target)) viewportHeightBeforeKeyboard = window.innerHeight; });
+    diaryForm.addEventListener('focusout', (event) => { if (isPotentiallyFocusableForKeyboard(event.target)) setTimeout(() => { isKeyboardOpen = false; viewportHeightBeforeKeyboard = window.innerHeight; updateKeyboardStatus(); }, 100); });
     if (dateInput) dateInput.addEventListener('change', () => { loadFormFromLocalStorage(); }); 
     if (dateIncrementButton) dateIncrementButton.addEventListener('click', () => changeDate(1));
     if (dateDecrementButton) dateDecrementButton.addEventListener('click', () => changeDate(-1));
-    
     if (energyLevelSlider) energyLevelSlider.addEventListener('input', () => updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay));
     if (stressLevelSlider) stressLevelSlider.addEventListener('input', () => updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay));
     if (humidityPercentSlider) humidityPercentSlider.addEventListener('input', () => updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay));
     if (uvIndexSlider) uvIndexSlider.addEventListener('input', () => updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay));
     if (dailyActivitySummaryTextarea) {
-        dailyActivitySummaryTextarea.addEventListener('input', () => {
-            updateSummaryCounts();
-            updateTabIndicators(`summaryTextarea_input`); 
-        });
+        dailyActivitySummaryTextarea.addEventListener('input', () => { updateSummaryCounts(); updateTabIndicators(`summaryTextarea_input`); });
     }
-    
     if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm); 
-
     diaryForm.addEventListener('input', (event) => {
-        const targetId = event.target.id;
-        let isRelevantInput = false;
-        // Check if the input's ID is in any of the tabInputMap arrays
-        for (const panelId in tabInputMap) {
-            if (tabInputMap[panelId].includes(targetId)) {
-                isRelevantInput = true;
-                break;
-            }
-        }
-        // Sliders also don't have IDs in tabInputMap, but this check handles text/number inputs
-        if (isRelevantInput) {
-            updateTabIndicators(`form_input_on_${targetId}`);
-        }
+        const targetId = event.target.id; let isRelevantInput = false;
+        for (const panelId in tabInputMap) { if (tabInputMap[panelId].includes(targetId)) { isRelevantInput = true; break; } }
+        if (isRelevantInput) { updateTabIndicators(`form_input_on_${targetId}`); }
     });
-    
     diaryForm.addEventListener('submit', function(event) { /* Unchanged */ 
-        event.preventDefault();
-        if (!downloadButton) return;
-        const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
+        event.preventDefault(); if (!downloadButton) return; const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML; setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
         setTimeout(() => {
-            try {
-                const data = {};
-                const selectedDateStr = getValue('date');
-                 if (!selectedDateStr) {
-                     showToast('Please select a date for the entry.', 'error');
-                     setButtonLoadingState(downloadButton, false, originalDownloadIconHTML);
-                     return;
-                }
-                data.date = selectedDateStr;
-                data.day_id = calculateDaysSince(REFERENCE_START_DATE, selectedDateStr);
-                data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: getValue('airQualityIndex', 'number'), humidity_percent: getValue('humidityPercent', 'range'), uv_index: getValue('uvIndex', 'range'), weather_condition: getValue('weatherCondition') };
-                data.body_measurements = { weight_kg: getValue('weightKg', 'number'), height_cm: getValue('heightCm', 'number'), chest: getValue('chest', 'number'), belly: getValue('belly', 'number') };
-                data.health_and_fitness = { sleep_hours: getValue('sleepHours'), steps_count: getValue('stepsCount', 'number'), steps_distance_km: getValue('stepsDistanceKm'), kilocalorie: getValue('kilocalorie', 'number'), water_intake_liters: getValue('waterIntakeLiters', 'number'), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
-                data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: getValue('meditationDurationMin', 'number') };
-                data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
-                data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
-                data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: getValue('phoneScreenOnHr') };
-                data.additional_notes = { key_events: getValue('keyEvents') };
-                data.daily_activity_summary = getValue('dailyActivitySummary');
-                const jsonString = JSON.stringify(data, null, 2);
-                downloadJSON(jsonString, `${data.date || 'nodate'}.json`);
-                showToast('JSON file downloaded.', 'success');
-            } catch (error) {
-                console.error("Error during JSON generation/download:", error);
-                showToast('Error generating/downloading JSON.', 'error');
-            } finally {
-                setButtonLoadingState(downloadButton, false, originalDownloadIconHTML);
-            }
+            try { const data = {}; const selectedDateStr = getValue('date'); if (!selectedDateStr) { showToast('Please select a date for the entry.', 'error'); setButtonLoadingState(downloadButton, false, originalDownloadIconHTML); return; }
+                data.date = selectedDateStr; data.day_id = calculateDaysSince(REFERENCE_START_DATE, selectedDateStr);
+                data.environment = {temperature_c:getValue('temperatureC'),air_quality_index:getValue('airQualityIndex','number'),humidity_percent:getValue('humidityPercent','range'),uv_index:getValue('uvIndex','range'),weather_condition:getValue('weatherCondition')};
+                data.body_measurements = {weight_kg:getValue('weightKg','number'),height_cm:getValue('heightCm','number'),chest:getValue('chest','number'),belly:getValue('belly','number')};
+                data.health_and_fitness = {sleep_hours:getValue('sleepHours'),steps_count:getValue('stepsCount','number'),steps_distance_km:getValue('stepsDistanceKm'),kilocalorie:getValue('kilocalorie','number'),water_intake_liters:getValue('waterIntakeLiters','number'),medications_taken:getValue('medicationsTaken'),physical_symptoms:getValue('physicalSymptoms'),energy_level:getValue('energyLevel','range'),stress_level:getValue('stressLevel','range')};
+                data.mental_and_emotional_health = {mental_state:getValue('mentalState'),meditation_status:getValue('meditationStatus'),meditation_duration_min:getValue('meditationDurationMin','number')};
+                data.personal_care = {face_product_name:getValue('faceProductName'),face_product_brand:getValue('faceProductBrand'),hair_product_name:getValue('hairProductName'),hair_product_brand:getValue('hairProductBrand'),hair_oil:getValue('hairOil'),skincare_routine:getValue('skincareRoutine')};
+                data.diet_and_nutrition = {breakfast:getValue('breakfast'),lunch:getValue('lunch'),dinner:getValue('dinner'),additional_items:getValue('additionalItems')};
+                data.activities_and_productivity = {tasks_today_english:getValue('tasksTodayEnglish'),travel_destination:getValue('travelDestination'),phone_screen_on_hr:getValue('phoneScreenOnHr')};
+                data.additional_notes = {key_events:getValue('keyEvents')}; data.daily_activity_summary = getValue('dailyActivitySummary');
+                const jsonString = JSON.stringify(data, null, 2); downloadJSON(jsonString, `${data.date || 'nodate'}.json`); showToast('JSON file downloaded.', 'success');
+            } catch (error) { console.error("Error during JSON generation/download:", error); showToast('Error generating/downloading JSON.', 'error');
+            } finally { setButtonLoadingState(downloadButton, false, originalDownloadIconHTML); }
         }, 50);
     });
     if (importJsonButton) importJsonButton.addEventListener('click', () => jsonFileInput.click());
     jsonFileInput.addEventListener('change', function(event) { /* Unchanged */  
-        const file = event.target.files[0];
-        if (file && importJsonButton) {
-            const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
-            setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
+        const file = event.target.files[0]; if (file && importJsonButton) {
+            const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML; setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
             const reader = new FileReader();
             reader.onload = function(e) {
-                try {
-                    const importedData = JSON.parse(e.target.result);
-                    populateFormWithJson(importedData); 
-                    if (importedData.date) {
-                        performSaveOperation(true); 
-                    }
+                try { const importedData = JSON.parse(e.target.result); populateFormWithJson(importedData); if (importedData.date) performSaveOperation(true); 
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
-                    for (let i = 0; i < tabPanels.length - 1; i++) { 
-                        const panelId = tabPanels[i].id;
-                        const inputIdsForPanel = tabInputMap[panelId] || [];
-                        let hasData = false;
-                        for (const inputId of inputIdsForPanel) {
-                            const inputElement = document.getElementById(inputId);
-                            if (inputElement && inputElement.value.trim() !== '' && inputElement.value.trim() !== 'Na' && inputElement.value.trim() !== '0') {
-                                hasData = true;
-                                break;
-                            }
-                        }
-                        if (panelId === 'tab-summary' && document.getElementById('dailyActivitySummary').value.trim() !== '') {
-                            hasData = true;
-                        }
+                    for (let i=0; i < tabPanels.length - 1; i++) { 
+                        const panelId = tabPanels[i].id; const inputIdsForPanel = tabInputMap[panelId] || []; let hasData = false;
+                        for (const inputId of inputIdsForPanel) { const inputElement = document.getElementById(inputId); if (inputElement && inputElement.value.trim() !== '' && inputElement.value.trim() !== 'Na' && inputElement.value.trim() !== '0') { hasData = true; break; } }
+                        if (panelId === 'tab-summary' && document.getElementById('dailyActivitySummary').value.trim() !== '') hasData = true;
                         if (hasData) { firstPopulatedIndex = i; break; }
-                    }
-                    slideToPanel(firstPopulatedIndex);
-                } catch (error) {
-                    console.error("Error parsing JSON file:", error);
-                    showToast('Failed to import diary entry. Invalid JSON file.', 'error');
-                } finally {
-                    jsonFileInput.value = '';
-                    setButtonLoadingState(importJsonButton, false, originalImportIconHTML);
-                }
-            };
-            reader.readAsText(file);
+                    } slideToPanel(firstPopulatedIndex);
+                } catch (error) { console.error("Error parsing JSON file:", error); showToast('Failed to import diary entry. Invalid JSON file.', 'error');
+                } finally { jsonFileInput.value = ''; setButtonLoadingState(importJsonButton, false, originalImportIconHTML); }
+            }; reader.readAsText(file);
         }
     });
     if (saveFormButton) saveFormButton.addEventListener('click', () => { /* Unchanged */  
-        const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
-        setTimeout(() => {
-            performSaveOperation(false); 
-            setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
-        }, 10);
+        const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML; setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
+        setTimeout(() => { performSaveOperation(false); setButtonLoadingState(saveFormButton, false, originalSaveIconHTML); }, 10);
     });
-    bottomNavButtons.forEach((button, index) => button.addEventListener('click', () => slideToPanel(index)));
+    bottomNavButtons.forEach((button, index) => {
+        button.addEventListener('click', () => {
+            slideToPanel(index); 
+        });
+    });
     if (tabViewPort) { /* Unchanged swipe logic */  
         let swipeInProgress = false;
-        tabViewPort.addEventListener('touchstart', (e) => {
-            if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
-                swipeInProgress = false; return;
-            }
-            swipeInProgress = true;
-            touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX;
-            tabPanelsSlider.style.transition = 'none';
-        }, { passive: true });
-
-        tabViewPort.addEventListener('touchmove', (e) => {
-            if (!swipeInProgress || isKeyboardOpen) return;
-            touchEndX = e.touches[0].clientX;
-        }, { passive: true });
-
-        tabViewPort.addEventListener('touchend', () => {
-            if (!swipeInProgress || isKeyboardOpen) { swipeInProgress = false; return; }
-            const deltaX = touchEndX - touchStartX;
-            let newIndex = currentTabIndex;
-            if (Math.abs(deltaX) > swipeThreshold) {
-                newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
-            }
-            slideToPanel(newIndex, true);
-            swipeInProgress = false; touchStartX = 0; touchEndX = 0;
-        });
+        tabViewPort.addEventListener('touchstart', (e) => { if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) { swipeInProgress = false; return; } swipeInProgress = true; touchStartX = e.touches[0].clientX; touchEndX = touchStartX; tabPanelsSlider.style.transition = 'none'; }, { passive: true });
+        tabViewPort.addEventListener('touchmove', (e) => { if (!swipeInProgress || isKeyboardOpen) return; touchEndX = e.touches[0].clientX; }, { passive: true });
+        tabViewPort.addEventListener('touchend', () => { if (!swipeInProgress || isKeyboardOpen) { swipeInProgress = false; return; } const deltaX = touchEndX - touchStartX; let newIndex = currentTabIndex; if (Math.abs(deltaX) > swipeThreshold) newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0); slideToPanel(newIndex, true); swipeInProgress = false; touchStartX = 0; touchEndX = 0; });
     }
     window.addEventListener('pagehide', autoSaveOnPageHide);
     if (cancelMultiSelectButton) cancelMultiSelectButton.addEventListener('click', disableMultiSelectMode);
@@ -1141,11 +755,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initial Setup
     updateTopBarForMultiSelectView(false);
     loadFormFromLocalStorage(); 
-    slideToPanel(0, false);
+    // Explicitly slide to panel 0 and trigger its indicator check after initial load.
+    // slideToPanel calls updateTabIndicators itself.
+    slideToPanel(0, false); 
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js') // Ensure sw.js is at the root or correct path
+            navigator.serviceWorker.register('sw.js') 
                 .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
                 .catch(error => console.log('ServiceWorker registration failed: ', error));
         });
