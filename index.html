@@ -9,19 +9,18 @@
     <meta name="theme-color" content="#1e293b">
 
     <!-- Favicons - Revised for better compatibility and new assets -->
-    <link rel="icon" href="images/logo.svg" type="image/svg+xml">
-    <link rel="alternate icon" href="images/logo.ico" sizes="any">
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logo32.png">
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml"> <!-- Preferred: SVG for modern browsers -->
+    <link rel="alternate icon" href="images/logo.ico" sizes="any"> <!-- Fallback: ICO for older browsers / specific cases -->
+    <link rel="icon" type="image/png" sizes="32x32" href="images/logo32.png"> <!-- Common PNG size -->
     <link rel="icon" type="image/png" sizes="16x16" href="images/logo16.png">
-    <link rel="apple-touch-icon" href="images/logo256.png">
+    <link rel="apple-touch-icon" href="images/logo256.png"> <!-- Good size for Apple Touch Icon -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="style.css">
-    <!-- <meta name="apple-mobile-web-app-capable" content="yes"> <!-- Deprecated -->
-    <meta name="mobile-web-app-capable" content="yes"> <!-- Standard -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 </head>
 
@@ -120,12 +119,12 @@
                         </fieldset>
                         <fieldset>
                             <legend><i class="fas fa-dumbbell icon-legend"></i> Health & Fitness</legend>
-                            <div> <label for="sleepHours">Sleep (hours):</label> <input type="text" id="sleepHours"
-                                    name="sleepHours" placeholder="e.g., 7.5"> </div>
+                            <div> <label for="sleepHours">Sleep (hours):</label> <input type="number" id="sleepHours"
+                                    name="sleepHours" step="0.1" placeholder="e.g., 7.5"> </div>
                             <div> <label for="stepsCount">Steps Count:</label> <input type="number" id="stepsCount"
                                     name="stepsCount" placeholder="e.g., 8500"> </div>
-                            <div> <label for="stepsDistanceKm">Steps Distance (km):</label> <input type="text"
-                                    id="stepsDistanceKm" name="stepsDistanceKm" placeholder="e.g., 6.8">
+                            <div> <label for="stepsDistanceKm">Steps Distance (km):</label> <input type="number"
+                                    id="stepsDistanceKm" name="stepsDistanceKm" step="0.1" placeholder="e.g., 6.8">
                             </div>
                             <div> <label for="kilocalorie">Kilocalories Burned:</label> <input type="number"
                                     id="kilocalorie" name="kilocalorie" placeholder="e.g., 2200"> </div>
@@ -144,7 +143,7 @@
                             <div class="slider-container"> <label for="stressLevel">Stress Level: <span
                                         id="stressLevelValue">5</span></label> <input type="range" id="stressLevel"
                                     name="stressLevel" min="1" max="10" value="5" step="1" inputmode="none"> </div>
-                            <!-- <div style=" height: 20px; background-color: transparent;"></div> -->
+                            <div style=" height: 20px; background-color: transparent;"></div>
                         </fieldset>
                     </div>
 
@@ -202,7 +201,7 @@
                                     id="skincareRoutine" name="skincareRoutine" list="skincareRoutineSuggestions"
                                     placeholder="e.g., Cleanser → Toner → Serum"> <datalist
                                     id="skincareRoutineSuggestions"></datalist> </div>
-                            <!-- <div style=" height: 20px; background-color: transparent;"></div> -->
+                            <div style=" height: 20px; background-color: transparent;"></div>
                         </fieldset>
                     </div>
 
@@ -233,8 +232,8 @@
                             <div> <label for="travelDestination">Travel Destination:</label> <input type="text"
                                     id="travelDestination" name="travelDestination" placeholder="e.g., Office, Home">
                             </div>
-                            <div> <label for="phoneScreenOnHr">Phone Screen On (hr):</label> <input type="text"
-                                    id="phoneScreenOnHr" name="phoneScreenOnHr" placeholder="e.g., 3.5">
+                            <div> <label for="phoneScreenOnHr">Phone Screen On (hr):</label> <input type="number"
+                                    id="phoneScreenOnHr" name="phoneScreenOnHr" step="0.1" placeholder="e.g., 3.5">
                             </div>
                         </fieldset>
                     </div>
@@ -273,37 +272,31 @@
         <nav class="bottom-nav">
             <button class="bottom-nav-button active" data-tab-target="tab-basic" aria-label="Basic Info"
                 title="Basic & Environment">
-                <span class="tab-indicator"></span>
                 <i class="fas fa-info-circle"></i>
                 <span>Basic</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-body" aria-label="Body & Health"
                 title="Body & Health">
-                <span class="tab-indicator"></span>
                 <i class="fas fa-heartbeat"></i>
                 <span>Body</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-mental" aria-label="Mental Care"
                 title="Mental & Personal Care">
-                <span class="tab-indicator"></span>
                 <i class="fas fa-brain"></i>
                 <span>Mental</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-diet" aria-label="Diet & Activities"
                 title="Diet & Activities">
-                <span class="tab-indicator"></span>
                 <i class="fas fa-utensils"></i>
                 <span>Diet</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-summary" aria-label="Summary"
                 title="Notes & Summary">
-                <span class="tab-indicator"></span>
                 <i class="fas fa-clipboard-list"></i>
                 <span>Summary</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-history" aria-label="History"
                 title="View History">
-                <span class="tab-indicator"></span> <!-- Will always be hidden for history tab by JS -->
                 <i class="fas fa-history"></i>
                 <span>History</span>
             </button>

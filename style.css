@@ -223,7 +223,6 @@ body {
     cursor: pointer;
     transition: color 0.2s ease;
     text-align: center;
-    position: relative; /* For tab indicator positioning */
 }
 .bottom-nav-button i {
     font-size: 1.4rem;
@@ -242,24 +241,6 @@ body {
 }
 .bottom-nav-button:hover:not(.active) {
     color: var(--text-primary);
-}
-
-/* Tab Indicator Dot */
-.tab-indicator {
-    position: absolute;
-    top: 6px; /* Adjust for vertical alignment near the icon */
-    left: calc(50% + 10px); /* Position to the right of the (centered) icon */
-    width: 8px;
-    height: 8px;
-    background-color: var(--danger-color);
-    border-radius: 50%;
-    border: 1px solid var(--primary-bg); /* Contrast border */
-    display: none; /* Hidden by default */
-    z-index: 1; /* Ensure it's above icon if overlapping */
-}
-
-.bottom-nav-button.has-empty-fields .tab-indicator {
-    display: block;
 }
 
 
