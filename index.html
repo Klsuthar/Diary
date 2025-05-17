@@ -119,12 +119,12 @@
                         </fieldset>
                         <fieldset>
                             <legend><i class="fas fa-dumbbell icon-legend"></i> Health & Fitness</legend>
-                            <div> <label for="sleepHours">Sleep (hours):</label> <input type="number" id="sleepHours"
-                                    name="sleepHours" step="0.1" placeholder="e.g., 7.5"> </div>
+                            <div> <label for="sleepHours">Sleep (hours):</label> <input type="text" id="sleepHours"
+                                    name="sleepHours" placeholder="e.g., 7.5"> </div>
                             <div> <label for="stepsCount">Steps Count:</label> <input type="number" id="stepsCount"
                                     name="stepsCount" placeholder="e.g., 8500"> </div>
-                            <div> <label for="stepsDistanceKm">Steps Distance (km):</label> <input type="number"
-                                    id="stepsDistanceKm" name="stepsDistanceKm" step="0.1" placeholder="e.g., 6.8">
+                            <div> <label for="stepsDistanceKm">Steps Distance (km):</label> <input type="text"
+                                    id="stepsDistanceKm" name="stepsDistanceKm" placeholder="e.g., 6.8">
                             </div>
                             <div> <label for="kilocalorie">Kilocalories Burned:</label> <input type="number"
                                     id="kilocalorie" name="kilocalorie" placeholder="e.g., 2200"> </div>
@@ -232,8 +232,8 @@
                             <div> <label for="travelDestination">Travel Destination:</label> <input type="text"
                                     id="travelDestination" name="travelDestination" placeholder="e.g., Office, Home">
                             </div>
-                            <div> <label for="phoneScreenOnHr">Phone Screen On (hr):</label> <input type="number"
-                                    id="phoneScreenOnHr" name="phoneScreenOnHr" step="0.1" placeholder="e.g., 3.5">
+                            <div> <label for="phoneScreenOnHr">Phone Screen On (hr):</label> <input type="text"
+                                    id="phoneScreenOnHr" name="phoneScreenOnHr" placeholder="e.g., 3.5">
                             </div>
                         </fieldset>
                     </div>
@@ -272,31 +272,37 @@
         <nav class="bottom-nav">
             <button class="bottom-nav-button active" data-tab-target="tab-basic" aria-label="Basic Info"
                 title="Basic & Environment">
+                <span class="tab-indicator"></span>
                 <i class="fas fa-info-circle"></i>
                 <span>Basic</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-body" aria-label="Body & Health"
                 title="Body & Health">
+                <span class="tab-indicator"></span>
                 <i class="fas fa-heartbeat"></i>
                 <span>Body</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-mental" aria-label="Mental Care"
                 title="Mental & Personal Care">
+                <span class="tab-indicator"></span>
                 <i class="fas fa-brain"></i>
                 <span>Mental</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-diet" aria-label="Diet & Activities"
                 title="Diet & Activities">
+                <span class="tab-indicator"></span>
                 <i class="fas fa-utensils"></i>
                 <span>Diet</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-summary" aria-label="Summary"
                 title="Notes & Summary">
+                <span class="tab-indicator"></span>
                 <i class="fas fa-clipboard-list"></i>
                 <span>Summary</span>
             </button>
             <button class="bottom-nav-button" data-tab-target="tab-history" aria-label="History"
                 title="View History">
+                <span class="tab-indicator"></span> <!-- Will always be hidden for history tab by JS -->
                 <i class="fas fa-history"></i>
                 <span>History</span>
             </button>
