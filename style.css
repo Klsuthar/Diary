@@ -23,7 +23,9 @@
     --bottom-nav-height: 60px;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
 }
@@ -72,7 +74,8 @@ body {
 }
 
 .logo-container {
-    padding-right: 10px; /* Space between logo and date controls */
+    padding-right: 10px;
+    /* Space between logo and date controls */
 }
 
 .app-logo {
@@ -84,11 +87,16 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    flex-grow: 1; /* Allows date controls to take available space */
-    justify-content: center; /* Center the date controls content */
-    position: relative; /* For positioning the transparent date input */
-    min-width: 180px; /* Ensure enough space for date controls */
+    flex-grow: 1;
+    /* Allows date controls to take available space */
+    justify-content: center;
+    /* Center the date controls content */
+    position: relative;
+    /* For positioning the transparent date input */
+    min-width: 180px;
+    /* Ensure enough space for date controls */
 }
+
 .top-bar #currentDateDisplay {
     font-size: 0.85rem;
     font-weight: 500;
@@ -102,9 +110,11 @@ body {
     justify-content: center;
     min-width: 130px;
 }
+
 .top-bar #currentDateDisplay:hover {
-    background-color: rgba(255,255,255,0.05);
+    background-color: rgba(255, 255, 255, 0.05);
 }
+
 .date-display-icon {
     margin-left: 8px;
     font-size: 0.9em;
@@ -147,14 +157,16 @@ body {
     z-index: 2;
     position: relative;
 }
+
 .top-bar .date-control-btn:hover,
 .top-bar .top-action-btn:hover {
     color: var(--text-primary);
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
 }
+
 .top-bar .date-control-btn:active,
 .top-bar .top-action-btn:active {
-    background-color: rgba(255,255,255,0.15);
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .top-bar .top-actions {
@@ -202,7 +214,7 @@ body {
     align-items: center;
     background-color: var(--secondary-bg);
     height: var(--bottom-nav-height);
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
     position: fixed;
     bottom: 0;
     left: 0;
@@ -224,21 +236,26 @@ body {
     transition: color 0.2s ease;
     text-align: center;
 }
+
 .bottom-nav-button i {
     font-size: 1.4rem;
     margin-bottom: 3px;
     transition: transform 0.2s ease-out;
 }
+
 .bottom-nav-button span {
     font-size: 0.65rem;
     display: block;
 }
+
 .bottom-nav-button.active {
     color: var(--accent-color);
 }
+
 .bottom-nav-button.active i {
     transform: scale(1.1);
 }
+
 .bottom-nav-button:hover:not(.active) {
     color: var(--text-primary);
 }
@@ -267,6 +284,7 @@ textarea {
     color: var(--text-primary);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus {
@@ -274,10 +292,27 @@ textarea:focus {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(218, 190, 36, 0.25);
 }
-input::placeholder, textarea::placeholder { color: var(--text-secondary); opacity: 0.7; }
-input[type="number"] { -moz-appearance: textfield; }
-input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-textarea { resize: vertical; min-height: 90px; }
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 90px;
+}
 
 fieldset {
     border: 1px solid var(--tertiary-bg);
@@ -286,7 +321,10 @@ fieldset {
     margin-bottom: 20px;
     background-color: transparent;
 }
-fieldset:last-of-type { margin-bottom: 0; }
+
+fieldset:last-of-type {
+    margin-bottom: 0;
+}
 
 legend {
     font-weight: 600;
@@ -297,22 +335,146 @@ legend {
     align-items: center;
     gap: 6px;
 }
-.icon-legend { font-size: 0.85em; opacity: 0.8; }
 
-.slider-container { margin-bottom: 15px; }
-.slider-container label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.slider-container label span { font-weight: 500; color: var(--accent-color); font-size: 0.9rem; }
-input[type="range"] { width: 100%; margin-top: 0; -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; height: 18px; }
-input[type="range"]::-webkit-slider-runnable-track { background: var(--tertiary-bg); height: 6px; border-radius: 3px; }
-input[type="range"]::-moz-range-track { background: var(--tertiary-bg); height: 6px; border-radius: 3px; }
-input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; margin-top: -6px; background-color: var(--accent-color); height: 20px; width: 20px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
-input[type="range"]::-moz-range-thumb { background-color: var(--accent-color); height: 18px; width: 18px; border-radius: 50%; border: 2px solid var(--secondary-bg); transition: background-color 0.2s ease; }
+.icon-legend {
+    font-size: 0.85em;
+    opacity: 0.8;
+}
 
-#summaryCounts { font-size: 0.75rem; color: var(--text-secondary); text-align: right; margin-top: 4px; margin-bottom: 8px; }
-datalist {} datalist option {}
+.slider-container {
+    margin-bottom: 15px;
+}
+
+.slider-container label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.slider-container label span {
+    font-weight: 500;
+    color: var(--accent-color);
+    font-size: 0.9rem;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin-top: 0;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+    height: 18px;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    background: var(--tertiary-bg);
+    height: 6px;
+    border-radius: 3px;
+}
+
+input[type="range"]::-moz-range-track {
+    background: var(--tertiary-bg);
+    height: 6px;
+    border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    margin-top: -6px;
+    background-color: var(--accent-color);
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--secondary-bg);
+    transition: background-color 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+    background-color: var(--accent-color);
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    border: 2px solid var(--secondary-bg);
+    transition: background-color 0.2s ease;
+}
+
+#summaryCounts {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-align: right;
+    margin-top: 4px;
+    margin-bottom: 8px;
+}
+
+datalist {}
+
+datalist option {}
+
+/* Radio Button Group Styling */
+.form-group-radio {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    /* Consistent with other form elements */
+    margin-top: 10px;
+    /* Add some top margin */
+}
+
+.form-group-radio-label {
+    margin-bottom: 0;
+    /* Remove bottom margin if it's part of a flex row */
+    margin-right: 10px;
+    /* Space between label and radio options */
+    flex-shrink: 0;
+    /* Prevent label from shrinking */
+    font-weight: 500;
+    /* Match other main labels */
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.radio-options {
+    display: flex;
+    flex-direction: row;
+    /* Explicitly set to row for horizontal layout */
+    align-items: center;
+    /* Vertically center the items */
+    gap: 15px;
+    /* Space between radio buttons and labels */
+
+}
+
+.radio-options input[type="radio"] {
+    width: auto;
+    /* Override full-width style for inputs */
+    margin-right: 5px;
+    /* Space between radio and its label */
+    accent-color: var(--accent-color);
+    /* Style the radio button itself */
+    transform: scale(1.1);
+    /* Slightly larger radio buttons */
+}
+
+.radio-options label {
+    /* Labels for individual radio options (Yes/No) */
+    margin-bottom: 0;
+    /* Override general label margin */
+    font-weight: normal;
+    /* Make them less prominent than main field labels */
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    /* Match input font size */
+}
+
 
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
-    display: inline-flex; align-items: center; justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     gap: 8px;
     padding: var(--button-padding-y) var(--button-padding-x);
     border: none;
@@ -324,25 +486,104 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     box-shadow: var(--box-shadow);
 }
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 6px rgba(0,0,0,0.2); }
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) { transform: translateY(0px); box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); }
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i { font-size: 1em; transition: none; }
-button:disabled { cursor: not-allowed; opacity: 0.7; }
+
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+}
+
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i {
+    font-size: 1em;
+    transition: none;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 
 
 /* --- Toast Notifications --- */
-#toast-container { position: fixed; bottom: calc(var(--bottom-nav-height) + 10px); left: 15px; right: 15px; z-index: 1000; display: flex; flex-direction: column-reverse; align-items: center; gap: 10px; }
-.toast { background-color: var(--secondary-bg); color: var(--text-primary); padding: 10px 15px; border-radius: var(--border-radius-sm); box-shadow: var(--box-shadow); border-left: 4px solid var(--accent-color); width: 100%; max-width: 320px; opacity: 0; transform: translateY(20px);
+#toast-container {
+    position: fixed;
+    bottom: calc(var(--bottom-nav-height) + 10px);
+    left: 15px;
+    right: 15px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 10px;
+}
+
+.toast {
+    background-color: var(--secondary-bg);
+    color: var(--text-primary);
+    padding: 10px 15px;
+    border-radius: var(--border-radius-sm);
+    box-shadow: var(--box-shadow);
+    border-left: 4px solid var(--accent-color);
+    width: 100%;
+    max-width: 320px;
+    opacity: 0;
+    transform: translateY(20px);
     animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards;
-    display: flex; align-items: center; gap: 10px; font-size: 0.85rem; }
-.toast i { font-size: 1em; }
-.toast.success { border-left-color: var(--success-color); } .toast.success i { color: var(--success-color); }
-.toast.error { border-left-color: var(--danger-color); } .toast.error i { color: var(--danger-color); }
-.toast.info { border-left-color: var(--info-color); } .toast.info i { color: var(--info-color); }
-@keyframes slideUpToast { to { opacity: 1; transform: translateY(0); } }
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+}
+
+.toast i {
+    font-size: 1em;
+}
+
+.toast.success {
+    border-left-color: var(--success-color);
+}
+
+.toast.success i {
+    color: var(--success-color);
+}
+
+.toast.error {
+    border-left-color: var(--danger-color);
+}
+
+.toast.error i {
+    color: var(--danger-color);
+}
+
+.toast.info {
+    border-left-color: var(--info-color);
+}
+
+.toast.info i {
+    color: var(--info-color);
+}
+
+@keyframes slideUpToast {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 @keyframes fadeOutToastGeneral {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(10px); }
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 }
 
 /* --- History Tab Styles --- */
@@ -382,18 +623,21 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
 /* Checkbox Styling for History Items */
 .history-item-checkbox-container {
     margin-right: 12px;
-    display: none; /* Hidden by default, shown by .multi-select-active */
+    display: none;
+    /* Hidden by default, shown by .multi-select-active */
     align-items: center;
 }
 
 .history-item.multi-select-active .history-item-checkbox-container {
-    display: flex; /* Show when multi-select is active on the item */
+    display: flex;
+    /* Show when multi-select is active on the item */
 }
 
 .history-item-checkbox {
     width: 20px;
     height: 20px;
-    accent-color: var(--accent-color); /* Styles the checkmark color in supporting browsers */
+    accent-color: var(--accent-color);
+    /* Styles the checkmark color in supporting browsers */
     cursor: pointer;
     /* For non-supporting browsers or more custom styling, you might need to hide the default
        and create a custom styled checkbox with ::before/::after on a label */
@@ -419,13 +663,20 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px; /* Adjust based on checkbox and actions */
+    max-width: 180px;
+    /* Adjust based on checkbox and actions */
 }
+
 @media (min-width: 380px) {
-    .history-item-preview { max-width: 200px; }
+    .history-item-preview {
+        max-width: 200px;
+    }
 }
+
 @media (min-width: 420px) {
-    .history-item-preview { max-width: 240px; }
+    .history-item-preview {
+        max-width: 240px;
+    }
 }
 
 
@@ -434,6 +685,7 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
     gap: 8px;
     flex-shrink: 0;
 }
+
 /* Hide individual actions when multi-select is active on the item (checkbox shown instead) */
 .history-item.multi-select-active .history-item-actions {
     display: none;
@@ -450,12 +702,22 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
     transition: color 0.2s ease;
     line-height: 1;
 }
+
 .history-item-actions button:hover {
     color: var(--text-primary);
 }
-.history-item-actions button.action-edit:hover { color: var(--info-color); }
-.history-item-actions button.action-export:hover { color: var(--success-color); }
-.history-item-actions button.action-delete:hover { color: var(--danger-color); }
+
+.history-item-actions button.action-edit:hover {
+    color: var(--info-color);
+}
+
+.history-item-actions button.action-export:hover {
+    color: var(--success-color);
+}
+
+.history-item-actions button.action-delete:hover {
+    color: var(--danger-color);
+}
 
 
 /* Top Bar Multi-Select Info and Button Styling */
@@ -464,7 +726,8 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
     font-size: 0.85rem;
     margin-right: auto;
     padding-left: 5px;
-    display: none; /* Hidden by default, shown by .multi-select-mode on top-bar */
+    display: none;
+    /* Hidden by default, shown by .multi-select-mode on top-bar */
 }
 
 .top-bar.multi-select-mode .date-controls {
@@ -474,6 +737,7 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
 .top-bar.multi-select-mode .top-actions .top-action-btn:not(#multiSelectCount):not(#exportSelectedButton):not(#deleteSelectedButton):not(#cancelMultiSelectButton) {
     display: none !important;
 }
+
 .top-bar.multi-select-mode .top-actions #downloadButton,
 .top-bar.multi-select-mode .top-actions #saveFormButton,
 .top-bar.multi-select-mode .top-actions #importJsonButton,
@@ -499,11 +763,14 @@ button:disabled { cursor: not-allowed; opacity: 0.7; }
     .top-bar #currentDateDisplay {
         font-size: 0.9rem;
     }
+
     .bottom-nav-button i {
         font-size: 1.5rem;
     }
+
     .bottom-nav-button span {
         font-size: 0.7rem;
     }
+
     /* .history-item-preview adjusted above based on screen width breakpoints */
 }
