@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'submit', 'reset', 'file', 'date', 'color'].includes(type)) {
             return true;
         }
+        if (tagName === 'SELECT') return true; // Added for select elements
         return false;
     }
     function updateKeyboardStatus() {
@@ -185,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
+        // For select, element.value directly gives the selected option's value
         const value = element.value.trim();
         if (type === 'range') return element.value === '' ? null : parseFloat(element.value);
         if (type === 'number') return value === '' ? null : parseFloat(value);
@@ -263,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Form Management ---
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset();
+            diaryForm.reset(); // This should reset select to its default "No" due to `selected` attribute
             const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -275,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            initializeForm(true);
+            initializeForm(true); // This will also explicitly set otherNoteStatus to No
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -304,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else el.value = '';
                 }
             });
+            setValue('otherNoteStatus', 'No'); // Explicitly set default for new field
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
             if (humidityPercentSlider) humidityPercentSlider.value = 10;
@@ -324,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function populateFormWithJson(jsonData) {
         diaryForm.reset();
-        initializeForm(true);
+        initializeForm(true); // Resets to defaults including otherNoteStatus
         
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
@@ -336,7 +339,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
         if (jsonData.diet_and_nutrition) { setValue('breakfast', jsonData.diet_and_nutrition.breakfast); setValue('lunch', jsonData.diet_and_nutrition.lunch); setValue('dinner', jsonData.diet_and_nutrition.dinner); setValue('additionalItems', jsonData.diet_and_nutrition.additional_items); }
         if (jsonData.activities_and_productivity) { setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english); setValue('travelDestination', jsonData.activities_and_productivity.travel_destination); setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr); }
-        if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
+        
+        if (jsonData.additional_notes) {
+            setValue('keyEvents', jsonData.additional_notes.key_events);
+            // Check for the new field specifically, defaulting to 'No' if not present
+            setValue('otherNoteStatus', jsonData.additional_notes.other_note_status || 'No');
+        } else {
+            // If additional_notes itself is missing, ensure otherNoteStatus is set to default
+            setValue('otherNoteStatus', 'No');
+        }
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
@@ -389,8 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
         
-        diaryForm.reset();
-        initializeForm(true);
+        diaryForm.reset(); // Resets to HTML defaults, including otherNoteStatus to "No"
+        initializeForm(true); // Then sets our script-defined defaults (which also sets otherNoteStatus to "No")
 
         setValue('date', currentFormDate);
         updateCurrentDateDisplay(currentFormDate);
@@ -405,6 +416,14 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 });
+                // Ensure otherNoteStatus is explicitly set from loaded data if available,
+                // otherwise it might retain the 'No' from initializeForm(true)
+                if (formDataForDate.otherNoteStatus) {
+                    setValue('otherNoteStatus', formDataForDate.otherNoteStatus);
+                } else {
+                    setValue('otherNoteStatus', 'No'); // If not in saved data, explicitly set to 'No'
+                }
+
                 if (!document.hidden && !isMultiSelectModeActive) {
                     showToast('Previously saved data for this date loaded.', 'info');
                 }
@@ -412,7 +431,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error loading from localStorage for date:", e);
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
+        } else {
+             // If no data for this date, ensure otherNoteStatus is 'No' (already done by initializeForm)
+            setValue('otherNoteStatus', 'No');
         }
+
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -600,8 +623,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
-            diaryForm.reset();
-            initializeForm(true);
+            diaryForm.reset(); // Reset to HTML defaults
+            initializeForm(true); // Set script defaults
 
             setValue('date', dateStr);
             updateCurrentDateDisplay(dateStr);
@@ -611,6 +634,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     setValue(elementId, entryFormData[elementId]);
                 }
             });
+             // Ensure otherNoteStatus is correctly set from loaded data for edit
+            setValue('otherNoteStatus', entryFormData.otherNoteStatus || 'No');
+
 
             if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
             if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -641,7 +667,10 @@ document.addEventListener('DOMContentLoaded', () => {
         exportData.personal_care = { face_product_name: entryFormData.faceProductName || '', face_product_brand: entryFormData.faceProductBrand || '', hair_product_name: entryFormData.hairProductName || '', hair_product_brand: entryFormData.hairProductBrand || '', hair_oil: entryFormData.hairOil || '', skincare_routine: entryFormData.skincareRoutine || '' };
         exportData.diet_and_nutrition = { breakfast: entryFormData.breakfast || '', lunch: entryFormData.lunch || '', dinner: entryFormData.dinner || '', additional_items: entryFormData.additionalItems || '' };
         exportData.activities_and_productivity = { tasks_today_english: entryFormData.tasksTodayEnglish || '', travel_destination: entryFormData.travelDestination || '', phone_screen_on_hr: pFloat(entryFormData.phoneScreenOnHr) };
-        exportData.additional_notes = { key_events: entryFormData.keyEvents || '' };
+        exportData.additional_notes = { 
+            key_events: entryFormData.keyEvents || '',
+            other_note_status: entryFormData.otherNoteStatus || 'No' // Ensure default if missing
+        };
         exportData.daily_activity_summary = entryFormData.dailyActivitySummary || '';
         return exportData;
     }
@@ -652,7 +681,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entryFormData) {
             const exportData = getFullEntryDataForExport(entryFormData, dateStr);
             const jsonString = JSON.stringify(exportData, null, 2);
-            // Use dateStr (which is YYYY-MM-DD) for the filename
             downloadJSON(jsonString, `${dateStr}.json`);
             showToast('Entry exported.', 'success');
         } else {
@@ -821,10 +849,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
                 data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
                 data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: pFloatLocal(getValue('phoneScreenOnHr')) };
-                data.additional_notes = { key_events: getValue('keyEvents') };
+                data.additional_notes = { 
+                    key_events: getValue('keyEvents'),
+                    other_note_status: getValue('otherNoteStatus') // Get value from the select
+                };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
-                // Use selectedDateStr (which is YYYY-MM-DD) for the filename
                 downloadJSON(jsonString, `${selectedDateStr}.json`);
                 showToast('JSON file downloaded.', 'success');
             } catch (error) {
@@ -852,9 +882,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
                     for (let i = 0; i < tabPanels.length - 1; i++) {
-                        const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea');
+                        const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea, select');
                         let hasData = false;
-                        for (const input of panelInputs) { if (input.value && input.value.trim() !== '' && input.value.trim() !== 'Na' && input.value.trim() !== '0') { hasData = true; break; } }
+                        for (const input of panelInputs) { 
+                            if (input.value && input.value.trim() !== '' && input.value.trim() !== 'Na' && input.value.trim() !== '0') {
+                                if (input.id === 'otherNoteStatus' && input.value === 'No') continue; // Don't count default "No" as data for tab selection
+                                hasData = true; 
+                                break; 
+                            } 
+                        }
                         if (hasData) { firstPopulatedIndex = i; break; }
                     }
                     slideToPanel(firstPopulatedIndex);
@@ -912,7 +948,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportSelectedButton) exportSelectedButton.addEventListener('click', handleExportSelectedEntries);
 
     updateTopBarForMultiSelectView(false);
-    initializeForm();
+    initializeForm(); // This will now set otherNoteStatus to 'No' by default
     slideToPanel(0, false);
 
     if ('serviceWorker' in navigator) {
