@@ -68,7 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (tagName === 'INPUT' && !['checkbox', 'radio', 'range', 'button', 'submit', 'reset', 'file', 'date', 'color'].includes(type)) {
             return true;
         }
-        if (tagName === 'SELECT') return true; // Added for select elements
+        // SELECT is no longer used for this field, but keeping the check for other potential SELECTs
+        if (tagName === 'SELECT') return true; 
         return false;
     }
     function updateKeyboardStatus() {
@@ -186,8 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getValue(elementId, type = 'text') {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
-        // For select, element.value directly gives the selected option's value
-        const value = element.value.trim();
+        const value = element.value.trim(); // For input type="text", this is correct
         if (type === 'range') return element.value === '' ? null : parseFloat(element.value);
         if (type === 'number') return value === '' ? null : parseFloat(value);
         return value;
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Form Management ---
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset(); // This should reset select to its default "No" due to `selected` attribute
+            diaryForm.reset(); // This will reset text input otherNoteStatus to its HTML value attribute "No"
             const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -277,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            initializeForm(true); // This will also explicitly set otherNoteStatus to No
+            initializeForm(true); // This will also explicitly set otherNoteStatus.value to "No"
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else el.value = '';
                 }
             });
-            setValue('otherNoteStatus', 'No'); // Explicitly set default for new field
+            setValue('otherNoteStatus', 'No'); // Set default value for the text input
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
             if (humidityPercentSlider) humidityPercentSlider.value = 10;
@@ -326,8 +326,8 @@ document.addEventListener('DOMContentLoaded', () => {
         updateKeyboardStatus();
     }
     function populateFormWithJson(jsonData) {
-        diaryForm.reset();
-        initializeForm(true); // Resets to defaults including otherNoteStatus
+        diaryForm.reset(); // Resets to HTML defaults including otherNoteStatus.value = "No"
+        initializeForm(true); // Resets to script defaults including otherNoteStatus.value = "No"
         
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
@@ -342,10 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (jsonData.additional_notes) {
             setValue('keyEvents', jsonData.additional_notes.key_events);
-            // Check for the new field specifically, defaulting to 'No' if not present
             setValue('otherNoteStatus', jsonData.additional_notes.other_note_status || 'No');
         } else {
-            // If additional_notes itself is missing, ensure otherNoteStatus is set to default
             setValue('otherNoteStatus', 'No');
         }
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
@@ -358,7 +356,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function performSaveOperation(isSilent = false) {
         try {
-            saveAllSuggestions();
+            saveAllSuggestions(); // This function is generic and should still work
             const currentFormDate = dateInput.value;
             if (!currentFormDate) {
                 if (!isSilent) showToast('Please select a date first to save.', 'error');
@@ -366,6 +364,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const formDataToSave = {};
+            // QuerySelectorAll will include the text input otherNoteStatus
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
                 if (element.id) {
                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
@@ -393,15 +392,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadFormFromLocalStorage() {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
-            diaryForm.reset();
-            initializeForm(true);
+            diaryForm.reset(); // Resets otherNoteStatus text input to HTML value="No"
+            initializeForm(true); // Sets script defaults including otherNoteStatus.value = "No"
             return;
         }
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
         
-        diaryForm.reset(); // Resets to HTML defaults, including otherNoteStatus to "No"
-        initializeForm(true); // Then sets our script-defined defaults (which also sets otherNoteStatus to "No")
+        diaryForm.reset(); 
+        initializeForm(true); 
 
         setValue('date', currentFormDate);
         updateCurrentDateDisplay(currentFormDate);
@@ -416,13 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 });
-                // Ensure otherNoteStatus is explicitly set from loaded data if available,
-                // otherwise it might retain the 'No' from initializeForm(true)
-                if (formDataForDate.otherNoteStatus) {
-                    setValue('otherNoteStatus', formDataForDate.otherNoteStatus);
-                } else {
-                    setValue('otherNoteStatus', 'No'); // If not in saved data, explicitly set to 'No'
-                }
+                // Ensure otherNoteStatus text input is explicitly set from loaded data if available
+                setValue('otherNoteStatus', formDataForDate.otherNoteStatus || 'No');
+
 
                 if (!document.hidden && !isMultiSelectModeActive) {
                     showToast('Previously saved data for this date loaded.', 'info');
@@ -432,7 +427,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
         } else {
-             // If no data for this date, ensure otherNoteStatus is 'No' (already done by initializeForm)
             setValue('otherNoteStatus', 'No');
         }
 
@@ -623,8 +617,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
-            diaryForm.reset(); // Reset to HTML defaults
-            initializeForm(true); // Set script defaults
+            diaryForm.reset(); 
+            initializeForm(true); 
 
             setValue('date', dateStr);
             updateCurrentDateDisplay(dateStr);
@@ -634,7 +628,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     setValue(elementId, entryFormData[elementId]);
                 }
             });
-             // Ensure otherNoteStatus is correctly set from loaded data for edit
             setValue('otherNoteStatus', entryFormData.otherNoteStatus || 'No');
 
 
@@ -669,7 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         exportData.activities_and_productivity = { tasks_today_english: entryFormData.tasksTodayEnglish || '', travel_destination: entryFormData.travelDestination || '', phone_screen_on_hr: pFloat(entryFormData.phoneScreenOnHr) };
         exportData.additional_notes = { 
             key_events: entryFormData.keyEvents || '',
-            other_note_status: entryFormData.otherNoteStatus || 'No' // Ensure default if missing
+            other_note_status: entryFormData.otherNoteStatus || 'No' 
         };
         exportData.daily_activity_summary = entryFormData.dailyActivitySummary || '';
         return exportData;
@@ -851,7 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: pFloatLocal(getValue('phoneScreenOnHr')) };
                 data.additional_notes = { 
                     key_events: getValue('keyEvents'),
-                    other_note_status: getValue('otherNoteStatus') // Get value from the select
+                    other_note_status: getValue('otherNoteStatus') // Get value from the text input
                 };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
@@ -882,11 +875,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
                     for (let i = 0; i < tabPanels.length - 1; i++) {
+                        // The querySelectorAll for inputs now correctly includes the text input
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea, select');
                         let hasData = false;
                         for (const input of panelInputs) { 
                             if (input.value && input.value.trim() !== '' && input.value.trim() !== 'Na' && input.value.trim() !== '0') {
-                                if (input.id === 'otherNoteStatus' && input.value === 'No') continue; // Don't count default "No" as data for tab selection
+                                // For text input, only count if not default "No"
+                                if (input.id === 'otherNoteStatus' && input.value.trim().toLowerCase() === 'no') continue; 
                                 hasData = true; 
                                 break; 
                             } 
@@ -948,7 +943,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportSelectedButton) exportSelectedButton.addEventListener('click', handleExportSelectedEntries);
 
     updateTopBarForMultiSelectView(false);
-    initializeForm(); // This will now set otherNoteStatus to 'No' by default
+    initializeForm(); // This will now set otherNoteStatus.value to 'No' by default
     slideToPanel(0, false);
 
     if ('serviceWorker' in navigator) {

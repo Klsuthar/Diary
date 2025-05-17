@@ -245,11 +245,12 @@
                             <div> <label for="keyEvents">Key Events:</label> <input type="text" id="keyEvents"
                                     name="keyEvents" placeholder="e.g., Client meeting, Birthday"> </div>
                             <div>
-                                <label for="otherNoteStatus">Other (Special Note?):</label>
-                                <select id="otherNoteStatus" name="otherNoteStatus">
-                                    <option value="No" selected>No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
+                                <label for="otherNoteStatus">Other:</label>
+                                <input type="text" id="otherNoteStatus" name="otherNoteStatus" list="otherNoteSuggestions" value="No">
+                                <datalist id="otherNoteSuggestions">
+                                    <option value="Yes"></option>
+                                    <option value="No"></option>
+                                </datalist>
                             </div>
                         </fieldset>
                         <fieldset>
