@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Form Management ---
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset(); // This will reset radio buttons to HTML defaults
+            diaryForm.reset();
             const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
@@ -275,7 +275,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            initializeForm(true); // This will reinforce defaults if needed
+            initializeForm(true);
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -308,10 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (stressLevelSlider) stressLevelSlider.value = 5;
             if (humidityPercentSlider) humidityPercentSlider.value = 10;
             if (uvIndexSlider) uvIndexSlider.value = 9;
-            
-            // Set "Other" radio to default "No"
-            const otherNoRadio = document.getElementById('otherNo');
-            if (otherNoRadio) otherNoRadio.checked = true;
         }
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
@@ -328,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function populateFormWithJson(jsonData) {
         diaryForm.reset();
-        initializeForm(true); // Resets form including radio to 'No' before populating
+        initializeForm(true);
         
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
@@ -340,16 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
         if (jsonData.diet_and_nutrition) { setValue('breakfast', jsonData.diet_and_nutrition.breakfast); setValue('lunch', jsonData.diet_and_nutrition.lunch); setValue('dinner', jsonData.diet_and_nutrition.dinner); setValue('additionalItems', jsonData.diet_and_nutrition.additional_items); }
         if (jsonData.activities_and_productivity) { setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english); setValue('travelDestination', jsonData.activities_and_productivity.travel_destination); setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr); }
-        
-        if (jsonData.additional_notes) {
-            setValue('keyEvents', jsonData.additional_notes.key_events);
-            const otherValue = jsonData.additional_notes.other || 'no';
-            document.querySelectorAll('input[name="other"]').forEach(radio => {
-                if (radio.value === otherValue) radio.checked = true;
-            });
-        } else {
-             document.getElementById('otherNo').checked = true; // Default if not present
-        }
+        if (jsonData.additional_notes) setValue('keyEvents', jsonData.additional_notes.key_events);
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
@@ -368,13 +355,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const formDataToSave = {};
-            diaryForm.querySelectorAll('input[id]:not([type="file"]):not([type="radio"]), textarea[id], select[id]').forEach(element => {
+            diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
                 if (element.id) {
-                   formDataToSave[element.id] = (element.type === 'checkbox') ? element.checked : element.value;
+                   formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                 }
             });
-            // Handle radio button for 'other'
-            formDataToSave['other'] = document.querySelector('input[name="other"]:checked')?.value || 'no';
             formDataToSave.date = currentFormDate;
 
 
@@ -404,8 +389,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
         
-        diaryForm.reset(); // Resets to HTML defaults, including 'other' to 'No'
-        initializeForm(true); // Sets specific text defaults and reinforces 'other' to 'No'
+        diaryForm.reset();
+        initializeForm(true);
 
         setValue('date', currentFormDate);
         updateCurrentDateDisplay(currentFormDate);
@@ -415,17 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 Object.keys(formDataForDate).forEach(elementId => {
                     const element = document.getElementById(elementId);
                     if (element) {
-                        if (elementId !== 'date' && elementId !== 'other') { // 'other' is handled separately
+                        if (elementId !== 'date') {
                            setValue(elementId, formDataForDate[elementId]);
                         }
                     }
                 });
-                // Handle 'other' radio
-                const otherValue = formDataForDate['other'] || 'no';
-                document.querySelectorAll('input[name="other"]').forEach(radio => {
-                    if (radio.value === otherValue) radio.checked = true;
-                });
-
                 if (!document.hidden && !isMultiSelectModeActive) {
                     showToast('Previously saved data for this date loaded.', 'info');
                 }
@@ -433,12 +412,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error("Error loading from localStorage for date:", e);
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
-        } else {
-            // If no data for this date, initializeForm(true) already set defaults.
-            // Explicitly ensure 'other' is 'no' if not in formDataForDate (covered by initializeForm(true))
-            // document.getElementById('otherNo').checked = true; 
         }
-
 
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -535,6 +509,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const actions = document.createElement('div');
                 actions.classList.add('history-item-actions');
                 
+                // Edit button removed as per request
+                // const editBtn = document.createElement('button');
+                // editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = 'Edit Entry'; editBtn.classList.add('action-edit');
+                // editBtn.addEventListener('click', (e) => { e.stopPropagation(); handleEditEntry(dateStr); });
+
                 const exportBtn = document.createElement('button');
                 exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
                 exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
@@ -543,11 +522,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
                 deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
 
+                // actions.appendChild(editBtn); // Edit button removed
                 actions.appendChild(exportBtn);
                 actions.appendChild(deleteBtn);
                 listItem.appendChild(actions);
 
-                listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem)); 
+                listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem)); // Pass event
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
                 listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
@@ -601,14 +581,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleHistoryItemTouchEnd(dateStr, listItem) {
-        if (longPressTimer) { 
+        if (longPressTimer) { // Was a short tap
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            handleHistoryItemClick(null, dateStr, listItem); 
+            handleHistoryItemClick(null, dateStr, listItem); // Pass null for event if not available
         }
     }
 
     function handleHistoryItemClick(event, dateStr, listItem) {
+        // If the click target is the checkbox itself, its own listener has already handled it.
+        // Or if it's one of the action buttons.
         if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) {
             return;
         }
@@ -616,6 +598,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
         } else {
+            // Default action for clicking item when not in multi-select is to edit
             handleEditEntry(dateStr);
         }
     }
@@ -627,22 +610,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
             diaryForm.reset();
-            initializeForm(true); // Resets form including radio to 'No'
+            initializeForm(true);
 
             setValue('date', dateStr);
             updateCurrentDateDisplay(dateStr);
 
             Object.keys(entryFormData).forEach(elementId => {
-                if (elementId !== 'date' && elementId !== 'other') { // 'other' handled separately
+                if (elementId !== 'date') {
                     setValue(elementId, entryFormData[elementId]);
                 }
             });
-            // Handle 'other' radio
-            const otherValue = entryFormData['other'] || 'no';
-            document.querySelectorAll('input[name="other"]').forEach(radio => {
-                if (radio.value === otherValue) radio.checked = true;
-            });
-
 
             if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
             if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
@@ -673,10 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         exportData.personal_care = { face_product_name: entryFormData.faceProductName || '', face_product_brand: entryFormData.faceProductBrand || '', hair_product_name: entryFormData.hairProductName || '', hair_product_brand: entryFormData.hairProductBrand || '', hair_oil: entryFormData.hairOil || '', skincare_routine: entryFormData.skincareRoutine || '' };
         exportData.diet_and_nutrition = { breakfast: entryFormData.breakfast || '', lunch: entryFormData.lunch || '', dinner: entryFormData.dinner || '', additional_items: entryFormData.additionalItems || '' };
         exportData.activities_and_productivity = { tasks_today_english: entryFormData.tasksTodayEnglish || '', travel_destination: entryFormData.travelDestination || '', phone_screen_on_hr: pFloat(entryFormData.phoneScreenOnHr) };
-        exportData.additional_notes = { 
-            key_events: entryFormData.keyEvents || '',
-            other: entryFormData.other || 'no' // Added 'other' field
-        };
+        exportData.additional_notes = { key_events: entryFormData.keyEvents || '' };
         exportData.daily_activity_summary = entryFormData.dailyActivitySummary || '';
         return exportData;
     }
@@ -825,6 +799,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
         
+        // Helper for parsing that returns null if NaN, used in getFullEntryDataForExport and here
         const pFloatLocal = valStr => {
             if (valStr === null || valStr === undefined || valStr.trim() === "") return null;
             const num = parseFloat(valStr);
@@ -855,10 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
                 data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
                 data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: pFloatLocal(getValue('phoneScreenOnHr')) };
-                data.additional_notes = { 
-                    key_events: getValue('keyEvents'),
-                    other: document.querySelector('input[name="other"]:checked')?.value || 'no'
-                };
+                data.additional_notes = { key_events: getValue('keyEvents') };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
                 downloadJSON(jsonString, `${data.date || 'nodate'}.json`);
