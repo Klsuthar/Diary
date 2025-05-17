@@ -461,7 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- History Tab & Multi-Select Functionality ---
-    function renderHistoryList() {
+        function renderHistoryList() {
         if (!historyListContainer) return;
         const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
 
@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (isMultiSelectModeActive) {
                     listItem.classList.add('multi-select-active');
-                    mainContent.classList.add('multi-select-active');
+                    mainContent.classList.add('multi-select-active'); // For styling checkbox visibility
                 }
                 if (isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr)) {
                     listItem.classList.add('selected');
@@ -508,11 +508,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.classList.add('history-item-checkbox');
                 checkbox.dataset.date = dateStr;
                 checkbox.checked = isMultiSelectModeActive && selectedEntriesForMultiAction.includes(dateStr);
-                // Event listener for checkbox is now specific to its action
-                checkbox.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent mainContent click
-                    toggleMultiSelectEntry(dateStr, listItem, checkbox);
-                });
                 checkboxContainer.appendChild(checkbox);
                 mainContent.appendChild(checkboxContainer);
 
@@ -536,22 +531,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const exportBtn = document.createElement('button');
                 exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
-                exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
+                actions.appendChild(exportBtn);
 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
-                deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
-
-                actions.appendChild(exportBtn);
                 actions.appendChild(deleteBtn);
-                mainContent.appendChild(actions);
                 
+                mainContent.appendChild(actions);
                 listItem.appendChild(mainContent);
 
                 const jsonView = document.createElement('pre');
                 jsonView.classList.add('history-item-json-view');
                 listItem.appendChild(jsonView);
 
+                // --- Specific Event Listeners for Interactive Elements ---
                 expandJsonBtn.addEventListener('click', (e) => {
                     e.stopPropagation(); 
                     const isExpanded = expandJsonBtn.getAttribute('aria-expanded') === 'true';
@@ -569,27 +562,50 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 });
 
-                // Attach the main click listener to mainContent
+                checkbox.addEventListener('click', (e) => {
+                    e.stopPropagation(); 
+                    toggleMultiSelectEntry(dateStr, listItem, checkbox);
+                });
+
+                exportBtn.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    handleExportEntry(dateStr); 
+                });
+
+                deleteBtn.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    handleDeleteEntry(dateStr); 
+                });
+
+                // --- General Click Listener for the main content area (details, date, preview) ---
+                // This listener is on `mainContent` but we need to ensure it doesn't fire if a button inside it was clicked.
+                // The `e.stopPropagation()` in button listeners above handles this.
+                // This handles the "click to edit/select" behavior.
                 mainContent.addEventListener('click', (event) => {
-                    // IMPORTANT: Check if the click was on the mainContent itself,
-                    // or on its children that DON'T have their own specific click handlers (like details, preview, date).
-                    // Clicks on expandJsonBtn, checkbox, or action buttons should be handled by their own listeners.
-                    if (event.target.closest('.history-item-expand-json') ||
-                        event.target.closest('.history-item-checkbox') ||
-                        event.target.closest('.history-item-actions button')) {
-                        return; // Let specific handlers do their job
+                    // Check if the direct target of the click is one of the buttons or the checkbox itself.
+                    // If so, their specific handlers (which stop propagation) would have already run.
+                    // This `if` condition acts as a secondary check, though ideally, propagation stopping is primary.
+                    if (event.target === expandJsonBtn || event.target.parentElement === expandJsonBtn ||
+                        event.target === checkbox ||
+                        event.target === exportBtn || event.target.parentElement === exportBtn ||
+                        event.target === deleteBtn || event.target.parentElement === deleteBtn) {
+                        return; // Action handled by specific button listener
                     }
+                    // If the click was not on a specific button, proceed with default item click behavior
                     handleHistoryItemClick(event, dateStr, listItem);
                 });
                 
-                // Touch and context menu listeners remain on listItem for broader interaction like long press
+                // Touch and context menu listeners on the entire listItem
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
-                listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
+                listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem)); // This will call handleHistoryItemClick if it was a short tap
                 listItem.addEventListener('contextmenu', (e) => { 
                     e.preventDefault();
-                    if (e.target.closest('.history-item-expand-json') || e.target.closest('.history-item-actions button')) return;
+                    // Similar check for context menu
+                    if (e.target.closest('.history-item-expand-json') || e.target.closest('.history-item-actions button') || e.target.closest('.history-item-checkbox-container')) return;
+                    
                     if (!isMultiSelectModeActive) enableMultiSelectMode();
+                    // Ensure we get the checkbox from listItem, not mainContent
                     const currentCheckbox = listItem.querySelector('.history-item-checkbox');
                     toggleMultiSelectEntry(dateStr, listItem, currentCheckbox);
                 });
