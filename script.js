@@ -509,11 +509,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const actions = document.createElement('div');
                 actions.classList.add('history-item-actions');
                 
-                // Edit button removed as per request
-                // const editBtn = document.createElement('button');
-                // editBtn.innerHTML = '<i class="fas fa-edit"></i>'; editBtn.title = 'Edit Entry'; editBtn.classList.add('action-edit');
-                // editBtn.addEventListener('click', (e) => { e.stopPropagation(); handleEditEntry(dateStr); });
-
                 const exportBtn = document.createElement('button');
                 exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
                 exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
@@ -522,12 +517,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
                 deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
 
-                // actions.appendChild(editBtn); // Edit button removed
                 actions.appendChild(exportBtn);
                 actions.appendChild(deleteBtn);
                 listItem.appendChild(actions);
 
-                listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem)); // Pass event
+                listItem.addEventListener('click', (event) => handleHistoryItemClick(event, dateStr, listItem));
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
                 listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
@@ -584,13 +578,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (longPressTimer) { // Was a short tap
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            handleHistoryItemClick(null, dateStr, listItem); // Pass null for event if not available
+            handleHistoryItemClick(null, dateStr, listItem); 
         }
     }
 
     function handleHistoryItemClick(event, dateStr, listItem) {
-        // If the click target is the checkbox itself, its own listener has already handled it.
-        // Or if it's one of the action buttons.
         if (event && event.target && (event.target.matches('.history-item-checkbox') || event.target.closest('.history-item-actions button'))) {
             return;
         }
@@ -598,7 +590,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
         } else {
-            // Default action for clicking item when not in multi-select is to edit
             handleEditEntry(dateStr);
         }
     }
@@ -661,7 +652,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (entryFormData) {
             const exportData = getFullEntryDataForExport(entryFormData, dateStr);
             const jsonString = JSON.stringify(exportData, null, 2);
-            downloadJSON(jsonString, `${exportData.date || 'diary-entry'}.json`);
+            // Use dateStr (which is YYYY-MM-DD) for the filename
+            downloadJSON(jsonString, `${dateStr}.json`);
             showToast('Entry exported.', 'success');
         } else {
             showToast('Could not find entry data to export.', 'error');
@@ -799,7 +791,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
         
-        // Helper for parsing that returns null if NaN, used in getFullEntryDataForExport and here
         const pFloatLocal = valStr => {
             if (valStr === null || valStr === undefined || valStr.trim() === "") return null;
             const num = parseFloat(valStr);
@@ -833,7 +824,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 data.additional_notes = { key_events: getValue('keyEvents') };
                 data.daily_activity_summary = getValue('dailyActivitySummary');
                 const jsonString = JSON.stringify(data, null, 2);
-                downloadJSON(jsonString, `${data.date || 'nodate'}.json`);
+                // Use selectedDateStr (which is YYYY-MM-DD) for the filename
+                downloadJSON(jsonString, `${selectedDateStr}.json`);
                 showToast('JSON file downloaded.', 'success');
             } catch (error) {
                 console.error("Error during JSON generation/download:", error);
