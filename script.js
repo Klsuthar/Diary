@@ -546,25 +546,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Tab Navigation ---
-    function slideToPanel(index, animate = true) {
-        if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
+   // Inside slideToPanel function in script.js
+function slideToPanel(index, animate = true) {
+    if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
-        if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
-            disableMultiSelectMode();
-        }
-
-        currentTabIndex = index;
-        const offset = -index * 100;
-        tabPanelsSlider.style.transition = animate ? 'transform 0.35s ease-in-out' : 'none';
-        tabPanelsSlider.style.transform = `translateX(${offset}%)`;
-
-        bottomNavButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
-
-        if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
-            renderHistoryList();
-        }
-        // No need to call checkAndUpdateAllTabIcons here, as content doesn't change on tab slide.
+    // Remove animation class from previously active panel
+    const oldActivePanel = tabPanels[currentTabIndex];
+    if (oldActivePanel) {
+        oldActivePanel.classList.remove('active-panel-animation');
+        // Set animation order for its children (fieldsets) for next time
+        const oldFieldsets = oldActivePanel.querySelectorAll('fieldset');
+        oldFieldsets.forEach((fieldset, i) => {
+            fieldset.style.setProperty('--animation-order', i);
+        });
     }
+
+    // ... (rest of your existing slideToPanel logic for multi-select, currentTabIndex, offset, transform)
+    currentTabIndex = index; // This should be before setting new active panel
+    const offset = -index * 100;
+    tabPanelsSlider.style.transition = animate ? 'transform var(--transition-slow)' : 'none'; // Use CSS var
+    tabPanelsSlider.style.transform = `translateX(${offset}%)`;
+
+    bottomNavButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
+
+    // Add animation class to the new active panel
+    const newActivePanel = tabPanels[index];
+    if (newActivePanel) {
+        // Set animation order for its children (fieldsets)
+        const newFieldsets = newActivePanel.querySelectorAll('fieldset');
+        newFieldsets.forEach((fieldset, i) => {
+            fieldset.style.setProperty('--animation-order', i);
+        });
+        // Add class after a short delay to ensure transition happens
+        // and then animation kicks in if the panel was already visible (e.g. first load)
+        // or after the slide completes.
+        // For slide, it's better to trigger after transitionend if possible,
+        // but for simplicity, a timeout can work.
+        setTimeout(() => {
+            newActivePanel.classList.add('active-panel-animation');
+        }, animate ? 50 : 0); // Shorter delay if no slide animation
+    }
+
+
+    if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
+        renderHistoryList();
+    }
+    // ...
+}
 
     // --- History Tab & Multi-Select Functionality ---
     function renderHistoryList() {
