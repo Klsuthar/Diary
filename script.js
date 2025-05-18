@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const bottomNavButtons = document.querySelectorAll('.bottom-nav-button');
     const tabPanels = document.querySelectorAll('.tab-panel');
-    const tabViewPort = document.getElementById('tabViewPort');
+    const tabViewPort = document.getElementById('tabViewPort'); // Keep reference if needed for other things, though swipe is removed
     const tabPanelsSlider = document.getElementById('tabPanelsSlider');
 
     const energyLevelSlider = document.getElementById('energyLevel');
@@ -45,8 +45,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const MAX_SUGGESTIONS_PER_FIELD = 7;
 
     let currentTabIndex = 0;
-    let touchStartX = 0, touchEndX = 0;
-    const swipeThreshold = 50; // Min distance for a swipe
+    // let touchStartX = 0, touchEndX = 0; // No longer needed for swipe
+    // const swipeThreshold = 50; // No longer needed for swipe
     let isKeyboardOpen = false;
     let viewportHeightBeforeKeyboard = window.innerHeight;
     const MIN_KEYBOARD_HEIGHT_PX = 150; // Heuristic for keyboard height
@@ -521,7 +521,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
-        const previousTabIndex = currentTabIndex; // Store previous tab index
+        // const previousTabIndex = currentTabIndex; // No longer needed for swipe logic
 
         if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
             disableMultiSelectMode();
@@ -534,13 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bottomNavButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
 
-        // Only call renderHistoryList if actually navigating to the history tab
-        // or if it's already the history tab and something might have changed (e.g., data deletion from another part of app)
-        // The scroll/expand fix relies on renderHistoryList preserving state, so calling it is okay if needed.
         if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
-             // If we are already on the history tab and just "swiped" to it again (potentially due to scroll misinterpretation)
-            // renderHistoryList will be called. The new renderHistoryList is designed to handle this by preserving state.
-            // If navigating from another tab, it's also correct to render it.
             renderHistoryList();
         }
     }
@@ -574,7 +568,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'none';
             dates.forEach(dateStr => {
-                const entryData = allSavedData[dateStr]; // This is the data for the specific date
+                const entryData = allSavedData[dateStr];
                 if (!entryData) return;
 
                 const listItem = document.createElement('div');
@@ -597,7 +591,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 expandJsonBtn.classList.add('history-item-expand-json');
                 expandJsonBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
                 expandJsonBtn.title = 'Show/Hide JSON Data';
-                // expandJsonBtn.setAttribute('aria-expanded', 'false'); // Set by restoration logic
                 mainContent.appendChild(expandJsonBtn);
 
                 const checkboxContainer = document.createElement('div');
@@ -645,7 +638,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 jsonView.classList.add('history-item-json-view');
                 listItem.appendChild(jsonView);
 
-                // Restore expanded state
                 if (expandedItemDates.has(dateStr)) {
                     const fullEntryData = getFullEntryDataForExport(entryData, dateStr);
                     jsonView.textContent = JSON.stringify(fullEntryData, null, 2);
@@ -658,17 +650,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     expandJsonBtn.classList.remove('expanded');
                 }
 
-                // Re-attach event listeners
                 expandJsonBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const isCurrentlyExpanded = expandJsonBtn.getAttribute('aria-expanded') === 'true';
                     if (isCurrentlyExpanded) {
                         jsonView.style.display = 'none';
-                        jsonView.textContent = ''; // Clear content on collapse as per original logic
+                        jsonView.textContent = ''; 
                         expandJsonBtn.setAttribute('aria-expanded', 'false');
                         expandJsonBtn.classList.remove('expanded');
                     } else {
-                        const currentEntryData = allSavedData[dateStr]; // Fetch fresh data in case of updates
+                        const currentEntryData = allSavedData[dateStr]; 
                         const fullEntryData = getFullEntryDataForExport(currentEntryData, dateStr);
                         jsonView.textContent = JSON.stringify(fullEntryData, null, 2);
                         jsonView.style.display = 'block';
@@ -768,11 +759,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (longPressTimer) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            // Check if it was a click or a long press that was just cleared
-            // For simplicity, if longPressTimer was active and cleared here, it implies it wasn't a drag
-            // The original click handler will manage the action.
-            // If you want to prevent click after long press, add more logic here.
-            handleHistoryItemClick(null, dateStr, listItem); // Simulate click if it wasn't a drag
+            handleHistoryItemClick(null, dateStr, listItem); 
         }
     }
 
@@ -781,7 +768,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.target.closest('.history-item-expand-json') ||
                 event.target.closest('.history-item-checkbox-container input[type="checkbox"]') || 
                 event.target.closest('.history-item-actions button')) {
-                return; // Action handled by specific button listeners
+                return; 
             }
         }
 
@@ -789,7 +776,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
         } else {
-            // If not multi-select, and not a specific action button, then it's an "edit" action
             handleEditEntry(dateStr);
         }
     }
@@ -822,7 +808,7 @@ document.addEventListener('DOMContentLoaded', () => {
             checkAndUpdateAllTabIcons(); 
 
             showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
-            slideToPanel(0); // Go to the first tab for editing
+            slideToPanel(0); 
         } else {
             showToast('Could not find entry data to edit.', 'error');
         }
@@ -873,7 +859,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 if (!isPartOfMulti) {
                     showToast('Entry deleted.', 'success');
-                    renderHistoryList(); // Re-render after deletion
+                    renderHistoryList(); 
                 }
                 return true;
             } else {
@@ -889,7 +875,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = true;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(true);
-        renderHistoryList(); // Re-render to show checkboxes
+        renderHistoryList(); 
         showToast('Multi-select enabled. Tap items to select.', 'info');
     }
 
@@ -898,7 +884,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = false;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(false);
-        renderHistoryList(); // Re-render to hide checkboxes and restore normal view
+        renderHistoryList(); 
     }
 
     function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) {
@@ -946,7 +932,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (handleDeleteEntry(dateStr, true)) deleteCount++;
             });
             showToast(`${deleteCount} of ${selectedEntriesForMultiAction.length} entries deleted.`, 'success');
-            disableMultiSelectMode(); // This will call renderHistoryList
+            disableMultiSelectMode(); 
         }
     }
 
@@ -1065,11 +1051,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     const importedData = JSON.parse(e.target.result);
                     populateFormWithJson(importedData);
                     if (importedData.date) {
-                        performSaveOperation(true); // Silently save imported data
+                        performSaveOperation(true); 
                     }
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
-                    for (let i = 0; i < tabPanels.length - 1; i++) { // Exclude history tab
+                    for (let i = 0; i < tabPanels.length - 1; i++) { 
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea, select');
                         let hasData = false;
                         for (const input of panelInputs) { 
@@ -1105,46 +1091,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bottomNavButtons.forEach((button, index) => button.addEventListener('click', () => slideToPanel(index)));
 
-    if (tabViewPort) {
-        let swipeInProgress = false;
-        tabViewPort.addEventListener('touchstart', (e) => {
-            if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
-                swipeInProgress = false; return;
-            }
-            // Check if the touch is on a scrollable element within the history tab that is not the main tab panel itself
-            if (tabPanels[currentTabIndex]?.id === 'tab-history') {
-                if (e.target.closest('.history-item-json-view')) { // If touching inside an expanded JSON view
-                     swipeInProgress = false; return; // Allow native scroll for this element
-                }
-            }
+    // REMOVED: Tab swipe functionality
+    // if (tabViewPort) {
+    //     let swipeInProgress = false;
+    //     tabViewPort.addEventListener('touchstart', (e) => {
+    //         if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
+    //             swipeInProgress = false; return;
+    //         }
+    //         if (tabPanels[currentTabIndex]?.id === 'tab-history') {
+    //             if (e.target.closest('.history-item-json-view')) { 
+    //                  swipeInProgress = false; return; 
+    //             }
+    //         }
+    //         swipeInProgress = true;
+    //         touchStartX = e.touches[0].clientX;
+    //         touchEndX = touchStartX;
+    //         tabPanelsSlider.style.transition = 'none';
+    //     }, { passive: true });
 
-            swipeInProgress = true;
-            touchStartX = e.touches[0].clientX;
-            touchEndX = touchStartX;
-            tabPanelsSlider.style.transition = 'none';
-        }, { passive: true }); // passive: true might be an issue if we need to preventDefault for some cases
+    //     tabViewPort.addEventListener('touchmove', (e) => {
+    //         if (!swipeInProgress || isKeyboardOpen) return;
+    //         touchEndX = e.touches[0].clientX;
+    //     }, { passive: true });
 
-        tabViewPort.addEventListener('touchmove', (e) => {
-            if (!swipeInProgress || isKeyboardOpen) return;
-            touchEndX = e.touches[0].clientX;
-            // If predominantly vertical scroll, consider not processing as swipe
-            // This is a bit tricky to get right without more complex gesture detection
-        }, { passive: true });
-
-        tabViewPort.addEventListener('touchend', () => {
-            if (!swipeInProgress || isKeyboardOpen) { swipeInProgress = false; return; }
-            const deltaX = touchEndX - touchStartX;
-            let newIndex = currentTabIndex;
-            if (Math.abs(deltaX) > swipeThreshold) {
-                newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
-            }
-            // Always call slideToPanel, even if index hasn't changed,
-            // because renderHistoryList (called by slideToPanel if on history tab)
-            // now preserves state, so it's safe and handles potential "swipe to same tab" scenarios.
-            slideToPanel(newIndex, true);
-            swipeInProgress = false; touchStartX = 0; touchEndX = 0;
-        });
-    }
+    //     tabViewPort.addEventListener('touchend', () => {
+    //         if (!swipeInProgress || isKeyboardOpen) { swipeInProgress = false; return; }
+    //         const deltaX = touchEndX - touchStartX;
+    //         let newIndex = currentTabIndex;
+    //         if (Math.abs(deltaX) > swipeThreshold) {
+    //             newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
+    //         }
+    //         slideToPanel(newIndex, true);
+    //         swipeInProgress = false; touchStartX = 0; touchEndX = 0;
+    //     });
+    // }
 
     if (typeof tabPanels !== 'undefined') {
         tabPanels.forEach(panel => {
