@@ -528,9 +528,6 @@ button:disabled {
     }
 }
 
---- START OF MODIFIED FILE style.css ---
-/* ... (previous CSS rules) ... */
-
 /* --- History Tab Styles --- */
 #tab-history {
     padding-bottom: 15px;
@@ -544,21 +541,15 @@ button:disabled {
 
 .history-item {
     background-color: var(--secondary-bg);
-    /* padding: 12px 15px; */
-    /* Adjusted padding to accommodate new icon */
     padding: 12px 10px 12px 15px;
     border-radius: var(--border-radius-sm);
     box-shadow: var(--box-shadow);
-    /* display: flex; /* Will be flex column now */
-    /* align-items: center; */
     flex-direction: column;
-    /* To stack main content and JSON view */
     cursor: pointer;
     transition: background-color 0.2s ease, border-left-color 0.2s ease;
     border-left: 3px solid transparent;
     user-select: none;
     position: relative;
-    /* For positioning expand icon if needed, though flex might be enough */
 }
 
 .history-item-main-content {
@@ -618,7 +609,6 @@ button:disabled {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 150px;
-    /* Adjust based on checkbox, actions, and new expand icon */
 }
 
 @media (min-width: 380px) {
@@ -645,10 +635,8 @@ button:disabled {
     gap: 8px;
     flex-shrink: 0;
     margin-left: auto;
-    /* Pushes actions to the right */
 }
 
-/* Hide individual actions when multi-select is active on the item (checkbox shown instead) */
 .history-item.multi-select-active .history-item-actions {
     display: none;
 }
@@ -687,17 +675,13 @@ button:disabled {
     border: none;
     color: var(--text-secondary);
     font-size: 1.1rem;
-    /* Same as other action buttons */
     padding: 5px;
     cursor: pointer;
     transition: color 0.2s ease, transform 0.2s ease;
     line-height: 1;
     margin-left: 8px;
-    /* Space from details or checkbox */
     order: -1;
-    /* Puts it to the left of details if main-content is row */
     margin-right: 8px;
-    /* Space before details */
 }
 
 .history-item-expand-json:hover {
@@ -710,24 +694,19 @@ button:disabled {
 
 .history-item-json-view {
     display: none;
-    /* Hidden by default */
     width: 100%;
     background-color: var(--primary-bg);
-    /* Slightly darker bg for contrast */
     border: 1px solid var(--tertiary-bg);
     border-radius: var(--border-radius-sm);
     padding: 10px;
     margin-top: 10px;
     box-sizing: border-box;
     max-height: 300px;
-    /* Limit height and make it scrollable */
     overflow: auto;
     font-family: 'Courier New', Courier, monospace;
-    /* Monospace font for JSON */
     font-size: 0.8rem;
     color: var(--text-primary);
     white-space: pre-wrap;
-    /* Preserve whitespace and wrap lines */
     word-break: break-all;
 }
 
@@ -739,7 +718,6 @@ button:disabled {
     margin-right: auto;
     padding-left: 5px;
     display: none;
-    /* Hidden by default, shown by .multi-select-mode on top-bar */
 }
 
 .top-bar.multi-select-mode .date-controls {
@@ -783,6 +761,4 @@ button:disabled {
     .bottom-nav-button span {
         font-size: 0.7rem;
     }
-
-    /* .history-item-preview adjusted above based on screen width breakpoints */
 }

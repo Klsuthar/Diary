@@ -8,14 +8,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e293b">
 
-    <!-- Favicons - Revised for better compatibility and new assets -->
-    <link rel="icon" href="images/logo.svg" type="image/svg+xml"> <!-- Preferred: SVG for modern browsers -->
-    <link rel="alternate icon" href="images/logo.ico" sizes="any"> <!-- Fallback: ICO for older browsers / specific cases -->
-    <link rel="icon" type="image/png" sizes="32x32" href="images/logo32.png"> <!-- Common PNG size -->
-    <link rel="icon" type="image/png" sizes="16x16" href="images/logo16.png">
-    <link rel="apple-touch-icon" href="images/logo256.png"> <!-- Good size for Apple Touch Icon -->
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="icon" href="images/logo.svg" type="image/svg+xml"> <link rel="alternate icon" href="images/logo.ico" sizes="any"> <link rel="icon" type="image/png" sizes="32x32" href="images/logo32.png"> <link rel="icon" type="image/png" sizes="16x16" href="images/logo16.png">
+    <link rel="apple-touch-icon" href="images/logo256.png"> <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -37,7 +31,6 @@
                         class="fas fa-chevron-right"></i></button>
             </div>
             <div class="top-actions">
-                <!-- Regular Action Buttons -->
                 <button type="submit" form="diaryForm" id="downloadButton" class="top-action-btn"
                     aria-label="Download Diary" title="Download Diary (Export JSON)">
                     <i class="fas fa-file-arrow-down"></i>
@@ -56,14 +49,12 @@
                     <i class="fas fa-trash-alt"></i>
                 </button>
 
-                <!-- Multi-Select Action Buttons (initially hidden by CSS or inline style if needed) -->
                 <span id="multiSelectCount" class="multi-select-info" style="display:none;">0 selected</span>
                 <button type="button" id="exportSelectedButton" class="top-action-btn" aria-label="Export Selected" title="Export Selected Entries" style="display:none;">
                     <i class="fas fa-file-export"></i>
                 </button>
                 <button type="button" id="deleteSelectedButton" class="top-action-btn" aria-label="Delete Selected" title="Delete Selected Entries" style="display:none;">
-                    <i class="fas fa-trash"></i> <!-- Changed icon for multi-delete clarity -->
-                </button>
+                    <i class="fas fa-trash"></i> </button>
                 <button type="button" id="cancelMultiSelectButton" class="top-action-btn" aria-label="Cancel Selection" title="Cancel Multi-Selection" style="display:none;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -73,7 +64,6 @@
         <form id="diaryForm">
             <div id="tabViewPort">
                 <div id="tabPanelsSlider">
-                    <!-- TAB: Basic & Environment -->
                     <div id="tab-basic" class="tab-panel active">
                         <fieldset>
                             <legend><i class="fas fa-cloud-sun icon-legend"></i> Environment</legend>
@@ -104,7 +94,6 @@
                         </fieldset>
                     </div>
 
-                    <!-- TAB: Body & Health -->
                     <div id="tab-body" class="tab-panel">
                         <fieldset>
                             <legend><i class="fas fa-ruler-combined icon-legend"></i> Body Measurements</legend>
@@ -147,7 +136,6 @@
                         </fieldset>
                     </div>
 
-                    <!-- TAB: Mental & Personal Care -->
                     <div id="tab-mental" class="tab-panel">
                         <fieldset>
                             <legend><i class="fas fa-brain icon-legend"></i> Mental & Emotional Health</legend>
@@ -205,7 +193,6 @@
                         </fieldset>
                     </div>
 
-                    <!-- TAB: Diet & Activities -->
                     <div id="tab-diet" class="tab-panel">
                         <fieldset>
                             <legend><i class="fas fa-utensils icon-legend"></i> Diet & Nutrition</legend>
@@ -238,7 +225,6 @@
                         </fieldset>
                     </div>
 
-                    <!-- TAB: Notes & Summary -->
                     <div id="tab-summary" class="tab-panel">
                         <fieldset>
                             <legend><i class="fas fa-sticky-note icon-legend"></i> Additional Notes</legend>
@@ -263,21 +249,15 @@
                         </fieldset>
                     </div>
 
-                    <!-- TAB: History -->
                     <div id="tab-history" class="tab-panel">
                         <div id="historyListContainer">
-                            <!-- History items will be dynamically inserted here -->
                             <p class="no-history-message" style="display:none; text-align:center; margin-top: 20px; color: var(--text-secondary);">
                                 No diary entries found.
                             </p>
                         </div>
                     </div>
 
-                </div> <!-- End #tabPanelsSlider -->
-            </div> <!-- End #tabViewPort -->
-        </form> <!-- End #diaryForm -->
-
-        <nav class="bottom-nav">
+                </div> </div> </form> <nav class="bottom-nav">
             <button class="bottom-nav-button active" data-tab-target="tab-basic" aria-label="Basic Info"
                 title="Basic & Environment">
                 <i class="fas fa-info-circle"></i>
@@ -310,8 +290,7 @@
             </button>
         </nav>
         <div id="toast-container"></div>
-    </div> <!-- End .app-container -->
-    <script src="script.js"></script>
+    </div> <script src="script.js"></script>
 </body>
 
 </html>
