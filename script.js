@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryCountsDisplay = document.getElementById('summaryCounts');
 
     const historyListContainer = document.getElementById('historyListContainer');
+    const historyTabPanel = document.getElementById('tab-history'); // Reference to the history tab panel for scrolling
 
     const topBar = document.querySelector('.top-bar');
     const multiSelectCountSpan = document.getElementById('multiSelectCount');
@@ -283,48 +284,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Empty Field Indicator Logic ---
-    /**
-     * Checks if a specific tab panel has any empty input values.
-     * Excludes history tab and certain input types like buttons or range sliders by default.
-     * @param {HTMLElement} tabPanelElement - The tab panel element.
-     * @returns {boolean} True if any relevant input is empty, false otherwise.
-     */
     function checkTabForEmptyValues(tabPanelElement) {
         if (!tabPanelElement || tabPanelElement.id === 'tab-history') {
-            return false; // Don't check history tab or non-existent panels
+            return false;
         }
-
         const inputsToCheck = tabPanelElement.querySelectorAll(
             'input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="search"], input[type="tel"], input[type="url"], textarea, select'
         );
-
         for (const input of inputsToCheck) {
-            // Skip inputs that are part of slider containers as their 'emptiness' is different
             if (input.closest('.slider-container')) continue;
-            // Also skip date input itself for this specific check
             if (input.id === 'date') continue;
-
-
             if (input.type === 'select-one' || input.type === 'select-multiple') {
-                if (input.value === '') {
-                    // console.log(`Tab ${tabPanelElement.id} has empty select: ${input.id}`);
-                    return true;
-                }
+                if (input.value === '') return true;
             } else {
-                if (input.value.trim() === '') {
-                    // console.log(`Tab ${tabPanelElement.id} has empty input: ${input.id}`);
-                    return true;
-                }
+                if (input.value.trim() === '') return true;
             }
         }
-        return false; // No empty values found in this tab
+        return false;
     }
 
-    /**
-     * Updates the visual indicator (e.g., a red dot) on a tab button in the bottom navigation.
-     * @param {string} tabId - The ID of the tab panel (e.g., 'tab-basic').
-     * @param {boolean} hasEmptyValues - Whether the tab has empty values.
-     */
     function updateTabIconWithIndicator(tabId, hasEmptyValues) {
         const navButton = document.querySelector(`.bottom-nav-button[data-tab-target="${tabId}"]`);
         if (navButton) {
@@ -336,9 +314,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Checks all relevant tabs and updates their icons with empty value indicators.
-     */
     function checkAndUpdateAllTabIcons() {
         if (typeof tabPanels !== 'undefined') {
             tabPanels.forEach(panel => {
@@ -366,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-            initializeForm(true); // This will also call checkAndUpdateAllTabIcons()
+            initializeForm(true);
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
@@ -413,12 +388,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isClearing) {
             loadFormFromLocalStorage();
         } else {
-            // If clearing, explicitly ensure otherNoteStatus is 'No' if it's not set by defaults
              setValue('otherNoteStatus', getValue('otherNoteStatus') || 'No');
         }
         updateSummaryCounts();
         updateKeyboardStatus();
-        checkAndUpdateAllTabIcons(); // <<< Ensure this is called
+        checkAndUpdateAllTabIcons();
     }
 
     function populateFormWithJson(jsonData) {
@@ -449,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
         if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
-        checkAndUpdateAllTabIcons(); // <<< Ensure this is called
+        checkAndUpdateAllTabIcons();
     }
 
     function performSaveOperation(isSilent = false) {
@@ -479,8 +453,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tabPanels[currentTabIndex]?.id === 'tab-history') {
                 renderHistoryList();
             }
-            // After saving, the state of empty fields might not change, but good to be sure if needed.
-            // checkAndUpdateAllTabIcons(); // Usually not needed right after save unless save changes values.
             return true;
         } catch (e) {
             console.error("Error saving to localStorage:", e);
@@ -500,7 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const formDataForDate = allSavedData[currentFormDate];
         
         diaryForm.reset();
-        initializeForm(true); // This resets and calls checkAndUpdateAllTabIcons at its end
+        initializeForm(true);
 
         setValue('date', currentFormDate);
         updateCurrentDateDisplay(currentFormDate);
@@ -534,7 +506,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
         if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
         updateSummaryCounts();
-        checkAndUpdateAllTabIcons(); // <<< Crucial call after populating from storage
+        checkAndUpdateAllTabIcons();
     }
 
     function autoSaveOnPageHide() {
@@ -549,6 +521,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
+        const previousTabIndex = currentTabIndex; // Store previous tab index
+
         if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
             disableMultiSelectMode();
         }
@@ -560,17 +534,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bottomNavButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
 
+        // Only call renderHistoryList if actually navigating to the history tab
+        // or if it's already the history tab and something might have changed (e.g., data deletion from another part of app)
+        // The scroll/expand fix relies on renderHistoryList preserving state, so calling it is okay if needed.
         if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
+             // If we are already on the history tab and just "swiped" to it again (potentially due to scroll misinterpretation)
+            // renderHistoryList will be called. The new renderHistoryList is designed to handle this by preserving state.
+            // If navigating from another tab, it's also correct to render it.
             renderHistoryList();
         }
-        // No need to call checkAndUpdateAllTabIcons here, as content doesn't change on tab slide.
     }
 
     // --- History Tab & Multi-Select Functionality ---
     function renderHistoryList() {
-        if (!historyListContainer) return;
-        const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
+        if (!historyListContainer || !historyTabPanel) return;
 
+        let currentScrollTop = 0;
+        if (historyTabPanel) {
+            currentScrollTop = historyTabPanel.scrollTop;
+        }
+
+        const expandedItemDates = new Set();
+        historyListContainer.querySelectorAll('.history-item').forEach(item => {
+            const expandButton = item.querySelector('.history-item-expand-json');
+            if (item.dataset.date && expandButton && expandButton.getAttribute('aria-expanded') === 'true') {
+                expandedItemDates.add(item.dataset.date);
+            }
+        });
+
+        const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
         const existingItems = historyListContainer.querySelectorAll('.history-item');
         existingItems.forEach(item => item.remove());
 
@@ -582,7 +574,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'none';
             dates.forEach(dateStr => {
-                const entryData = allSavedData[dateStr];
+                const entryData = allSavedData[dateStr]; // This is the data for the specific date
                 if (!entryData) return;
 
                 const listItem = document.createElement('div');
@@ -605,7 +597,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 expandJsonBtn.classList.add('history-item-expand-json');
                 expandJsonBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
                 expandJsonBtn.title = 'Show/Hide JSON Data';
-                expandJsonBtn.setAttribute('aria-expanded', 'false');
+                // expandJsonBtn.setAttribute('aria-expanded', 'false'); // Set by restoration logic
                 mainContent.appendChild(expandJsonBtn);
 
                 const checkboxContainer = document.createElement('div');
@@ -653,16 +645,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 jsonView.classList.add('history-item-json-view');
                 listItem.appendChild(jsonView);
 
+                // Restore expanded state
+                if (expandedItemDates.has(dateStr)) {
+                    const fullEntryData = getFullEntryDataForExport(entryData, dateStr);
+                    jsonView.textContent = JSON.stringify(fullEntryData, null, 2);
+                    jsonView.style.display = 'block';
+                    expandJsonBtn.setAttribute('aria-expanded', 'true');
+                    expandJsonBtn.classList.add('expanded');
+                } else {
+                    jsonView.style.display = 'none';
+                    expandJsonBtn.setAttribute('aria-expanded', 'false');
+                    expandJsonBtn.classList.remove('expanded');
+                }
+
+                // Re-attach event listeners
                 expandJsonBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const isExpanded = expandJsonBtn.getAttribute('aria-expanded') === 'true';
-                    if (isExpanded) {
+                    const isCurrentlyExpanded = expandJsonBtn.getAttribute('aria-expanded') === 'true';
+                    if (isCurrentlyExpanded) {
                         jsonView.style.display = 'none';
-                        jsonView.textContent = ''; 
+                        jsonView.textContent = ''; // Clear content on collapse as per original logic
                         expandJsonBtn.setAttribute('aria-expanded', 'false');
                         expandJsonBtn.classList.remove('expanded');
                     } else {
-                        const fullEntryData = getFullEntryDataForExport(entryData, dateStr);
+                        const currentEntryData = allSavedData[dateStr]; // Fetch fresh data in case of updates
+                        const fullEntryData = getFullEntryDataForExport(currentEntryData, dateStr);
                         jsonView.textContent = JSON.stringify(fullEntryData, null, 2);
                         jsonView.style.display = 'block';
                         expandJsonBtn.setAttribute('aria-expanded', 'true');
@@ -713,7 +720,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }
+
+        if (historyTabPanel) {
+            historyTabPanel.scrollTop = currentScrollTop;
+        }
     }
+
 
     function handleHistoryItemTouchStart(event, dateStr, listItem) {
         if (event.target.closest('.history-item-expand-json') || event.target.closest('.history-item-actions button') || event.target.closest('.history-item-checkbox-container')) {
@@ -756,7 +768,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (longPressTimer) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            handleHistoryItemClick(null, dateStr, listItem);
+            // Check if it was a click or a long press that was just cleared
+            // For simplicity, if longPressTimer was active and cleared here, it implies it wasn't a drag
+            // The original click handler will manage the action.
+            // If you want to prevent click after long press, add more logic here.
+            handleHistoryItemClick(null, dateStr, listItem); // Simulate click if it wasn't a drag
         }
     }
 
@@ -765,7 +781,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.target.closest('.history-item-expand-json') ||
                 event.target.closest('.history-item-checkbox-container input[type="checkbox"]') || 
                 event.target.closest('.history-item-actions button')) {
-                return;
+                return; // Action handled by specific button listeners
             }
         }
 
@@ -773,6 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
         } else {
+            // If not multi-select, and not a specific action button, then it's an "edit" action
             handleEditEntry(dateStr);
         }
     }
@@ -785,7 +802,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
             diaryForm.reset(); 
-            initializeForm(true); // Resets and calls checkAndUpdateAllTabIcons
+            initializeForm(true); 
 
             setValue('date', dateStr);
             updateCurrentDateDisplay(dateStr);
@@ -802,10 +819,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
             if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
             updateSummaryCounts();
-            checkAndUpdateAllTabIcons(); // <<< Important after populating for edit
+            checkAndUpdateAllTabIcons(); 
 
             showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
-            slideToPanel(0);
+            slideToPanel(0); // Go to the first tab for editing
         } else {
             showToast('Could not find entry data to edit.', 'error');
         }
@@ -856,7 +873,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 if (!isPartOfMulti) {
                     showToast('Entry deleted.', 'success');
-                    renderHistoryList();
+                    renderHistoryList(); // Re-render after deletion
                 }
                 return true;
             } else {
@@ -872,7 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = true;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(true);
-        renderHistoryList();
+        renderHistoryList(); // Re-render to show checkboxes
         showToast('Multi-select enabled. Tap items to select.', 'info');
     }
 
@@ -881,7 +898,7 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = false;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(false);
-        renderHistoryList();
+        renderHistoryList(); // Re-render to hide checkboxes and restore normal view
     }
 
     function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) {
@@ -929,7 +946,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (handleDeleteEntry(dateStr, true)) deleteCount++;
             });
             showToast(`${deleteCount} of ${selectedEntriesForMultiAction.length} entries deleted.`, 'success');
-            disableMultiSelectMode();
+            disableMultiSelectMode(); // This will call renderHistoryList
         }
     }
 
@@ -1046,13 +1063,13 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.onload = function(e) {
                 try {
                     const importedData = JSON.parse(e.target.result);
-                    populateFormWithJson(importedData); // This will also call checkAndUpdateAllTabIcons()
+                    populateFormWithJson(importedData);
                     if (importedData.date) {
-                        performSaveOperation(true);
+                        performSaveOperation(true); // Silently save imported data
                     }
                     showToast('Diary entry imported successfully!', 'success');
                     let firstPopulatedIndex = 0;
-                    for (let i = 0; i < tabPanels.length - 1; i++) {
+                    for (let i = 0; i < tabPanels.length - 1; i++) { // Exclude history tab
                         const panelInputs = tabPanels[i].querySelectorAll('input:not([type="range"]):not([type="date"]):not([type="checkbox"]):not([type="radio"]), textarea, select');
                         let hasData = false;
                         for (const input of panelInputs) { 
@@ -1094,15 +1111,24 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
                 swipeInProgress = false; return;
             }
+            // Check if the touch is on a scrollable element within the history tab that is not the main tab panel itself
+            if (tabPanels[currentTabIndex]?.id === 'tab-history') {
+                if (e.target.closest('.history-item-json-view')) { // If touching inside an expanded JSON view
+                     swipeInProgress = false; return; // Allow native scroll for this element
+                }
+            }
+
             swipeInProgress = true;
             touchStartX = e.touches[0].clientX;
             touchEndX = touchStartX;
             tabPanelsSlider.style.transition = 'none';
-        }, { passive: true });
+        }, { passive: true }); // passive: true might be an issue if we need to preventDefault for some cases
 
         tabViewPort.addEventListener('touchmove', (e) => {
             if (!swipeInProgress || isKeyboardOpen) return;
             touchEndX = e.touches[0].clientX;
+            // If predominantly vertical scroll, consider not processing as swipe
+            // This is a bit tricky to get right without more complex gesture detection
         }, { passive: true });
 
         tabViewPort.addEventListener('touchend', () => {
@@ -1112,12 +1138,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (Math.abs(deltaX) > swipeThreshold) {
                 newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
             }
+            // Always call slideToPanel, even if index hasn't changed,
+            // because renderHistoryList (called by slideToPanel if on history tab)
+            // now preserves state, so it's safe and handles potential "swipe to same tab" scenarios.
             slideToPanel(newIndex, true);
             swipeInProgress = false; touchStartX = 0; touchEndX = 0;
         });
     }
 
-    // Event listeners for input changes to update tab indicators
     if (typeof tabPanels !== 'undefined') {
         tabPanels.forEach(panel => {
             if (panel.id && panel.id !== 'tab-history' && panel.querySelector('input, textarea, select')) {
@@ -1145,9 +1173,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Application Setup ---
     updateTopBarForMultiSelectView(false);
-    initializeForm(); // This will call checkAndUpdateAllTabIcons
+    initializeForm(); 
     slideToPanel(0, false);
-    // checkAndUpdateAllTabIcons(); // Called within initializeForm now, and after specific loads
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
