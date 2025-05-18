@@ -75,7 +75,6 @@ body {
 
 .logo-container {
     padding-right: 10px;
-    /* Space between logo and date controls */
 }
 
 .app-logo {
@@ -88,13 +87,9 @@ body {
     align-items: center;
     gap: 6px;
     flex-grow: 1;
-    /* Allows date controls to take available space */
     justify-content: center;
-    /* Center the date controls content */
     position: relative;
-    /* For positioning the transparent date input */
     min-width: 180px;
-    /* Ensure enough space for date controls */
 }
 
 .top-bar #currentDateDisplay {
@@ -235,6 +230,7 @@ body {
     cursor: pointer;
     transition: color 0.2s ease;
     text-align: center;
+    position: relative; /* For the dot indicator */
 }
 
 .bottom-nav-button i {
@@ -260,6 +256,29 @@ body {
     color: var(--text-primary);
 }
 
+/* Red Dot Indicator for Empty Fields in Tab */
+.bottom-nav-button.has-empty-indicator::after {
+    content: '';
+    position: absolute;
+    top: 6px; /* Adjust as needed */
+    right: 10px; /* Adjust based on your button layout, might need to be closer to icon */
+    /* If you want it consistently to the right of the icon, you might target icon's position */
+    /* For example, if icon is the first child:
+       right: calc(50% - 16px); /* (Half button width - approx half icon width - some offset) */
+    width: 8px;
+    height: 8px;
+    background-color: var(--danger-color);
+    border-radius: 50%;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+    z-index: 5; /* Ensure it's visible */
+}
+/* Adjust right position for smaller screens if needed */
+@media (max-width: 360px) {
+    .bottom-nav-button.has-empty-indicator::after {
+        right: 8px; /* Closer for very small screens */
+    }
+}
+
 
 /* --- General Form Elements (Mobile Optimized) --- */
 label {
@@ -272,7 +291,9 @@ label {
 
 input[type="text"],
 input[type="number"],
-textarea {
+textarea,
+select /* Added select here for consistent styling */
+{
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
     border: 1px solid var(--tertiary-bg);
@@ -287,7 +308,9 @@ textarea {
 
 input[type="text"]:focus,
 input[type="number"]:focus,
-textarea:focus {
+textarea:focus,
+select:focus /* Added select focus */
+{
     outline: none;
     border-color: var(--accent-color);
     box-shadow: 0 0 0 2px rgba(218, 190, 36, 0.25);
@@ -298,6 +321,19 @@ textarea::placeholder {
     color: var(--text-secondary);
     opacity: 0.7;
 }
+
+/* Style select dropdown arrow (basic, may need more for full cross-browser) */
+select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right var(--input-padding-x) center;
+    background-size: .65em auto;
+    padding-right: calc(var(--input-padding-x) * 2 + 1em); /* Make space for arrow */
+}
+
 
 input[type="number"] {
     -moz-appearance: textfield;
@@ -572,13 +608,11 @@ button:disabled {
 .history-item-checkbox-container {
     margin-right: 12px;
     display: none;
-    /* Hidden by default, shown by .multi-select-active */
     align-items: center;
 }
 
 .history-item.multi-select-active .history-item-checkbox-container {
     display: flex;
-    /* Show when multi-select is active on the item */
 }
 
 .history-item-checkbox {
@@ -657,7 +691,7 @@ button:disabled {
     color: var(--text-primary);
 }
 
-.history-item-actions button.action-edit:hover {
+.history-item-actions button.action-edit:hover { /* This class was missing, assuming you might want it */
     color: var(--info-color);
 }
 
