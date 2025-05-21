@@ -1,5 +1,3 @@
---- START OF FILE script.js ---
-
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Element References ---
     const diaryForm = document.getElementById('diaryForm');
@@ -204,9 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const element = document.getElementById(elementId);
         if (!element) return type === 'number' || type === 'range' ? null : '';
 
-        // For 'sleepHours' and 'phoneScreenOnHr', always return string, even if type is 'number' (though it's text type)
-        // This ensures we don't try to parse them if a different type was accidentally passed.
-        // However, since their input type is 'text', the default behavior for type='text' is already string.
         const value = element.value.trim();
         if (type === 'range') return element.value === '' ? null : parseFloat(element.value);
         if (type === 'number') return value === '' ? null : parseFloat(value);
@@ -370,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (id === 'belly') el.value = "89";
                     else if (id === 'meditationStatus') el.value = "Na";
                     else if (id === 'meditationDurationMin') el.value = "0";
-                    else if (id === 'sleepHours') el.value = "8:00"; // Updated default format
+                    else if (id === 'sleepHours') el.value = "8";
                     else if (id === 'medicationsTaken') el.value = "Na";
                     else if (id === 'skincareRoutine') el.value = "Na";
                     else el.value = '';
@@ -829,27 +824,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         exportData.environment = { temperature_c: entryFormData.temperatureC || '', air_quality_index: pInt(entryFormData.airQualityIndex), humidity_percent: pInt(entryFormData.humidityPercent), uv_index: pInt(entryFormData.uvIndex), weather_condition: entryFormData.weatherCondition || '' };
         exportData.body_measurements = { weight_kg: pFloat(entryFormData.weightKg), height_cm: pInt(entryFormData.heightCm), chest: pInt(entryFormData.chest), belly: pInt(entryFormData.belly) };
-        
-        // Updated to use string values for sleepHours and phoneScreenOnHr
-        exportData.health_and_fitness = { 
-            sleep_hours: entryFormData.sleepHours || '', // Store as string
-            steps_count: pInt(entryFormData.stepsCount), 
-            steps_distance_km: pFloat(entryFormData.stepsDistanceKm), 
-            kilocalorie: pInt(entryFormData.kilocalorie), 
-            water_intake_liters: pFloat(entryFormData.waterIntakeLiters), 
-            medications_taken: entryFormData.medicationsTaken || '', 
-            physical_symptoms: entryFormData.physicalSymptoms || '', 
-            energy_level: pInt(entryFormData.energyLevel), 
-            stress_level: pInt(entryFormData.stressLevel) 
-        };
+        exportData.health_and_fitness = { sleep_hours: pFloat(entryFormData.sleepHours), steps_count: pInt(entryFormData.stepsCount), steps_distance_km: pFloat(entryFormData.stepsDistanceKm), kilocalorie: pInt(entryFormData.kilocalorie), water_intake_liters: pFloat(entryFormData.waterIntakeLiters), medications_taken: entryFormData.medicationsTaken || '', physical_symptoms: entryFormData.physicalSymptoms || '', energy_level: pInt(entryFormData.energyLevel), stress_level: pInt(entryFormData.stressLevel) };
         exportData.mental_and_emotional_health = { mental_state: entryFormData.mentalState || '', meditation_status: entryFormData.meditationStatus || '', meditation_duration_min: pInt(entryFormData.meditationDurationMin) };
         exportData.personal_care = { face_product_name: entryFormData.faceProductName || '', face_product_brand: entryFormData.faceProductBrand || '', hair_product_name: entryFormData.hairProductName || '', hair_product_brand: entryFormData.hairProductBrand || '', hair_oil: entryFormData.hairOil || '', skincare_routine: entryFormData.skincareRoutine || '' };
         exportData.diet_and_nutrition = { breakfast: entryFormData.breakfast || '', lunch: entryFormData.lunch || '', dinner: entryFormData.dinner || '', additional_items: entryFormData.additionalItems || '' };
-        exportData.activities_and_productivity = { 
-            tasks_today_english: entryFormData.tasksTodayEnglish || '', 
-            travel_destination: entryFormData.travelDestination || '', 
-            phone_screen_on_hr: entryFormData.phoneScreenOnHr || '' // Store as string
-        };
+        exportData.activities_and_productivity = { tasks_today_english: entryFormData.tasksTodayEnglish || '', travel_destination: entryFormData.travelDestination || '', phone_screen_on_hr: pFloat(entryFormData.phoneScreenOnHr) };
         exportData.additional_notes = { 
             key_events: entryFormData.keyEvents || '',
             other_note_status: entryFormData.otherNoteStatus || 'No' 
@@ -1037,27 +1016,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 data.environment = { temperature_c: getValue('temperatureC'), air_quality_index: pIntLocal(getValue('airQualityIndex')), humidity_percent: getValue('humidityPercent', 'range'), uv_index: getValue('uvIndex', 'range'), weather_condition: getValue('weatherCondition') };
                 data.body_measurements = { weight_kg: pFloatLocal(getValue('weightKg')), height_cm: pIntLocal(getValue('heightCm')), chest: pIntLocal(getValue('chest')), belly: pIntLocal(getValue('belly')) };
-                
-                // Updated to use string values for sleepHours and phoneScreenOnHr
-                data.health_and_fitness = { 
-                    sleep_hours: getValue('sleepHours'), // Get as string
-                    steps_count: pIntLocal(getValue('stepsCount')), 
-                    steps_distance_km: pFloatLocal(getValue('stepsDistanceKm')), 
-                    kilocalorie: pIntLocal(getValue('kilocalorie')), 
-                    water_intake_liters: pFloatLocal(getValue('waterIntakeLiters')), 
-                    medications_taken: getValue('medicationsTaken'), 
-                    physical_symptoms: getValue('physicalSymptoms'), 
-                    energy_level: getValue('energyLevel', 'range'), 
-                    stress_level: getValue('stressLevel', 'range') 
-                };
+                data.health_and_fitness = { sleep_hours: pFloatLocal(getValue('sleepHours')), steps_count: pIntLocal(getValue('stepsCount')), steps_distance_km: pFloatLocal(getValue('stepsDistanceKm')), kilocalorie: pIntLocal(getValue('kilocalorie')), water_intake_liters: pFloatLocal(getValue('waterIntakeLiters')), medications_taken: getValue('medicationsTaken'), physical_symptoms: getValue('physicalSymptoms'), energy_level: getValue('energyLevel', 'range'), stress_level: getValue('stressLevel', 'range') };
                 data.mental_and_emotional_health = { mental_state: getValue('mentalState'), meditation_status: getValue('meditationStatus'), meditation_duration_min: pIntLocal(getValue('meditationDurationMin')) };
                 data.personal_care = { face_product_name: getValue('faceProductName'), face_product_brand: getValue('faceProductBrand'), hair_product_name: getValue('hairProductName'), hair_product_brand: getValue('hairProductBrand'), hair_oil: getValue('hairOil'), skincare_routine: getValue('skincareRoutine') };
                 data.diet_and_nutrition = { breakfast: getValue('breakfast'), lunch: getValue('lunch'), dinner: getValue('dinner'), additional_items: getValue('additionalItems') };
-                data.activities_and_productivity = { 
-                    tasks_today_english: getValue('tasksTodayEnglish'), 
-                    travel_destination: getValue('travelDestination'), 
-                    phone_screen_on_hr: getValue('phoneScreenOnHr') // Get as string
-                };
+                data.activities_and_productivity = { tasks_today_english: getValue('tasksTodayEnglish'), travel_destination: getValue('travelDestination'), phone_screen_on_hr: pFloatLocal(getValue('phoneScreenOnHr')) };
                 data.additional_notes = { 
                     key_events: getValue('keyEvents'),
                     other_note_status: getValue('otherNoteStatus')
@@ -1128,6 +1091,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     bottomNavButtons.forEach((button, index) => button.addEventListener('click', () => slideToPanel(index)));
 
+    // REMOVED: Tab swipe functionality
+    // if (tabViewPort) {
+    //     let swipeInProgress = false;
+    //     tabViewPort.addEventListener('touchstart', (e) => {
+    //         if (isKeyboardOpen || e.target.closest('.slider-container') || e.target.closest('input[type="range"]') || (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history')) {
+    //             swipeInProgress = false; return;
+    //         }
+    //         if (tabPanels[currentTabIndex]?.id === 'tab-history') {
+    //             if (e.target.closest('.history-item-json-view')) { 
+    //                  swipeInProgress = false; return; 
+    //             }
+    //         }
+    //         swipeInProgress = true;
+    //         touchStartX = e.touches[0].clientX;
+    //         touchEndX = touchStartX;
+    //         tabPanelsSlider.style.transition = 'none';
+    //     }, { passive: true });
+
+    //     tabViewPort.addEventListener('touchmove', (e) => {
+    //         if (!swipeInProgress || isKeyboardOpen) return;
+    //         touchEndX = e.touches[0].clientX;
+    //     }, { passive: true });
+
+    //     tabViewPort.addEventListener('touchend', () => {
+    //         if (!swipeInProgress || isKeyboardOpen) { swipeInProgress = false; return; }
+    //         const deltaX = touchEndX - touchStartX;
+    //         let newIndex = currentTabIndex;
+    //         if (Math.abs(deltaX) > swipeThreshold) {
+    //             newIndex = (deltaX < 0) ? Math.min(currentTabIndex + 1, tabPanels.length - 1) : Math.max(currentTabIndex - 1, 0);
+    //         }
+    //         slideToPanel(newIndex, true);
+    //         swipeInProgress = false; touchStartX = 0; touchEndX = 0;
+    //     });
+    // }
 
     if (typeof tabPanels !== 'undefined') {
         tabPanels.forEach(panel => {
