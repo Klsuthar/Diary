@@ -149,7 +149,7 @@ body {
     width: 38px;
     height: 38px;
     flex-shrink: 0;
-    z-index: 2;
+    z-index: 2; /* Ensure buttons are above date input */
     position: relative;
 }
 
@@ -167,7 +167,55 @@ body {
 .top-bar .top-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 6px; /* Gap between direct children like download, save, menu container */
+}
+
+
+/* --- Dropdown Menu Styles --- */
+.dropdown-container {
+    position: relative;
+    display: inline-block; /* Or flex if needed */
+}
+
+.dropdown-content {
+    display: none; /* Hidden by default, JS will toggle */
+    position: absolute;
+    right: 0;
+    top: calc(100% + 5px); /* Position below the menu button */
+    background-color: var(--tertiary-bg);
+    min-width: 200px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
+    border-radius: var(--border-radius-sm);
+    z-index: 101; /* Above top-bar content but below modals if any */
+    padding: 5px 0;
+    overflow: hidden; /* Ensures border-radius applies to children */
+}
+
+.dropdown-item {
+    color: var(--text-primary);
+    padding: 10px 15px;
+    text-decoration: none;
+    display: flex; /* Changed to flex for icon alignment */
+    align-items: center; /* Vertically align icon and text */
+    gap: 10px; /* Space between icon and text */
+    font-size: 0.9rem;
+    background-color: transparent;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.dropdown-item i {
+    font-size: 1em; /* Icon size relative to text */
+    color: var(--text-secondary); /* Softer icon color */
+    width: 18px; /* Fixed width for icon alignment */
+    text-align: center;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 
@@ -191,6 +239,7 @@ body {
 #tabPanelsSlider {
     display: flex;
     height: 100%;
+    /* transition: transform 0.35s ease-in-out; */ /* JS will manage this for instant vs animated */
 }
 
 .tab-panel {
@@ -198,8 +247,9 @@ body {
     flex-shrink: 0;
     overflow-y: auto;
     height: 100%;
-    padding: 15px 15px 30px;
+    padding: 15px 15px 30px; /* Added more bottom padding for scroll room */
     background-color: var(--primary-bg);
+    /* -webkit-overflow-scrolling: touch; */ /* For smoother scrolling on iOS, if needed */
 }
 
 /* --- Bottom Navigation --- */
@@ -260,17 +310,14 @@ body {
 .bottom-nav-button.has-empty-indicator::after {
     content: '';
     position: absolute;
-    top: 6px; /* Adjust as needed */
-    right: 10px; /* Adjust based on your button layout, might need to be closer to icon */
-    /* If you want it consistently to the right of the icon, you might target icon's position */
-    /* For example, if icon is the first child:
-       right: calc(50% - 16px); /* (Half button width - approx half icon width - some offset) */
+    top: 6px; 
+    right: 10px; 
     width: 8px;
     height: 8px;
     background-color: var(--danger-color);
     border-radius: 50%;
     box-shadow: 0 0 2px rgba(0,0,0,0.5);
-    z-index: 5; /* Ensure it's visible */
+    z-index: 5; 
 }
 /* Adjust right position for smaller screens if needed */
 @media (max-width: 360px) {
@@ -292,7 +339,7 @@ label {
 input[type="text"],
 input[type="number"],
 textarea,
-select /* Added select here for consistent styling */
+select 
 {
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
@@ -309,7 +356,7 @@ select /* Added select here for consistent styling */
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus,
-select:focus /* Added select focus */
+select:focus 
 {
     outline: none;
     border-color: var(--accent-color);
@@ -322,7 +369,6 @@ textarea::placeholder {
     opacity: 0.7;
 }
 
-/* Style select dropdown arrow (basic, may need more for full cross-browser) */
 select {
     appearance: none;
     -webkit-appearance: none;
@@ -331,7 +377,7 @@ select {
     background-repeat: no-repeat;
     background-position: right var(--input-padding-x) center;
     background-size: .65em auto;
-    padding-right: calc(var(--input-padding-x) * 2 + 1em); /* Make space for arrow */
+    padding-right: calc(var(--input-padding-x) * 2 + 1em); 
 }
 
 
@@ -355,11 +401,11 @@ fieldset {
     border-radius: var(--border-radius-md);
     padding: 15px;
     margin-bottom: 20px;
-    background-color: transparent;
+    background-color: transparent; /* Ensure fieldset itself is transparent if tab panel has bg */
 }
 
 fieldset:last-of-type {
-    margin-bottom: 0;
+    margin-bottom: 0; /* Remove bottom margin for the last fieldset in a tab */
 }
 
 legend {
@@ -378,7 +424,7 @@ legend {
 }
 
 .slider-container {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Spacing for sliders */
 }
 
 .slider-container label {
@@ -388,7 +434,7 @@ legend {
     margin-bottom: 6px;
 }
 
-.slider-container label span {
+.slider-container label span { /* The value display part of the label */
     font-weight: 500;
     color: var(--accent-color);
     font-size: 0.9rem;
@@ -396,41 +442,41 @@ legend {
 
 input[type="range"] {
     width: 100%;
-    margin-top: 0;
+    margin-top: 0; /* Remove default top margin if any */
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
     cursor: pointer;
-    height: 18px;
+    height: 18px; /* Height of the clickable area for the thumb */
 }
 
+/* Track */
 input[type="range"]::-webkit-slider-runnable-track {
     background: var(--tertiary-bg);
     height: 6px;
     border-radius: 3px;
 }
-
 input[type="range"]::-moz-range-track {
     background: var(--tertiary-bg);
     height: 6px;
     border-radius: 3px;
 }
 
+/* Thumb */
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    margin-top: -6px;
+    margin-top: -7px; /* (Track height - Thumb height) / 2 ... but fine-tuned: (6px - 20px)/2 = -7px */
     background-color: var(--accent-color);
     height: 20px;
     width: 20px;
     border-radius: 50%;
-    border: 2px solid var(--secondary-bg);
+    border: 2px solid var(--secondary-bg); /* Border to make it pop from track */
     transition: background-color 0.2s ease;
 }
-
 input[type="range"]::-moz-range-thumb {
     background-color: var(--accent-color);
-    height: 18px;
+    height: 18px; /* Slightly smaller for Moz consistency if needed */
     width: 18px;
     border-radius: 50%;
     border: 2px solid var(--secondary-bg);
@@ -442,13 +488,15 @@ input[type="range"]::-moz-range-thumb {
     color: var(--text-secondary);
     text-align: right;
     margin-top: 4px;
-    margin-bottom: 8px;
+    margin-bottom: 8px; /* Space below counts before next element */
 }
 
+/* Datalist - usually unstyled directly, browser handles rendering */
 datalist {}
-
 datalist option {}
 
+
+/* Generic Buttons (those not specifically .date-control-btn, .bottom-nav-button, .top-action-btn) */
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex;
     align-items: center;
@@ -463,22 +511,22 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     font-family: var(--font-family);
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
     box-shadow: var(--box-shadow);
+    /* Add default colors or specific classes for styling */
 }
 
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) {
     transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
 }
-
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) {
-    transform: translateY(0px);
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+    transform: translateY(0px); /* Reset transform */
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); /* Pressed effect */
+}
+button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i {
+    font-size: 1em; /* Make icon size relative to button's font size */
+    transition: none; /* Icons generally don't need transition here unless specified */
 }
 
-button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i {
-    font-size: 1em;
-    transition: none;
-}
 
 button:disabled {
     cursor: not-allowed;
@@ -494,8 +542,8 @@ button:disabled {
     right: 15px;
     z-index: 1000;
     display: flex;
-    flex-direction: column-reverse;
-    align-items: center;
+    flex-direction: column-reverse; /* New toasts appear above old ones */
+    align-items: center; /* Center toasts horizontally */
     gap: 10px;
 }
 
@@ -505,45 +553,29 @@ button:disabled {
     padding: 10px 15px;
     border-radius: var(--border-radius-sm);
     box-shadow: var(--box-shadow);
-    border-left: 4px solid var(--accent-color);
+    border-left: 4px solid var(--accent-color); /* Default border color */
     width: 100%;
-    max-width: 320px;
+    max-width: 320px; /* Max width for toasts on larger screens */
     opacity: 0;
     transform: translateY(20px);
-    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards;
-    display: flex;
+    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards; /* 3s total visible time */
+    display: flex; /* For icon and text alignment */
     align-items: center;
-    gap: 10px;
+    gap: 10px; /* Space between icon and text */
     font-size: 0.85rem;
 }
 
 .toast i {
-    font-size: 1em;
+    font-size: 1em; /* Icon size relative to toast text */
 }
 
-.toast.success {
-    border-left-color: var(--success-color);
-}
+.toast.success { border-left-color: var(--success-color); }
+.toast.success i { color: var(--success-color); }
+.toast.error   { border-left-color: var(--danger-color); }
+.toast.error i   { color: var(--danger-color); }
+.toast.info    { border-left-color: var(--info-color); }
+.toast.info i    { color: var(--info-color); }
 
-.toast.success i {
-    color: var(--success-color);
-}
-
-.toast.error {
-    border-left-color: var(--danger-color);
-}
-
-.toast.error i {
-    color: var(--danger-color);
-}
-
-.toast.info {
-    border-left-color: var(--info-color);
-}
-
-.toast.info i {
-    color: var(--info-color);
-}
 
 @keyframes slideUpToast {
     to {
@@ -552,43 +584,42 @@ button:disabled {
     }
 }
 
-@keyframes fadeOutToastGeneral {
+@keyframes fadeOutToastGeneral { /* Renamed for clarity */
     from {
         opacity: 1;
         transform: translateY(0);
     }
-
     to {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(10px); /* Slightly move up on fade out */
     }
 }
 
 /* --- History Tab Styles --- */
 #tab-history {
-    padding-bottom: 15px;
+    padding-bottom: 15px; /* Extra padding at the bottom of the scrollable area */
 }
 
 #historyListContainer {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 10px; /* Space between history items */
 }
 
 .history-item {
     background-color: var(--secondary-bg);
-    padding: 12px 10px 12px 15px;
+    padding: 12px 10px 12px 15px; /* T R B L */
     border-radius: var(--border-radius-sm);
     box-shadow: var(--box-shadow);
-    flex-direction: column;
+    /* display: flex; REMOVED - using internal flex for main-content */
+    flex-direction: column; /* For main content and JSON view stacking */
     cursor: pointer;
     transition: background-color 0.2s ease, border-left-color 0.2s ease;
-    border-left: 3px solid transparent;
-    user-select: none;
-    position: relative;
+    border-left: 3px solid transparent; /* Placeholder for selected state */
+    user-select: none; /* Prevent text selection on click/tap */
+    position: relative; /* For potential absolute positioned children if any */
 }
-
-.history-item-main-content {
+.history-item-main-content { /* NEW: Wrapper for top part of history item */
     display: flex;
     align-items: center;
     width: 100%;
@@ -596,37 +627,35 @@ button:disabled {
 
 
 .history-item:hover:not(.selected) {
-    background-color: var(--tertiary-bg);
+    background-color: var(--tertiary-bg); /* Hover for non-selected items */
 }
 
 .history-item.selected {
-    background-color: #2c3a4f;
+    background-color: #2c3a4f; /* Slightly different bg for selected */
     border-left-color: var(--accent-color);
 }
 
 /* Checkbox Styling for History Items */
 .history-item-checkbox-container {
     margin-right: 12px;
-    display: none;
-    align-items: center;
+    display: none; /* Hidden by default, shown in multi-select mode */
+    align-items: center; /* Vertically center checkbox */
 }
-
 .history-item.multi-select-active .history-item-checkbox-container {
-    display: flex;
+    display: flex; /* Show checkbox in multi-select mode */
 }
-
 .history-item-checkbox {
     width: 20px;
     height: 20px;
-    accent-color: var(--accent-color);
+    accent-color: var(--accent-color); /* Color for the checkbox itself */
     cursor: pointer;
 }
 
 
 .history-item-details {
-    flex-grow: 1;
-    margin-right: 10px;
-    overflow: hidden;
+    flex-grow: 1; /* Takes available space */
+    margin-right: 10px; /* Space before action buttons */
+    overflow: hidden; /* For text ellipsis */
 }
 
 .history-item-date {
@@ -642,35 +671,21 @@ button:disabled {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px;
+    max-width: 150px; /* Initial max-width, adjust with media queries */
 }
-
-@media (min-width: 380px) {
-    .history-item-preview {
-        max-width: 170px;
-    }
-}
-
-@media (min-width: 420px) {
-    .history-item-preview {
-        max-width: 210px;
-    }
-}
-
-@media (min-width: 480px) {
-    .history-item-preview {
-        max-width: 250px;
-    }
-}
+/* Responsive preview width */
+@media (min-width: 380px) { .history-item-preview { max-width: 170px; } }
+@media (min-width: 420px) { .history-item-preview { max-width: 210px; } }
+@media (min-width: 480px) { .history-item-preview { max-width: 250px; } }
 
 
 .history-item-actions {
     display: flex;
     gap: 8px;
-    flex-shrink: 0;
-    margin-left: auto;
+    flex-shrink: 0; /* Prevent shrinking */
+    margin-left: auto; /* Push actions to the right */
 }
-
+/* Hide individual actions when item is part of multi-select UI */
 .history-item.multi-select-active .history-item-actions {
     display: none;
 }
@@ -681,24 +696,20 @@ button:disabled {
     border: none;
     color: var(--text-secondary);
     font-size: 1.1rem;
-    padding: 5px;
+    padding: 5px; /* Clickable area */
     cursor: pointer;
     transition: color 0.2s ease;
-    line-height: 1;
+    line-height: 1; /* Ensure icon is centered */
 }
-
 .history-item-actions button:hover {
-    color: var(--text-primary);
+    color: var(--text-primary); /* General hover */
 }
-
-.history-item-actions button.action-edit:hover { /* This class was missing, assuming you might want it */
+.history-item-actions button.action-edit:hover { /* Specific hover colors */
     color: var(--info-color);
 }
-
 .history-item-actions button.action-export:hover {
     color: var(--success-color);
 }
-
 .history-item-actions button.action-delete:hover {
     color: var(--danger-color);
 }
@@ -708,40 +719,38 @@ button:disabled {
     background: none;
     border: none;
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: 1.1rem; /* Consistent with other action buttons */
     padding: 5px;
     cursor: pointer;
     transition: color 0.2s ease, transform 0.2s ease;
     line-height: 1;
-    margin-left: 8px;
-    order: -1;
-    margin-right: 8px;
+    margin-left: 0; /* Adjusted from 8px, spacing handled by main-content gap */
+    order: -1; /* Place it at the beginning of the flex row if needed, or manage with flex order if inside details */
+    margin-right: 8px; /* Space between expand and checkbox */
 }
-
 .history-item-expand-json:hover {
     color: var(--accent-color);
 }
-
-.history-item-expand-json.expanded i {
+.history-item-expand-json.expanded i { /* When expanded, rotate icon */
     transform: rotate(90deg);
 }
 
 .history-item-json-view {
-    display: none;
-    width: 100%;
-    background-color: var(--primary-bg);
+    display: none; /* Hidden by default */
+    width: 100%; /* Full width */
+    background-color: var(--primary-bg); /* Slightly different bg for contrast */
     border: 1px solid var(--tertiary-bg);
     border-radius: var(--border-radius-sm);
     padding: 10px;
-    margin-top: 10px;
+    margin-top: 10px; /* Space below the main item content */
     box-sizing: border-box;
-    max-height: 300px;
-    overflow: auto;
-    font-family: 'Courier New', Courier, monospace;
+    max-height: 300px; /* Prevent it from becoming too tall */
+    overflow: auto; /* Scroll if content exceeds max-height */
+    font-family: 'Courier New', Courier, monospace; /* Monospaced font for JSON */
     font-size: 0.8rem;
     color: var(--text-primary);
-    white-space: pre-wrap;
-    word-break: break-all;
+    white-space: pre-wrap; /* Wrap long lines but preserve formatting */
+    word-break: break-all; /* Break long strings if necessary */
 }
 
 
@@ -749,32 +758,37 @@ button:disabled {
 .multi-select-info {
     color: var(--text-primary);
     font-size: 0.85rem;
-    margin-right: auto;
-    padding-left: 5px;
-    display: none;
+    margin-right: auto; /* Pushes subsequent buttons to the right */
+    padding-left: 5px; /* Some spacing */
+    display: none; /* Hidden by default */
 }
 
+/* When in multi-select mode */
 .top-bar.multi-select-mode .date-controls {
+    display: none !important; /* Hide date controls */
+}
+
+/* Hide regular top actions that are NOT part of multi-select controls */
+.top-bar.multi-select-mode .top-actions .top-action-btn:not(#multiSelectCount):not(#exportSelectedButton):not(#deleteSelectedButton):not(#cancelMultiSelectButton):not(#menuButton),
+.top-bar.multi-select-mode .top-actions .dropdown-container:not(:has(#multiSelectCount):not(:has(#exportSelectedButton)):not(:has(#deleteSelectedButton)):not(:has(#cancelMultiSelectButton))) {
     display: none !important;
 }
 
-.top-bar.multi-select-mode .top-actions .top-action-btn:not(#multiSelectCount):not(#exportSelectedButton):not(#deleteSelectedButton):not(#cancelMultiSelectButton) {
-    display: none !important;
-}
-
+/* Specifically hide download, save buttons (and the new menu button if it's not a multi-select action container) */
 .top-bar.multi-select-mode .top-actions #downloadButton,
 .top-bar.multi-select-mode .top-actions #saveFormButton,
-.top-bar.multi-select-mode .top-actions #importJsonButton,
-.top-bar.multi-select-mode .top-actions #topBarClearButton {
+.top-bar.multi-select-mode .top-actions #menuButton, /* Hide 3-dot menu in multi-select */
+.top-bar.multi-select-mode .top-actions .dropdown-container { /* Hide the entire dropdown container */
     display: none !important;
 }
 
 
+/* Show multi-select specific controls */
 .top-bar.multi-select-mode .top-actions #multiSelectCount,
 .top-bar.multi-select-mode .top-actions #exportSelectedButton,
 .top-bar.multi-select-mode .top-actions #deleteSelectedButton,
 .top-bar.multi-select-mode .top-actions #cancelMultiSelectButton {
-    display: flex !important;
+    display: flex !important; /* Ensure they are flex items for alignment */
 }
 
 .no-history-message {
@@ -783,15 +797,14 @@ button:disabled {
     color: var(--text-secondary);
 }
 
-@media (min-width: 400px) {
+/* --- Media Queries for Responsiveness --- */
+@media (min-width: 400px) { /* Example breakpoint */
     .top-bar #currentDateDisplay {
         font-size: 0.9rem;
     }
-
     .bottom-nav-button i {
         font-size: 1.5rem;
     }
-
     .bottom-nav-button span {
         font-size: 0.7rem;
     }

@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Element References ---
     const diaryForm = document.getElementById('diaryForm');
-    const importJsonButton = document.getElementById('importJsonButton');
+    // const importJsonButton = document.getElementById('importJsonButton'); // Removed
     const jsonFileInput = document.getElementById('jsonFile');
     const saveFormButton = document.getElementById('saveFormButton');
     const toastContainer = document.getElementById('toast-container');
@@ -11,11 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
     const currentDateDisplay = document.getElementById('currentDateDisplay');
-    const topBarClearButton = document.getElementById('topBarClearButton');
+    // const topBarClearButton = document.getElementById('topBarClearButton'); // Removed
 
     const bottomNavButtons = document.querySelectorAll('.bottom-nav-button');
     const tabPanels = document.querySelectorAll('.tab-panel');
-    const tabViewPort = document.getElementById('tabViewPort'); 
+    const tabViewPort = document.getElementById('tabViewPort');
     const tabPanelsSlider = document.getElementById('tabPanelsSlider');
 
     const energyLevelSlider = document.getElementById('energyLevel');
@@ -31,13 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryCountsDisplay = document.getElementById('summaryCounts');
 
     const historyListContainer = document.getElementById('historyListContainer');
-    const historyTabPanel = document.getElementById('tab-history'); 
+    const historyTabPanel = document.getElementById('tab-history');
 
     const topBar = document.querySelector('.top-bar');
     const multiSelectCountSpan = document.getElementById('multiSelectCount');
     const exportSelectedButton = document.getElementById('exportSelectedButton');
     const deleteSelectedButton = document.getElementById('deleteSelectedButton');
     const cancelMultiSelectButton = document.getElementById('cancelMultiSelectButton');
+
+    // New Menu Elements
+    const menuButton = document.getElementById('menuButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const shareEntryButton = document.getElementById('shareEntryButton');
+    const menuImportButton = document.getElementById('menuImportButton');
+    const menuClearFormButton = document.getElementById('menuClearFormButton');
+
 
     // --- Constants and State Variables ---
     const REFERENCE_START_DATE = new Date(2003, 6, 4); // July 4, 2003
@@ -47,13 +55,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTabIndex = 0;
     let isKeyboardOpen = false;
     let viewportHeightBeforeKeyboard = window.innerHeight;
-    const MIN_KEYBOARD_HEIGHT_PX = 150; 
+    const MIN_KEYBOARD_HEIGHT_PX = 150;
 
     let isMultiSelectModeActive = false;
     let selectedEntriesForMultiAction = [];
     let longPressTimer;
-    const LONG_PRESS_DURATION = 600; 
+    const LONG_PRESS_DURATION = 600;
     let itemTouchStartX, itemTouchStartY;
+    let isDropdownMenuOpen = false;
 
 
     const suggestionConfigs = [
@@ -111,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 iconElement.className = tempDiv.firstChild.className;
                 delete button.dataset.originalIcon;
             } else if (iconElement && originalIconHTML) {
-                // Fallback if originalIcon dataset was not set (e.g. initial call)
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = originalIconHTML;
                 if (tempDiv.firstChild) iconElement.className = tempDiv.firstChild.className;
@@ -147,7 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentDateDisplay) {
             if (dateStr) {
                 try {
-                    const dateObj = new Date(dateStr + 'T00:00:00'); // Ensure consistent time for local display
+                    const dateObj = new Date(dateStr + 'T00:00:00');
                     if (isNaN(dateObj.getTime())) {
                         currentDateDisplay.innerHTML = `Invalid Date <i class="fas fa-calendar-alt date-display-icon"></i>`;
                     } else {
@@ -168,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const [year, month, day] = dateInput.value.split('-').map(Number);
             currentDateValue = new Date(year, month - 1, day);
         } else {
-            currentDateValue = new Date(); // Use local today
+            currentDateValue = new Date();
         }
 
         if (!isNaN(currentDateValue.getTime())) {
@@ -176,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
             dateInput.value = formatDate(currentDateValue);
             updateCurrentDateDisplay(dateInput.value);
             loadFormFromLocalStorage();
-        } else { // Fallback if date was invalid
+        } else {
             const today = new Date();
             dateInput.value = formatDate(today);
             updateCurrentDateDisplay(dateInput.value);
@@ -292,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
         );
         for (const input of inputsToCheck) {
             if (input.closest('.slider-container')) continue;
-            if (input.id === 'date') continue; // Date is handled by top bar
+            if (input.id === 'date') continue;
             if (input.type === 'select-one' || input.type === 'select-multiple') {
                 if (input.value === '') return true;
             } else {
@@ -316,7 +324,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function checkAndUpdateAllTabIcons() {
         if (typeof tabPanels !== 'undefined') {
             tabPanels.forEach(panel => {
-                // Ensure panel has inputs and is not history tab
                 if (panel.id && panel.id !== 'tab-history' && panel.querySelector('input, textarea, select')) {
                     const hasEmpty = checkTabForEmptyValues(panel);
                     updateTabIconWithIndicator(panel.id, hasEmpty);
@@ -329,41 +336,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Form Management ---
     function clearDiaryForm() {
         if (confirm("Are you sure you want to clear the form? This will remove unsaved changes and locally saved data for the current date (suggestions will remain).")) {
-            diaryForm.reset(); // Resets form fields to their HTML default values
-            const currentFormDate = dateInput.value; // Get date *before* initializing
+            diaryForm.reset();
+            const currentFormDate = dateInput.value;
             if (currentFormDate) {
                 const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
                 if (allSavedData[currentFormDate]) {
                     delete allSavedData[currentFormDate];
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                     if (tabPanels[currentTabIndex]?.id === 'tab-history') {
-                        renderHistoryList(); // Update history if it's visible
+                        renderHistoryList();
                     }
                 }
             }
-            initializeForm(true); // Now initialize with defaults, setting today's date if needed
+            initializeForm(true);
             showToast("Form cleared for current date.", "info");
             slideToPanel(0);
         }
     }
 
     function initializeForm(isClearing = false) {
-        // Set date if not already set or if clearing
         if (!dateInput.value || isClearing) {
             const today = new Date();
             dateInput.value = formatDate(today);
         }
         updateCurrentDateDisplay(dateInput.value);
 
-        // Set default values if clearing or form is truly new
         if (isClearing) {
-            // Specific defaults (these will be set by diaryForm.reset() if they are HTML defaults,
-            // but can be explicitly set here if different from HTML defaults or for non-input elements)
             ['weightKg', 'heightCm', 'chest', 'belly', 'meditationStatus',
              'meditationDurationMin', 'sleepHours', 'medicationsTaken', 'skincareRoutine'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
-                    // Set to specific values or rely on diaryForm.reset() and HTML attributes
                     if (id === 'weightKg') el.value = "72";
                     else if (id === 'heightCm') el.value = "178";
                     else if (id === 'chest') el.value = "90";
@@ -373,99 +375,47 @@ document.addEventListener('DOMContentLoaded', () => {
                     else if (id === 'sleepHours') el.value = "8:00";
                     else if (id === 'medicationsTaken') el.value = "Na";
                     else if (id === 'skincareRoutine') el.value = "Na";
-                    else el.value = ''; // Default for others
+                    else el.value = '';
                 }
             });
-            setValue('otherNoteStatus', 'No'); // Explicitly set if it's a common default
-
-            // Reset sliders to their default values
+            setValue('otherNoteStatus', 'No');
             if (energyLevelSlider) energyLevelSlider.value = 5;
             if (stressLevelSlider) stressLevelSlider.value = 5;
             if (humidityPercentSlider) humidityPercentSlider.value = 10;
             if (uvIndexSlider) uvIndexSlider.value = 9;
         }
 
-        // Update slider display values
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
         if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
 
-        loadAllSuggestions(); // Load suggestions for datalists
+        loadAllSuggestions();
 
-        // If not clearing, attempt to load data for the current date
         if (!isClearing) {
             loadFormFromLocalStorage();
         } else {
-             // Ensure 'otherNoteStatus' has a value even after clearing if it was not reset by diaryForm.reset()
              setValue('otherNoteStatus', getValue('otherNoteStatus') || 'No');
         }
-        updateSummaryCounts(); // Update word/char counts
-        updateKeyboardStatus(); // Check keyboard state
-        checkAndUpdateAllTabIcons(); // Update tab indicators for empty fields
+        updateSummaryCounts();
+        updateKeyboardStatus();
+        checkAndUpdateAllTabIcons();
     }
 
     function populateFormWithJson(jsonData) {
-        // Does NOT reset the form internally. Caller should handle reset if needed.
-        // This function is purely for populating based on jsonData.
-
         setValue('date', jsonData.date);
         updateCurrentDateDisplay(jsonData.date);
 
-        // Environment
-        if (jsonData.environment) {
-            const envMap = {temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'};
-            Object.keys(envMap).forEach(key => setValue(envMap[key], jsonData.environment[key]));
-        }
-        // Body Measurements
-        if (jsonData.body_measurements) {
-            const bodyMap = {weight_kg:'weightKg', height_cm:'heightCm', chest:'chest', belly:'belly'};
-            Object.keys(bodyMap).forEach(key => setValue(bodyMap[key], jsonData.body_measurements[key]));
-        }
-        // Health & Fitness
-        if (jsonData.health_and_fitness) {
-            const healthMap = {sleep_hours:'sleepHours', steps_count:'stepsCount', steps_distance_km:'stepsDistanceKm', kilocalorie:'kilocalorie', water_intake_liters:'waterIntakeLiters', medications_taken:'medicationsTaken', physical_symptoms:'physicalSymptoms', energy_level:'energyLevel', stress_level:'stressLevel'};
-            Object.keys(healthMap).forEach(key => setValue(healthMap[key], jsonData.health_and_fitness[key]));
-        }
-        // Mental & Emotional Health
-        if (jsonData.mental_and_emotional_health) {
-            setValue('mentalState', jsonData.mental_and_emotional_health.mental_state);
-            setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status);
-            setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min);
-        }
-        // Personal Care
-        if (jsonData.personal_care) {
-            setValue('faceProductName', jsonData.personal_care.face_product_name);
-            setValue('faceProductBrand', jsonData.personal_care.face_product_brand);
-            setValue('hairProductName', jsonData.personal_care.hair_product_name);
-            setValue('hairProductBrand', jsonData.personal_care.hair_product_brand);
-            setValue('hairOil', jsonData.personal_care.hair_oil);
-            setValue('skincareRoutine', jsonData.personal_care.skincare_routine);
-        }
-        // Diet & Nutrition
-        if (jsonData.diet_and_nutrition) {
-            setValue('breakfast', jsonData.diet_and_nutrition.breakfast);
-            setValue('lunch', jsonData.diet_and_nutrition.lunch);
-            setValue('dinner', jsonData.diet_and_nutrition.dinner);
-            setValue('additionalItems', jsonData.diet_and_nutrition.additional_items);
-        }
-        // Activities & Productivity
-        if (jsonData.activities_and_productivity) {
-            setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english);
-            setValue('travelDestination', jsonData.activities_and_productivity.travel_destination);
-            setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr);
-        }
-        // Additional Notes
-        if (jsonData.additional_notes) {
-            setValue('keyEvents', jsonData.additional_notes.key_events);
-            setValue('otherNoteStatus', jsonData.additional_notes.other_note_status || 'No');
-        } else {
-             setValue('otherNoteStatus', 'No'); // Default if section is missing
-        }
-        // Daily Summary
+        if (jsonData.environment) { const envMap = {temperature_c:'temperatureC', air_quality_index:'airQualityIndex', humidity_percent:'humidityPercent', uv_index:'uvIndex', weather_condition:'weatherCondition'}; Object.keys(envMap).forEach(key => setValue(envMap[key], jsonData.environment[key]));}
+        if (jsonData.body_measurements) { const bodyMap = {weight_kg:'weightKg', height_cm:'heightCm', chest:'chest', belly:'belly'}; Object.keys(bodyMap).forEach(key => setValue(bodyMap[key], jsonData.body_measurements[key]));}
+        if (jsonData.health_and_fitness) { const healthMap = {sleep_hours:'sleepHours', steps_count:'stepsCount', steps_distance_km:'stepsDistanceKm', kilocalorie:'kilocalorie', water_intake_liters:'waterIntakeLiters', medications_taken:'medicationsTaken', physical_symptoms:'physicalSymptoms', energy_level:'energyLevel', stress_level:'stressLevel'}; Object.keys(healthMap).forEach(key => setValue(healthMap[key], jsonData.health_and_fitness[key]));}
+        if (jsonData.mental_and_emotional_health) { setValue('mentalState', jsonData.mental_and_emotional_health.mental_state); setValue('meditationStatus', jsonData.mental_and_emotional_health.meditation_status); setValue('meditationDurationMin', jsonData.mental_and_emotional_health.meditation_duration_min); }
+        if (jsonData.personal_care) { setValue('faceProductName', jsonData.personal_care.face_product_name); setValue('faceProductBrand', jsonData.personal_care.face_product_brand); setValue('hairProductName', jsonData.personal_care.hair_product_name); setValue('hairProductBrand', jsonData.personal_care.hair_product_brand); setValue('hairOil', jsonData.personal_care.hair_oil); setValue('skincareRoutine', jsonData.personal_care.skincare_routine); }
+        if (jsonData.diet_and_nutrition) { setValue('breakfast', jsonData.diet_and_nutrition.breakfast); setValue('lunch', jsonData.diet_and_nutrition.lunch); setValue('dinner', jsonData.diet_and_nutrition.dinner); setValue('additionalItems', jsonData.diet_and_nutrition.additional_items); }
+        if (jsonData.activities_and_productivity) { setValue('tasksTodayEnglish', jsonData.activities_and_productivity.tasks_today_english); setValue('travelDestination', jsonData.activities_and_productivity.travel_destination); setValue('phoneScreenOnHr', jsonData.activities_and_productivity.phone_screen_on_hr); }
+        if (jsonData.additional_notes) { setValue('keyEvents', jsonData.additional_notes.key_events); setValue('otherNoteStatus', jsonData.additional_notes.other_note_status || 'No'); } else { setValue('otherNoteStatus', 'No'); }
         setValue('dailyActivitySummary', jsonData.daily_activity_summary);
 
-        // Update UI elements based on new values
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
@@ -476,30 +426,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function performSaveOperation(isSilent = false) {
         try {
-            saveAllSuggestions(); // Save any new input values to datalist suggestions
+            saveAllSuggestions();
             const currentFormDate = dateInput.value;
             if (!currentFormDate) {
                 if (!isSilent) showToast('Please select a date first to save.', 'error');
                 return false;
             }
 
-            // Create an object to hold all form data
             const formDataToSave = {};
             diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
-                if (element.id) { // Ensure element has an ID
+                if (element.id) {
                    formDataToSave[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                 }
             });
-            formDataToSave.date = currentFormDate; // Explicitly ensure date is part of the saved object matching the key
+            formDataToSave.date = currentFormDate;
 
-            // Retrieve all currently saved data, or initialize if none exists
+
             let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-            allSavedData[currentFormDate] = formDataToSave; // Add or update the entry for the current date
+            allSavedData[currentFormDate] = formDataToSave;
 
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
-            if (!isSilent) showToast('Form data saved locally for this date!', 'success');
+            if (!isSilent) {
+                 // Check if it's not the initial auto-save on load
+                if (document.visibilityState === 'visible') { // Only show toast if tab is active
+                    showToast('Form data saved locally for this date!', 'success');
+                } else {
+                    console.log('Form data auto-saved silently.');
+                }
+            }
 
-            // If history tab is active, refresh its content
+
             if (tabPanels[currentTabIndex]?.id === 'tab-history') {
                 renderHistoryList();
             }
@@ -514,34 +470,31 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadFormFromLocalStorage() {
         const currentFormDate = dateInput.value;
         if (!currentFormDate) {
-            diaryForm.reset(); 
-            initializeForm(true); // Initialize with defaults for today
+            diaryForm.reset();
+            initializeForm(true);
             return;
         }
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const formDataForDate = allSavedData[currentFormDate];
-        
-        diaryForm.reset(); // Reset form to HTML defaults
-        initializeForm(true); // Apply application-specific defaults and set date to currentFormDate
 
-        setValue('date', currentFormDate); // Ensure date input shows the correct date
+        diaryForm.reset();
+        initializeForm(true);
+
+        setValue('date', currentFormDate);
         updateCurrentDateDisplay(currentFormDate);
 
         if (formDataForDate) {
             try {
-                // Populate form with saved data
                 Object.keys(formDataForDate).forEach(elementId => {
                     const element = document.getElementById(elementId);
-                    if (element) { // Check if element exists
-                        if (elementId !== 'date') { // Date is already handled
+                    if (element) {
+                        if (elementId !== 'date') {
                            setValue(elementId, formDataForDate[elementId]);
                         }
                     }
                 });
-                // Ensure 'otherNoteStatus' is explicitly handled if it might be missing
                 setValue('otherNoteStatus', formDataForDate.otherNoteStatus || 'No');
 
-                // Optionally, show a toast that data was loaded, but not if page is hidden or in multi-select
                 if (!document.hidden && !isMultiSelectModeActive) {
                     showToast('Previously saved data for this date loaded.', 'info');
                 }
@@ -550,11 +503,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Could not load saved data. It might be corrupted.', 'error');
             }
         } else {
-            // If no data for this date, ensure 'otherNoteStatus' is set to default
             setValue('otherNoteStatus', 'No');
         }
 
-        // Update UI elements based on loaded/default values
         if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
         if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
         if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
@@ -563,20 +514,23 @@ document.addEventListener('DOMContentLoaded', () => {
         checkAndUpdateAllTabIcons();
     }
 
-    function autoSaveOnPageHide() {
-        if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return; // Don't autosave if in multi-select or on history tab
-        const success = performSaveOperation(true); // Silent save
-        if (success) {
-            console.log('Auto-save successful on page hide.');
+    function autoSaveOnVisibilityChange() {
+        if (document.visibilityState === 'hidden') {
+            if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return;
+            const success = performSaveOperation(true); // Silent save
+            if (success) {
+                console.log('Auto-save successful on visibility change to hidden.');
+            }
         }
     }
+
 
     // --- Tab Navigation ---
     function slideToPanel(index, animate = true) {
         if (!tabPanelsSlider || index < 0 || index >= tabPanels.length) return;
 
         if (isMultiSelectModeActive && tabPanels[currentTabIndex]?.id === 'tab-history' && tabPanels[index]?.id !== 'tab-history') {
-            disableMultiSelectMode(); // Exit multi-select if navigating away from history tab
+            disableMultiSelectMode();
         }
 
         currentTabIndex = index;
@@ -586,7 +540,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         bottomNavButtons.forEach((btn, i) => btn.classList.toggle('active', i === index));
 
-        // If navigating to history tab, render its content
         if (tabPanels[index] && tabPanels[index].id === 'tab-history') {
             renderHistoryList();
         }
@@ -596,22 +549,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderHistoryList() {
         if (!historyListContainer || !historyTabPanel) return;
 
-        let currentScrollTop = historyTabPanel.scrollTop; // Preserve scroll position
+        let currentScrollTop = historyTabPanel.scrollTop;
 
-        // Preserve expanded JSON views
         const expandedItemDates = new Set();
         historyListContainer.querySelectorAll('.history-item.expanded-json').forEach(item => {
             if (item.dataset.date) expandedItemDates.add(item.dataset.date);
         });
 
         const noHistoryMsgElement = historyListContainer.querySelector('.no-history-message');
-        // Clear existing items except the "no history" message
         const existingItems = historyListContainer.querySelectorAll('.history-item');
         existingItems.forEach(item => item.remove());
 
 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const dates = Object.keys(allSavedData).sort((a, b) => new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')); // Sort newest first
+        const dates = Object.keys(allSavedData).sort((a, b) => new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00'));
 
         if (dates.length === 0) {
             if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'block';
@@ -619,7 +570,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (noHistoryMsgElement) noHistoryMsgElement.style.display = 'none';
             dates.forEach(dateStr => {
                 const entryData = allSavedData[dateStr];
-                if (!entryData) return; // Should not happen if key exists
+                if (!entryData) return;
 
                 const listItem = document.createElement('div');
                 listItem.classList.add('history-item');
@@ -635,7 +586,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
 
-                // Expand JSON Button
                 const expandJsonBtn = document.createElement('button');
                 expandJsonBtn.type = 'button';
                 expandJsonBtn.classList.add('history-item-expand-json');
@@ -644,7 +594,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 expandJsonBtn.setAttribute('aria-expanded', 'false');
                 mainContent.appendChild(expandJsonBtn);
 
-                // Checkbox for Multi-select
                 const checkboxContainer = document.createElement('div');
                 checkboxContainer.classList.add('history-item-checkbox-container');
                 const checkbox = document.createElement('input');
@@ -655,14 +604,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkboxContainer.appendChild(checkbox);
                 mainContent.appendChild(checkboxContainer);
 
-                // Details (Date, Preview)
                 const details = document.createElement('div');
                 details.classList.add('history-item-details');
                 const itemDate = document.createElement('div');
                 itemDate.classList.add('history-item-date');
                 try {
                     itemDate.textContent = new Date(dateStr + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
-                } catch (e) { itemDate.textContent = dateStr; } // Fallback
+                } catch (e) { itemDate.textContent = dateStr; }
                 const preview = document.createElement('div');
                 preview.classList.add('history-item-preview');
                 const summary = entryData.dailyActivitySummary || entryData.keyEvents || 'No summary/events';
@@ -671,10 +619,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 details.appendChild(preview);
                 mainContent.appendChild(details);
 
-                // Action Buttons (Export, Delete for single item)
                 const actions = document.createElement('div');
                 actions.classList.add('history-item-actions');
-                
+
                 const exportBtn = document.createElement('button');
                 exportBtn.type = 'button';
                 exportBtn.innerHTML = '<i class="fas fa-file-export"></i>'; exportBtn.title = 'Export Entry'; exportBtn.classList.add('action-export');
@@ -684,17 +631,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteBtn.type = 'button';
                 deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>'; deleteBtn.title = 'Delete Entry'; deleteBtn.classList.add('action-delete');
                 actions.appendChild(deleteBtn);
-                
+
                 mainContent.appendChild(actions);
                 listItem.appendChild(mainContent);
 
-                // JSON View Area (hidden by default)
                 const jsonView = document.createElement('pre');
                 jsonView.classList.add('history-item-json-view');
                 listItem.appendChild(jsonView);
 
                 if (expandedItemDates.has(dateStr)) {
-                    const fullEntryData = getFullEntryDataForExport(entryData, dateStr); // entryData is already localStorage format
+                    const fullEntryData = getFullEntryDataForExport(entryData, dateStr);
                     jsonView.textContent = JSON.stringify(fullEntryData, null, 2);
                     jsonView.style.display = 'block';
                     expandJsonBtn.setAttribute('aria-expanded', 'true');
@@ -702,13 +648,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     listItem.classList.add('expanded-json');
                 }
 
-                // Event Listeners for item interactions
                 expandJsonBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const isCurrentlyExpanded = expandJsonBtn.getAttribute('aria-expanded') === 'true';
                     if (isCurrentlyExpanded) {
                         jsonView.style.display = 'none';
-                        jsonView.textContent = ''; 
+                        jsonView.textContent = '';
                         expandJsonBtn.setAttribute('aria-expanded', 'false');
                         expandJsonBtn.classList.remove('expanded');
                         listItem.classList.remove('expanded-json');
@@ -726,51 +671,46 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 checkbox.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent item click
+                    e.stopPropagation();
                     toggleMultiSelectEntry(dateStr, listItem, checkbox);
                 });
 
                 exportBtn.addEventListener('click', (e) => { e.stopPropagation(); handleExportEntry(dateStr); });
                 deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); handleDeleteEntry(dateStr); });
 
-                // Main content click (for edit or multi-select toggle)
                 mainContent.addEventListener('click', (event) => {
                     handleHistoryItemClick(event, dateStr, listItem);
                 });
-                
-                // Touch events for long press
+
                 listItem.addEventListener('touchstart', (e) => handleHistoryItemTouchStart(e, dateStr, listItem), { passive: false });
                 listItem.addEventListener('touchmove', handleHistoryItemTouchMove);
-                listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem)); 
-                
-                // Context menu for long press alternative on desktop
-                listItem.addEventListener('contextmenu', (e) => { 
+                listItem.addEventListener('touchend', () => handleHistoryItemTouchEnd(dateStr, listItem));
+
+                listItem.addEventListener('contextmenu', (e) => {
                     e.preventDefault();
-                    // Ignore if context menu is on interactive elements
-                    if (e.target.closest('.history-item-expand-json') || 
-                        e.target.closest('.history-item-actions button') || 
+                    if (e.target.closest('.history-item-expand-json') ||
+                        e.target.closest('.history-item-actions button') ||
                         e.target.closest('.history-item-checkbox-container')) {
                         return;
                     }
-                    
+
                     if (!isMultiSelectModeActive) enableMultiSelectMode();
                     const currentCheckbox = listItem.querySelector('.history-item-checkbox');
-                    toggleMultiSelectEntry(dateStr, listItem, currentCheckbox); // Toggle selection
+                    toggleMultiSelectEntry(dateStr, listItem, currentCheckbox);
                 });
 
-                if (noHistoryMsgElement) { // Insert before the "no history" message if it exists
+                if (noHistoryMsgElement) {
                     historyListContainer.insertBefore(listItem, noHistoryMsgElement);
                 } else {
                     historyListContainer.appendChild(listItem);
                 }
             });
         }
-        historyTabPanel.scrollTop = currentScrollTop; // Restore scroll position
+        historyTabPanel.scrollTop = currentScrollTop;
     }
 
 
     function handleHistoryItemTouchStart(event, dateStr, listItem) {
-        // Ignore if touch starts on interactive elements within the item
         if (event.target.closest('.history-item-expand-json') || event.target.closest('.history-item-actions button') || event.target.closest('.history-item-checkbox-container')) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
@@ -778,31 +718,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         itemTouchStartX = event.touches[0].clientX;
         itemTouchStartY = event.touches[0].clientY;
-        clearTimeout(longPressTimer); // Clear any existing timer
+        clearTimeout(longPressTimer);
         longPressTimer = setTimeout(() => {
-            longPressTimer = null; // Timer has fired
+            longPressTimer = null;
             if (!isMultiSelectModeActive) {
-                enableMultiSelectMode(); // Enable mode first
-                // Re-find the listItem in case the DOM was re-rendered by enableMultiSelectMode
+                enableMultiSelectMode();
                 const freshListItem = historyListContainer.querySelector(`.history-item[data-date="${dateStr}"]`);
                 if (freshListItem) {
                     const checkbox = freshListItem.querySelector('.history-item-checkbox');
-                    toggleMultiSelectEntry(dateStr, freshListItem, checkbox); // Then toggle
+                    toggleMultiSelectEntry(dateStr, freshListItem, checkbox);
                 }
             } else {
-                // If already in multi-select, just toggle this item
                 const checkbox = listItem.querySelector('.history-item-checkbox');
                 toggleMultiSelectEntry(dateStr, listItem, checkbox);
             }
-            if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback
+            if (navigator.vibrate) navigator.vibrate(50);
         }, LONG_PRESS_DURATION);
     }
 
     function handleHistoryItemTouchMove(event) {
-        if (longPressTimer) { // Only if a long press is pending
+        if (longPressTimer) {
             const deltaX = Math.abs(event.touches[0].clientX - itemTouchStartX);
             const deltaY = Math.abs(event.touches[0].clientY - itemTouchStartY);
-            // If significant movement, cancel long press (it's a scroll)
             if (deltaX > 10 || deltaY > 10) {
                 clearTimeout(longPressTimer);
                 longPressTimer = null;
@@ -811,21 +748,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleHistoryItemTouchEnd(dateStr, listItem) {
-        if (longPressTimer) { // If timer still active (short tap, not a long press or scroll)
+        if (longPressTimer) {
             clearTimeout(longPressTimer);
             longPressTimer = null;
-            handleHistoryItemClick(null, dateStr, listItem); // Treat as a regular click
+            handleHistoryItemClick(null, dateStr, listItem);
         }
-        // If longPressTimer is null, it means it either fired (long press) or was cancelled (scroll)
     }
 
     function handleHistoryItemClick(event, dateStr, listItem) {
-        // If event exists, check if click was on specific interactive parts
         if (event && event.target) {
             if (event.target.closest('.history-item-expand-json') ||
-                event.target.closest('.history-item-checkbox-container input[type="checkbox"]') || 
+                event.target.closest('.history-item-checkbox-container input[type="checkbox"]') ||
                 event.target.closest('.history-item-actions button')) {
-                return; // Action already handled by specific listeners
+                return;
             }
         }
 
@@ -833,114 +768,67 @@ document.addEventListener('DOMContentLoaded', () => {
             const checkbox = listItem.querySelector('.history-item-checkbox');
             toggleMultiSelectEntry(dateStr, listItem, checkbox);
         } else {
-            handleEditEntry(dateStr); // Default action: edit entry
+            handleEditEntry(dateStr);
         }
     }
 
 
     function handleEditEntry(dateStr) {
-        if (isMultiSelectModeActive) disableMultiSelectMode(); // Exit multi-select if editing
+        if (isMultiSelectModeActive) disableMultiSelectMode();
 
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const entryFormData = allSavedData[dateStr]; // This is already in localStorage format
+        const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
-            diaryForm.reset(); 
-            initializeForm(true); // Reset to defaults, set current date, etc.
+            diaryForm.reset();
+            initializeForm(true);
 
-            setValue('date', dateStr); // Set the date input to the entry's date
+            setValue('date', dateStr);
             updateCurrentDateDisplay(dateStr);
 
-            // Populate form with the entry's data
             Object.keys(entryFormData).forEach(elementId => {
-                if (elementId !== 'date') { // Date is already handled
+                if (elementId !== 'date') {
                     setValue(elementId, entryFormData[elementId]);
                 }
             });
-            setValue('otherNoteStatus', entryFormData.otherNoteStatus || 'No'); // Ensure this default
+            setValue('otherNoteStatus', entryFormData.otherNoteStatus || 'No');
 
-            // Update UI elements
             if (energyLevelSlider) updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay);
             if (stressLevelSlider) updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay);
             if (humidityPercentSlider) updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay);
             if (uvIndexSlider) updateSliderDisplay(uvIndexSlider, uvIndexValueDisplay);
             updateSummaryCounts();
-            checkAndUpdateAllTabIcons(); 
+            checkAndUpdateAllTabIcons();
 
             showToast(`Editing entry for ${new Date(dateStr + 'T00:00:00').toLocaleDateString()}.`, 'info');
-            slideToPanel(0); // Navigate to the first tab (basic info)
+            slideToPanel(0);
         } else {
             showToast('Could not find entry data to edit.', 'error');
         }
     }
 
     function getFullEntryDataForExport(entryFormData, dateKey) {
-        // entryFormData is the object directly from localStorage (form field IDs as keys)
         const exportData = {};
-        exportData.date = entryFormData.date || dateKey; // Use date from object or key
+        exportData.date = entryFormData.date || dateKey;
         exportData.day_id = calculateDaysSince(REFERENCE_START_DATE, exportData.date);
 
         const pFloat = val => (val !== null && val !== undefined && String(val).trim() !== "" && !isNaN(parseFloat(String(val)))) ? parseFloat(String(val)) : null;
         const pInt = val => (val !== null && val !== undefined && String(val).trim() !== "" && !isNaN(parseInt(String(val)))) ? parseInt(String(val)) : null;
 
-        exportData.environment = { 
-            temperature_c: entryFormData.temperatureC || '', 
-            air_quality_index: pInt(entryFormData.airQualityIndex), 
-            humidity_percent: pInt(entryFormData.humidityPercent), // Already number from range
-            uv_index: pInt(entryFormData.uvIndex), // Already number from range
-            weather_condition: entryFormData.weatherCondition || '' 
-        };
-        exportData.body_measurements = { 
-            weight_kg: pFloat(entryFormData.weightKg), 
-            height_cm: pInt(entryFormData.heightCm), 
-            chest: pInt(entryFormData.chest), 
-            belly: pInt(entryFormData.belly) 
-        };
-        exportData.health_and_fitness = { 
-            sleep_hours: entryFormData.sleepHours || '', 
-            steps_count: pInt(entryFormData.stepsCount), 
-            steps_distance_km: pFloat(entryFormData.stepsDistanceKm), 
-            kilocalorie: pInt(entryFormData.kilocalorie), 
-            water_intake_liters: pFloat(entryFormData.waterIntakeLiters), 
-            medications_taken: entryFormData.medicationsTaken || '', 
-            physical_symptoms: entryFormData.physicalSymptoms || '', 
-            energy_level: pInt(entryFormData.energyLevel), // Already number from range
-            stress_level: pInt(entryFormData.stressLevel)  // Already number from range
-        };
-        exportData.mental_and_emotional_health = { 
-            mental_state: entryFormData.mentalState || '', 
-            meditation_status: entryFormData.meditationStatus || '', 
-            meditation_duration_min: pInt(entryFormData.meditationDurationMin) 
-        };
-        exportData.personal_care = { 
-            face_product_name: entryFormData.faceProductName || '', 
-            face_product_brand: entryFormData.faceProductBrand || '', 
-            hair_product_name: entryFormData.hairProductName || '', 
-            hair_product_brand: entryFormData.hairProductBrand || '', 
-            hair_oil: entryFormData.hairOil || '', 
-            skincare_routine: entryFormData.skincareRoutine || '' 
-        };
-        exportData.diet_and_nutrition = { 
-            breakfast: entryFormData.breakfast || '', 
-            lunch: entryFormData.lunch || '', 
-            dinner: entryFormData.dinner || '', 
-            additional_items: entryFormData.additionalItems || '' 
-        };
-        exportData.activities_and_productivity = { 
-            tasks_today_english: entryFormData.tasksTodayEnglish || '', 
-            travel_destination: entryFormData.travelDestination || '', 
-            phone_screen_on_hr: entryFormData.phoneScreenOnHr || '' 
-        };
-        exportData.additional_notes = { 
-            key_events: entryFormData.keyEvents || '',
-            other_note_status: entryFormData.otherNoteStatus || 'No' 
-        };
+        exportData.environment = { temperature_c: entryFormData.temperatureC || '', air_quality_index: pInt(entryFormData.airQualityIndex), humidity_percent: pInt(entryFormData.humidityPercent), uv_index: pInt(entryFormData.uvIndex), weather_condition: entryFormData.weatherCondition || '' };
+        exportData.body_measurements = { weight_kg: pFloat(entryFormData.weightKg), height_cm: pInt(entryFormData.heightCm), chest: pInt(entryFormData.chest), belly: pInt(entryFormData.belly) };
+        exportData.health_and_fitness = { sleep_hours: entryFormData.sleepHours || '', steps_count: pInt(entryFormData.stepsCount), steps_distance_km: pFloat(entryFormData.stepsDistanceKm), kilocalorie: pInt(entryFormData.kilocalorie), water_intake_liters: pFloat(entryFormData.waterIntakeLiters), medications_taken: entryFormData.medicationsTaken || '', physical_symptoms: entryFormData.physicalSymptoms || '', energy_level: pInt(entryFormData.energyLevel), stress_level: pInt(entryFormData.stressLevel) };
+        exportData.mental_and_emotional_health = { mental_state: entryFormData.mentalState || '', meditation_status: entryFormData.meditationStatus || '', meditation_duration_min: pInt(entryFormData.meditationDurationMin) };
+        exportData.personal_care = { face_product_name: entryFormData.faceProductName || '', face_product_brand: entryFormData.faceProductBrand || '', hair_product_name: entryFormData.hairProductName || '', hair_product_brand: entryFormData.hairProductBrand || '', hair_oil: entryFormData.hairOil || '', skincare_routine: entryFormData.skincareRoutine || '' };
+        exportData.diet_and_nutrition = { breakfast: entryFormData.breakfast || '', lunch: entryFormData.lunch || '', dinner: entryFormData.dinner || '', additional_items: entryFormData.additionalItems || '' };
+        exportData.activities_and_productivity = { tasks_today_english: entryFormData.tasksTodayEnglish || '', travel_destination: entryFormData.travelDestination || '', phone_screen_on_hr: entryFormData.phoneScreenOnHr || '' };
+        exportData.additional_notes = { key_events: entryFormData.keyEvents || '', other_note_status: entryFormData.otherNoteStatus || 'No' };
         exportData.daily_activity_summary = entryFormData.dailyActivitySummary || '';
         return exportData;
     }
 
     function handleExportEntry(dateStr) {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        const entryFormData = allSavedData[dateStr]; // This is localStorage format
+        const entryFormData = allSavedData[dateStr];
         if (entryFormData) {
             const exportData = getFullEntryDataForExport(entryFormData, dateStr);
             const jsonString = JSON.stringify(exportData, null, 2);
@@ -960,24 +848,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
                 if (!isPartOfMulti) {
                     showToast('Entry deleted.', 'success');
-                    renderHistoryList(); // Refresh list if not part of multi-delete (multi-delete refreshes at end)
+                    renderHistoryList();
                 }
-                return true; // Indicate success
+                return true;
             } else {
                 if (!isPartOfMulti) showToast('Entry not found for deletion.', 'error');
-                return false; // Indicate failure
+                return false;
             }
         }
-        return false; // Not confirmed
+        return false;
     }
 
     function enableMultiSelectMode() {
         if (isMultiSelectModeActive) return;
         isMultiSelectModeActive = true;
-        selectedEntriesForMultiAction = []; // Clear previous selections
+        selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(true);
-        renderHistoryList(); // Re-render to show checkboxes
+        renderHistoryList();
         showToast('Multi-select enabled. Tap items to select.', 'info');
+        if (isDropdownMenuOpen) toggleDropdownMenu(false); // Close dropdown if open
     }
 
     function disableMultiSelectMode() {
@@ -985,18 +874,18 @@ document.addEventListener('DOMContentLoaded', () => {
         isMultiSelectModeActive = false;
         selectedEntriesForMultiAction = [];
         updateTopBarForMultiSelectView(false);
-        renderHistoryList(); // Re-render to hide checkboxes and clear selections
+        renderHistoryList();
     }
 
     function toggleMultiSelectEntry(dateStr, listItemElement, checkboxElement = null) {
         const index = selectedEntriesForMultiAction.indexOf(dateStr);
         const actualCheckbox = checkboxElement || listItemElement.querySelector('.history-item-checkbox');
 
-        if (index > -1) { // Item is currently selected, so deselect it
+        if (index > -1) {
             selectedEntriesForMultiAction.splice(index, 1);
             listItemElement.classList.remove('selected');
             if (actualCheckbox) actualCheckbox.checked = false;
-        } else { // Item is not selected, so select it
+        } else {
             selectedEntriesForMultiAction.push(dateStr);
             listItemElement.classList.add('selected');
             if (actualCheckbox) actualCheckbox.checked = true;
@@ -1007,7 +896,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateMultiSelectCount() {
         if (multiSelectCountSpan) multiSelectCountSpan.textContent = `${selectedEntriesForMultiAction.length} selected`;
         const hasSelection = selectedEntriesForMultiAction.length > 0;
-        // Enable/disable action buttons based on selection
         if (deleteSelectedButton) deleteSelectedButton.disabled = !hasSelection;
         if (exportSelectedButton) exportSelectedButton.disabled = !hasSelection;
     }
@@ -1016,7 +904,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!topBar) return;
         if (isActive) {
             topBar.classList.add('multi-select-mode');
-            updateMultiSelectCount(); // Initialize count and button states
+            updateMultiSelectCount();
         } else {
             topBar.classList.remove('multi-select-mode');
         }
@@ -1031,10 +919,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirmed) {
             let deleteCount = 0;
             selectedEntriesForMultiAction.forEach(dateStr => {
-                if (handleDeleteEntry(dateStr, true)) deleteCount++; // true for isPartOfMulti
+                if (handleDeleteEntry(dateStr, true)) deleteCount++;
             });
             showToast(`${deleteCount} of ${selectedEntriesForMultiAction.length} entries deleted.`, 'success');
-            disableMultiSelectMode(); // Exits multi-select mode and refreshes list
+            disableMultiSelectMode();
         }
     }
 
@@ -1046,7 +934,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
         const entriesToExport = [];
         selectedEntriesForMultiAction.forEach(dateStr => {
-            const entryFormData = allSavedData[dateStr]; // localStorage format
+            const entryFormData = allSavedData[dateStr];
             if (entryFormData) {
                 entriesToExport.push(getFullEntryDataForExport(entryFormData, dateStr));
             }
@@ -1057,12 +945,84 @@ document.addEventListener('DOMContentLoaded', () => {
             const timestamp = new Date().toISOString().slice(0,10).replace(/-/g,'');
             downloadJSON(jsonString, `diary_export_multiple_${timestamp}.json`);
             showToast(`${entriesToExport.length} entries exported.`, 'success');
-            disableMultiSelectMode(); // Exit multi-select and refresh list
+            disableMultiSelectMode();
         } else {
             showToast('No valid data found for selected entries.', 'error');
-            disableMultiSelectMode(); // Still exit mode
+            disableMultiSelectMode();
         }
     }
+
+    // --- Dropdown Menu Logic ---
+    function toggleDropdownMenu(forceState) {
+        if (dropdownMenu) {
+            isDropdownMenuOpen = typeof forceState === 'boolean' ? forceState : !isDropdownMenuOpen;
+            dropdownMenu.style.display = isDropdownMenuOpen ? 'block' : 'none';
+        }
+    }
+
+    async function handleShareCurrentEntry() {
+        if (!navigator.share) {
+            showToast('Web Share API is not available on this browser/device.', 'error');
+            return;
+        }
+        if (isMultiSelectModeActive) { // Don't share if in multi-select mode
+            showToast('Sharing is disabled in multi-select mode.', 'info');
+            return;
+        }
+
+        const currentFormValuesForExport = {};
+        diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
+            if (element.id) {
+                currentFormValuesForExport[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
+            }
+        });
+        const selectedDateStr = currentFormValuesForExport.date || getValue('date');
+
+        if (!selectedDateStr) {
+            showToast('Please select a date or ensure the form has data to share.', 'error');
+            return;
+        }
+
+        const shareButtonOriginalIconHTML = shareEntryButton.querySelector('i')?.outerHTML;
+        setButtonLoadingState(shareEntryButton, true);
+
+
+        try {
+            const entryData = getFullEntryDataForExport(currentFormValuesForExport, selectedDateStr);
+            const jsonString = JSON.stringify(entryData, null, 2);
+            const fileName = `${selectedDateStr}_diary_entry.json`;
+            const fileToShare = new File([jsonString], fileName, { type: 'application/json' });
+
+            if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
+                await navigator.share({
+                    files: [fileToShare],
+                    title: `Diary Entry: ${selectedDateStr}`,
+                    text: `Here is my diary entry for ${new Date(selectedDateStr+'T00:00:00').toLocaleDateString()}.`,
+                });
+                showToast('Entry shared successfully!', 'success');
+            } else {
+                 // Fallback or specific message if files of this type can't be shared
+                // Attempt to share as text (less ideal but a fallback)
+                await navigator.share({
+                    title: `Diary Entry: ${selectedDateStr}`,
+                    text: `Diary Entry - ${new Date(selectedDateStr+'T00:00:00').toLocaleDateString()}:\n\n${jsonString}`,
+                });
+                showToast('Entry content shared as text.', 'info');
+            }
+        } catch (error) {
+            if (error.name === 'AbortError') {
+                console.log('Sharing was aborted by the user.');
+                // showToast('Sharing cancelled.', 'info'); // Optional: can be noisy
+            } else {
+                console.error('Error sharing entry:', error);
+                showToast('Error sharing entry. See console for details.', 'error');
+            }
+        } finally {
+            setButtonLoadingState(shareEntryButton, false, shareButtonOriginalIconHTML);
+            toggleDropdownMenu(false); // Close menu after action
+        }
+    }
+
 
     // --- Event Listeners & Initialization ---
 
@@ -1082,7 +1042,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dateInput) dateInput.showPicker ? dateInput.showPicker() : dateInput.click();
     });
 
-
     if (energyLevelSlider) energyLevelSlider.addEventListener('input', () => updateSliderDisplay(energyLevelSlider, energyLevelValueDisplay));
     if (stressLevelSlider) stressLevelSlider.addEventListener('input', () => updateSliderDisplay(stressLevelSlider, stressLevelValueDisplay));
     if (humidityPercentSlider) humidityPercentSlider.addEventListener('input', () => updateSliderDisplay(humidityPercentSlider, humidityPercentValueDisplay));
@@ -1090,34 +1049,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dailyActivitySummaryTextarea) dailyActivitySummaryTextarea.addEventListener('input', updateSummaryCounts);
 
-    if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm);
+    // Removed: if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm);
 
     diaryForm.addEventListener('submit', function(event) {
-        event.preventDefault();
+        event.preventDefault(); // For "Download" button which is type submit
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
-        
-        // Use current form values to build the export object
-        // This reuses getFullEntryDataForExport by creating a temporary "localStorage-like" object from the form
+
         const currentFormValuesForExport = {};
         diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
             if (element.id) {
                 currentFormValuesForExport[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
             }
         });
-        const selectedDateStr = currentFormValuesForExport.date || getValue('date'); // Ensure date is present
+        const selectedDateStr = currentFormValuesForExport.date || getValue('date');
 
-        setTimeout(() => { // Brief timeout to allow UI to update (spinner)
+        setTimeout(() => {
             try {
                  if (!selectedDateStr) {
                      showToast('Please select a date for the entry.', 'error');
                      setButtonLoadingState(downloadButton, false, originalDownloadIconHTML);
                      return;
                 }
-                // Pass the currentFormValuesForExport which matches localStorage structure
                 const data = getFullEntryDataForExport(currentFormValuesForExport, selectedDateStr);
-
                 const jsonString = JSON.stringify(data, null, 2);
                 downloadJSON(jsonString, `${selectedDateStr}.json`);
                 showToast('JSON file downloaded.', 'success');
@@ -1127,21 +1082,22 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 setButtonLoadingState(downloadButton, false, originalDownloadIconHTML);
             }
-        }, 50); // 50ms should be enough for UI update
+        }, 50);
     });
 
-    if (importJsonButton) importJsonButton.addEventListener('click', () => jsonFileInput.click());
-    
-    // MODIFIED: jsonFileInput event listener to handle multiple files
+    // Removed: if (importJsonButton) importJsonButton.addEventListener('click', () => jsonFileInput.click());
+
     jsonFileInput.addEventListener('change', async function(event) {
         const files = event.target.files;
-        if (!files || files.length === 0 || !importJsonButton) {
-            jsonFileInput.value = ''; // Clear selection if no files
+        if (!files || files.length === 0 /*|| !importJsonButton - now menuImportButton*/) {
+            jsonFileInput.value = '';
             return;
         }
+        // Use menuImportButton for loading state if it exists, otherwise fallback to a generic state if needed
+        const buttonForLoading = menuImportButton || document.getElementById('importJsonButton'); // Fallback just in case
+        const originalImportIconHTML = buttonForLoading ? buttonForLoading.querySelector('i')?.outerHTML : null;
+        if (buttonForLoading) setButtonLoadingState(buttonForLoading, true, originalImportIconHTML);
 
-        const originalImportIconHTML = importJsonButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(importJsonButton, true, originalImportIconHTML);
 
         const allEntriesFromFiles = [];
         const fileReadPromises = [];
@@ -1154,22 +1110,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         try {
                             const fileContent = JSON.parse(e.target.result);
                             let entriesInThisFile = [];
-                            if (Array.isArray(fileContent)) { // File contains an array of entries
+                            if (Array.isArray(fileContent)) {
                                 entriesInThisFile = fileContent.filter(item => item && typeof item === 'object' && item.date);
-                            } else if (typeof fileContent === 'object' && fileContent !== null && fileContent.date) { // File contains a single entry
+                            } else if (typeof fileContent === 'object' && fileContent !== null && fileContent.date) {
                                 entriesInThisFile = [fileContent];
                             }
                             resolve(entriesInThisFile);
                         } catch (err) {
                             console.error('Error parsing JSON from file:', file.name, err);
                             showToast(`Error parsing ${file.name}. Invalid JSON.`, 'error');
-                            resolve([]); // Resolve with empty for this file to not break Promise.all
+                            resolve([]);
                         }
                     };
                     reader.onerror = function() {
                         console.error('Error reading file:', file.name);
                         showToast(`Error reading ${file.name}.`, 'error');
-                        resolve([]); // Resolve with empty on read error
+                        resolve([]);
                     };
                     reader.readAsText(file);
                 })
@@ -1178,33 +1134,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             const results = await Promise.all(fileReadPromises);
-            results.forEach(entries => allEntriesFromFiles.push(...entries)); // Flatten the array of arrays
+            results.forEach(entries => allEntriesFromFiles.push(...entries));
 
             if (allEntriesFromFiles.length > 0) {
                 let allSavedData = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
                 let importedCount = 0;
-                let successfullyProcessedEntries = []; // To store actual entry objects that were good
+                let successfullyProcessedEntries = [];
 
-                allEntriesFromFiles.forEach(entry => { // entry is in export format
-                    if (entry && entry.date) { // Basic validation
-                        diaryForm.reset();      // Reset to HTML defaults
-                        initializeForm(true); // Apply app defaults for the current date (which will be overwritten by entry.date)
-                        
-                        // Populate form with this entry's data. This sets all fields including dateInput.
-                        populateFormWithJson(entry); 
+                allEntriesFromFiles.forEach(entry => {
+                    if (entry && entry.date) {
+                        diaryForm.reset();
+                        initializeForm(true);
+                        populateFormWithJson(entry);
 
-                        // Now extract the complete form data (which is now in localStorage format)
                         const currentFormObject = {};
                         diaryForm.querySelectorAll('input[id]:not([type="file"]), textarea[id], select[id]').forEach(element => {
                             if (element.id) {
                                 currentFormObject[element.id] = (element.type === 'checkbox' || element.type === 'radio') ? element.checked : element.value;
                             }
                         });
-                        // The date from populateFormWithJson (entry.date) is now in currentFormObject.date
-                        
-                        allSavedData[entry.date] = currentFormObject; // Save to master object
+                        allSavedData[entry.date] = currentFormObject;
                         importedCount++;
-                        successfullyProcessedEntries.push(entry); // Store the original imported entry
+                        successfullyProcessedEntries.push(entry);
                     }
                 });
 
@@ -1212,17 +1163,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (importedCount > 0) {
                     showToast(`${importedCount} entries imported successfully!`, 'success');
-                    const lastEntryToDisplay = successfullyProcessedEntries.pop(); // Get the last valid one
+                    const lastEntryToDisplay = successfullyProcessedEntries.pop();
                     if (lastEntryToDisplay) {
                         diaryForm.reset();
-                        initializeForm(true); // Reset again for clean slate
-                        populateFormWithJson(lastEntryToDisplay); // Populate form with the last imported entry
-                        slideToPanel(0); // Show first tab
+                        initializeForm(true);
+                        populateFormWithJson(lastEntryToDisplay);
+                        slideToPanel(0);
                     }
                 } else {
                     showToast('No valid diary entries found in the selected file(s).', 'info');
-                    // Optionally, reset form to current date if no entries were valid
-                    // initializeForm(); 
                 }
             } else {
                 showToast('No processable entries found in selected files.', 'info');
@@ -1231,19 +1180,18 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("Error processing imported files:", error);
             showToast('An error occurred during import.', 'error');
         } finally {
-            jsonFileInput.value = ''; // Clear file input selection
-            setButtonLoadingState(importJsonButton, false, originalImportIconHTML);
-            renderHistoryList(); // Always refresh history
-            checkAndUpdateAllTabIcons(); // And tab icons
+            jsonFileInput.value = '';
+            if (buttonForLoading) setButtonLoadingState(buttonForLoading, false, originalImportIconHTML);
+            renderHistoryList();
+            checkAndUpdateAllTabIcons();
         }
     });
-
 
     if (saveFormButton) saveFormButton.addEventListener('click', () => {
         const originalSaveIconHTML = saveFormButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(saveFormButton, true, originalSaveIconHTML);
-        setTimeout(() => { // Brief delay to allow UI update
-            performSaveOperation(false); // isSilent = false for user-initiated save
+        setTimeout(() => {
+            performSaveOperation(false);
             setButtonLoadingState(saveFormButton, false, originalSaveIconHTML);
         }, 10);
     });
@@ -1253,39 +1201,72 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (typeof tabPanels !== 'undefined') {
         tabPanels.forEach(panel => {
-            // Add listeners to inputs within each panel to check for empty values
             if (panel.id && panel.id !== 'tab-history' && panel.querySelector('input, textarea, select')) {
                 panel.addEventListener('input', (event) => {
-                    // Check for common text-like inputs
                     if (event.target.matches('input[type="text"], input[type="number"], textarea, input[type="email"], input[type="password"], input[type="search"], input[type="tel"], input[type="url"]')) {
                         const hasEmpty = checkTabForEmptyValues(panel);
                         updateTabIconWithIndicator(panel.id, hasEmpty);
                     }
                 });
-                panel.addEventListener('change', (event) => { // For selects, range, date, etc.
-                     if (event.target.matches('select')) { // Specifically for select elements on change
+                panel.addEventListener('change', (event) => {
+                     if (event.target.matches('select')) {
                         const hasEmpty = checkTabForEmptyValues(panel);
                         updateTabIconWithIndicator(panel.id, hasEmpty);
                     }
-                    // Could add more specific checks here if needed for other input types on 'change'
                 });
             }
         });
     }
 
-    window.addEventListener('pagehide', autoSaveOnPageHide); // For backgrounding/closing tab
+    // Auto-save on page hide/visibility change
+    window.addEventListener('pagehide', () => autoSaveOnVisibilityChange()); // pagehide is a good fallback
+    document.addEventListener('visibilitychange', autoSaveOnVisibilityChange);
+
 
     // Multi-select action buttons
     if (cancelMultiSelectButton) cancelMultiSelectButton.addEventListener('click', disableMultiSelectMode);
     if (deleteSelectedButton) deleteSelectedButton.addEventListener('click', handleDeleteSelectedEntries);
     if (exportSelectedButton) exportSelectedButton.addEventListener('click', handleExportSelectedEntries);
 
-    // --- Initial Application Setup ---
-    updateTopBarForMultiSelectView(false); // Ensure multi-select UI is off initially
-    initializeForm(); // Initialize form (sets date, loads data if any, loads suggestions)
-    slideToPanel(0, false); // Go to the first tab without animation
+    // Dropdown Menu Event Listeners
+    if (menuButton) {
+        menuButton.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevent click from bubbling to document
+            if (isMultiSelectModeActive) return; // Don't show menu in multi-select
+            toggleDropdownMenu();
+        });
+    }
+    if (shareEntryButton) {
+        shareEntryButton.addEventListener('click', () => {
+            handleShareCurrentEntry(); // This will also close the menu
+        });
+    }
+    if (menuImportButton) {
+        menuImportButton.addEventListener('click', () => {
+            jsonFileInput.click();
+            toggleDropdownMenu(false); // Close menu
+        });
+    }
+    if (menuClearFormButton) {
+        menuClearFormButton.addEventListener('click', () => {
+            clearDiaryForm();
+            toggleDropdownMenu(false); // Close menu
+        });
+    }
 
-    // Service Worker Registration
+    // Close dropdown if clicked outside
+    document.addEventListener('click', (event) => {
+        if (isDropdownMenuOpen && dropdownMenu && !dropdownMenu.contains(event.target) && event.target !== menuButton && !menuButton.contains(event.target)) {
+            toggleDropdownMenu(false);
+        }
+    });
+
+
+    // --- Initial Application Setup ---
+    updateTopBarForMultiSelectView(false);
+    initializeForm();
+    slideToPanel(0, false);
+
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js')

@@ -39,22 +39,35 @@
                     title="Save Form Data Locally">
                     <i class="fas fa-save"></i>
                 </button>
-                <button type="button" id="importJsonButton" class="top-action-btn" aria-label="Import Diary"
-                    title="Import JSON Data">
-                    <i class="fas fa-file-import"></i>
-                </button>
-                <input type="file" id="jsonFile" accept=".json" style="display:none;" multiple> 
-                <button type="button" id="topBarClearButton" class="top-action-btn" aria-label="Clear Form"
-                    title="Clear Form">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
 
+                <!-- 3-Dot Menu -->
+                <div class="dropdown-container">
+                    <button type="button" id="menuButton" class="top-action-btn" aria-label="More options" title="More options">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <div id="dropdownMenu" class="dropdown-content" style="display:none;">
+                        <button type="button" id="shareEntryButton" class="dropdown-item">
+                            <i class="fas fa-share-alt"></i> Share Current Entry
+                        </button>
+                        <button type="button" id="menuImportButton" class="dropdown-item">
+                            <i class="fas fa-file-import"></i> Import JSON
+                        </button>
+                        <button type="button" id="menuClearFormButton" class="dropdown-item">
+                            <i class="fas fa-trash-alt"></i> Clear Form
+                        </button>
+                    </div>
+                </div>
+                <input type="file" id="jsonFile" accept=".json" style="display:none;" multiple>
+
+
+                <!-- Multi-select controls (remain visible when multi-select mode is active) -->
                 <span id="multiSelectCount" class="multi-select-info" style="display:none;">0 selected</span>
                 <button type="button" id="exportSelectedButton" class="top-action-btn" aria-label="Export Selected" title="Export Selected Entries" style="display:none;">
                     <i class="fas fa-file-export"></i>
                 </button>
                 <button type="button" id="deleteSelectedButton" class="top-action-btn" aria-label="Delete Selected" title="Delete Selected Entries" style="display:none;">
-                    <i class="fas fa-trash"></i> </button>
+                    <i class="fas fa-trash"></i>
+                </button>
                 <button type="button" id="cancelMultiSelectButton" class="top-action-btn" aria-label="Cancel Selection" title="Cancel Multi-Selection" style="display:none;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -257,7 +270,10 @@
                         </div>
                     </div>
 
-                </div> </div> </form> <nav class="bottom-nav">
+                </div>
+            </div>
+        </form>
+        <nav class="bottom-nav">
             <button class="bottom-nav-button active" data-tab-target="tab-basic" aria-label="Basic Info"
                 title="Basic & Environment">
                 <i class="fas fa-info-circle"></i>
@@ -290,7 +306,8 @@
             </button>
         </nav>
         <div id="toast-container"></div>
-    </div> <script src="script.js"></script>
+    </div>
+    <script src="script.js"></script>
 </body>
 
 </html>
