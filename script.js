@@ -107,9 +107,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLoading) {
             button.disabled = true;
             if (iconElement) {
-                if (!button.dataset.originalIcon && originalIconHTML) { // Store if not already stored and provided
+                if (!button.dataset.originalIcon && originalIconHTML) {
                      button.dataset.originalIcon = originalIconHTML;
-                } else if (!button.dataset.originalIcon && iconElement.outerHTML) { // Fallback to current icon if none provided
+                } else if (!button.dataset.originalIcon && iconElement.outerHTML) {
                     button.dataset.originalIcon = iconElement.outerHTML;
                 }
                 iconElement.className = 'fas fa-spinner fa-spin';
@@ -120,8 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = button.dataset.originalIcon;
                 iconElement.className = tempDiv.firstChild.className;
-                delete button.dataset.originalIcon; // Clean up
-            } else if (iconElement && originalIconHTML) { // Fallback if dataset somehow missed
+                delete button.dataset.originalIcon;
+            } else if (iconElement && originalIconHTML) {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = originalIconHTML;
                 if (tempDiv.firstChild) iconElement.className = tempDiv.firstChild.className;
@@ -996,26 +996,44 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileName = `${selectedDateStr}_diary_entry.json`;
             const fileToShare = new File([jsonString], fileName, { type: 'application/json' });
 
-            const shareData = {
+            const shareDataPayload = {
                 title: `Diary Entry: ${selectedDateStr}`,
                 text: `Here is my diary entry for ${new Date(selectedDateStr+'T00:00:00').toLocaleDateString()}.`,
             };
 
+            let sharedSuccessfully = false;
+
             if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-                shareData.files = [fileToShare];
-                await navigator.share(shareData);
-                showToast('Entry shared successfully!', 'success');
-            } else if (navigator.canShare && navigator.canShare({ text: shareData.text, title: shareData.title })) {
-                await navigator.share({ title: shareData.title, text: shareData.text + "\n\n" + jsonString });
-                showToast('Entry content shared as text (file sharing not supported/allowed).', 'info');
-            } else {
-                showToast('Sharing (files or text) is not supported or allowed by the browser in this context.', 'error');
+                try {
+                    const filesPayload = { ...shareDataPayload, files: [fileToShare] };
+                    await navigator.share(filesPayload);
+                    showToast('Entry shared successfully!', 'success');
+                    sharedSuccessfully = true;
+                } catch (fileShareError) {
+                    if (fileShareError.name !== 'AbortError') {
+                        console.warn('File sharing failed, attempting text fallback.', fileShareError);
+                    } else {
+                         console.log('File sharing aborted by user.');
+                         sharedSuccessfully = true;
+                    }
+                }
             }
+
+            if (!sharedSuccessfully && navigator.canShare && navigator.canShare({ text: shareDataPayload.text, title: shareDataPayload.title })) {
+                await navigator.share({ title: shareDataPayload.title, text: shareDataPayload.text + "\n\n" + jsonString });
+                showToast('Entry content shared as text.', 'info');
+                sharedSuccessfully = true;
+            }
+
+            if (!sharedSuccessfully) {
+                showToast('Sharing is not supported or was cancelled by the browser in this context.', 'error');
+            }
+
         } catch (error) {
             if (error.name === 'AbortError') {
-                console.log('Sharing was aborted by the user.');
+                console.log('Sharing (text fallback) was aborted by the user.');
             } else {
-                console.error('Error sharing entry:', error.name, error.message, error);
+                console.error('Error sharing entry (outer catch):', error.name, error.message, error);
                 showToast(`Error sharing entry: ${error.message}`, 'error');
             }
         } finally {
@@ -1260,7 +1278,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            // Ensure you are not on file:/// protocol for SW registration
             if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
                 navigator.serviceWorker.register('sw.js')
                     .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
