@@ -1,7 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Element References ---
     const diaryForm = document.getElementById('diaryForm');
-    // const importJsonButton = document.getElementById('importJsonButton'); // Removed
     const jsonFileInput = document.getElementById('jsonFile');
     const saveFormButton = document.getElementById('saveFormButton');
     const toastContainer = document.getElementById('toast-container');
@@ -11,7 +10,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateIncrementButton = document.getElementById('dateIncrement');
     const dateDecrementButton = document.getElementById('dateDecrement');
     const currentDateDisplay = document.getElementById('currentDateDisplay');
-    // const topBarClearButton = document.getElementById('topBarClearButton'); // Removed
 
     const bottomNavButtons = document.querySelectorAll('.bottom-nav-button');
     const tabPanels = document.querySelectorAll('.tab-panel');
@@ -39,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteSelectedButton = document.getElementById('deleteSelectedButton');
     const cancelMultiSelectButton = document.getElementById('cancelMultiSelectButton');
 
-    // New Menu Elements
+    // Menu Elements
     const menuButton = document.getElementById('menuButton');
     const dropdownMenu = document.getElementById('dropdownMenu');
     const shareEntryButton = document.getElementById('shareEntryButton');
@@ -109,7 +107,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isLoading) {
             button.disabled = true;
             if (iconElement) {
-                if (!button.dataset.originalIcon) button.dataset.originalIcon = iconElement.outerHTML;
+                if (!button.dataset.originalIcon && originalIconHTML) { // Store if not already stored and provided
+                     button.dataset.originalIcon = originalIconHTML;
+                } else if (!button.dataset.originalIcon && iconElement.outerHTML) { // Fallback to current icon if none provided
+                    button.dataset.originalIcon = iconElement.outerHTML;
+                }
                 iconElement.className = 'fas fa-spinner fa-spin';
             }
         } else {
@@ -118,8 +120,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = button.dataset.originalIcon;
                 iconElement.className = tempDiv.firstChild.className;
-                delete button.dataset.originalIcon;
-            } else if (iconElement && originalIconHTML) {
+                delete button.dataset.originalIcon; // Clean up
+            } else if (iconElement && originalIconHTML) { // Fallback if dataset somehow missed
                 const tempDiv = document.createElement('div');
                 tempDiv.innerHTML = originalIconHTML;
                 if (tempDiv.firstChild) iconElement.className = tempDiv.firstChild.className;
@@ -447,8 +449,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(allSavedData));
             if (!isSilent) {
-                 // Check if it's not the initial auto-save on load
-                if (document.visibilityState === 'visible') { // Only show toast if tab is active
+                if (document.visibilityState === 'visible') {
                     showToast('Form data saved locally for this date!', 'success');
                 } else {
                     console.log('Form data auto-saved silently.');
@@ -517,7 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function autoSaveOnVisibilityChange() {
         if (document.visibilityState === 'hidden') {
             if (isMultiSelectModeActive || (tabPanels[currentTabIndex]?.id === 'tab-history')) return;
-            const success = performSaveOperation(true); // Silent save
+            const success = performSaveOperation(true);
             if (success) {
                 console.log('Auto-save successful on visibility change to hidden.');
             }
@@ -866,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTopBarForMultiSelectView(true);
         renderHistoryList();
         showToast('Multi-select enabled. Tap items to select.', 'info');
-        if (isDropdownMenuOpen) toggleDropdownMenu(false); // Close dropdown if open
+        if (isDropdownMenuOpen) toggleDropdownMenu(false);
     }
 
     function disableMultiSelectMode() {
@@ -963,10 +964,12 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleShareCurrentEntry() {
         if (!navigator.share) {
             showToast('Web Share API is not available on this browser/device.', 'error');
+            toggleDropdownMenu(false);
             return;
         }
-        if (isMultiSelectModeActive) { // Don't share if in multi-select mode
+        if (isMultiSelectModeActive) {
             showToast('Sharing is disabled in multi-select mode.', 'info');
+            toggleDropdownMenu(false);
             return;
         }
 
@@ -980,12 +983,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!selectedDateStr) {
             showToast('Please select a date or ensure the form has data to share.', 'error');
+            toggleDropdownMenu(false);
             return;
         }
 
         const shareButtonOriginalIconHTML = shareEntryButton.querySelector('i')?.outerHTML;
-        setButtonLoadingState(shareEntryButton, true);
-
+        setButtonLoadingState(shareEntryButton, true, shareButtonOriginalIconHTML);
 
         try {
             const entryData = getFullEntryDataForExport(currentFormValuesForExport, selectedDateStr);
@@ -993,33 +996,31 @@ document.addEventListener('DOMContentLoaded', () => {
             const fileName = `${selectedDateStr}_diary_entry.json`;
             const fileToShare = new File([jsonString], fileName, { type: 'application/json' });
 
+            const shareData = {
+                title: `Diary Entry: ${selectedDateStr}`,
+                text: `Here is my diary entry for ${new Date(selectedDateStr+'T00:00:00').toLocaleDateString()}.`,
+            };
+
             if (navigator.canShare && navigator.canShare({ files: [fileToShare] })) {
-                await navigator.share({
-                    files: [fileToShare],
-                    title: `Diary Entry: ${selectedDateStr}`,
-                    text: `Here is my diary entry for ${new Date(selectedDateStr+'T00:00:00').toLocaleDateString()}.`,
-                });
+                shareData.files = [fileToShare];
+                await navigator.share(shareData);
                 showToast('Entry shared successfully!', 'success');
+            } else if (navigator.canShare && navigator.canShare({ text: shareData.text, title: shareData.title })) {
+                await navigator.share({ title: shareData.title, text: shareData.text + "\n\n" + jsonString });
+                showToast('Entry content shared as text (file sharing not supported/allowed).', 'info');
             } else {
-                 // Fallback or specific message if files of this type can't be shared
-                // Attempt to share as text (less ideal but a fallback)
-                await navigator.share({
-                    title: `Diary Entry: ${selectedDateStr}`,
-                    text: `Diary Entry - ${new Date(selectedDateStr+'T00:00:00').toLocaleDateString()}:\n\n${jsonString}`,
-                });
-                showToast('Entry content shared as text.', 'info');
+                showToast('Sharing (files or text) is not supported or allowed by the browser in this context.', 'error');
             }
         } catch (error) {
             if (error.name === 'AbortError') {
                 console.log('Sharing was aborted by the user.');
-                // showToast('Sharing cancelled.', 'info'); // Optional: can be noisy
             } else {
-                console.error('Error sharing entry:', error);
-                showToast('Error sharing entry. See console for details.', 'error');
+                console.error('Error sharing entry:', error.name, error.message, error);
+                showToast(`Error sharing entry: ${error.message}`, 'error');
             }
         } finally {
             setButtonLoadingState(shareEntryButton, false, shareButtonOriginalIconHTML);
-            toggleDropdownMenu(false); // Close menu after action
+            toggleDropdownMenu(false);
         }
     }
 
@@ -1049,10 +1050,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dailyActivitySummaryTextarea) dailyActivitySummaryTextarea.addEventListener('input', updateSummaryCounts);
 
-    // Removed: if (topBarClearButton) topBarClearButton.addEventListener('click', clearDiaryForm);
-
     diaryForm.addEventListener('submit', function(event) {
-        event.preventDefault(); // For "Download" button which is type submit
+        event.preventDefault();
         if (!downloadButton) return;
         const originalDownloadIconHTML = downloadButton.querySelector('i')?.outerHTML;
         setButtonLoadingState(downloadButton, true, originalDownloadIconHTML);
@@ -1085,16 +1084,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 50);
     });
 
-    // Removed: if (importJsonButton) importJsonButton.addEventListener('click', () => jsonFileInput.click());
-
     jsonFileInput.addEventListener('change', async function(event) {
         const files = event.target.files;
-        if (!files || files.length === 0 /*|| !importJsonButton - now menuImportButton*/) {
+        if (!files || files.length === 0) {
             jsonFileInput.value = '';
             return;
         }
-        // Use menuImportButton for loading state if it exists, otherwise fallback to a generic state if needed
-        const buttonForLoading = menuImportButton || document.getElementById('importJsonButton'); // Fallback just in case
+        const buttonForLoading = menuImportButton || document.getElementById('importJsonButton');
         const originalImportIconHTML = buttonForLoading ? buttonForLoading.querySelector('i')?.outerHTML : null;
         if (buttonForLoading) setButtonLoadingState(buttonForLoading, true, originalImportIconHTML);
 
@@ -1218,43 +1214,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Auto-save on page hide/visibility change
-    window.addEventListener('pagehide', () => autoSaveOnVisibilityChange()); // pagehide is a good fallback
+    window.addEventListener('pagehide', () => autoSaveOnVisibilityChange());
     document.addEventListener('visibilitychange', autoSaveOnVisibilityChange);
 
-
-    // Multi-select action buttons
     if (cancelMultiSelectButton) cancelMultiSelectButton.addEventListener('click', disableMultiSelectMode);
     if (deleteSelectedButton) deleteSelectedButton.addEventListener('click', handleDeleteSelectedEntries);
     if (exportSelectedButton) exportSelectedButton.addEventListener('click', handleExportSelectedEntries);
 
-    // Dropdown Menu Event Listeners
     if (menuButton) {
         menuButton.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevent click from bubbling to document
-            if (isMultiSelectModeActive) return; // Don't show menu in multi-select
+            event.stopPropagation();
+            if (isMultiSelectModeActive) return;
             toggleDropdownMenu();
         });
     }
     if (shareEntryButton) {
         shareEntryButton.addEventListener('click', () => {
-            handleShareCurrentEntry(); // This will also close the menu
+            handleShareCurrentEntry();
         });
     }
     if (menuImportButton) {
         menuImportButton.addEventListener('click', () => {
             jsonFileInput.click();
-            toggleDropdownMenu(false); // Close menu
+            toggleDropdownMenu(false);
         });
     }
     if (menuClearFormButton) {
         menuClearFormButton.addEventListener('click', () => {
             clearDiaryForm();
-            toggleDropdownMenu(false); // Close menu
+            toggleDropdownMenu(false);
         });
     }
 
-    // Close dropdown if clicked outside
     document.addEventListener('click', (event) => {
         if (isDropdownMenuOpen && dropdownMenu && !dropdownMenu.contains(event.target) && event.target !== menuButton && !menuButton.contains(event.target)) {
             toggleDropdownMenu(false);
@@ -1269,9 +1260,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
-                .catch(error => console.log('ServiceWorker registration failed: ', error));
+            // Ensure you are not on file:/// protocol for SW registration
+            if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
+                    .catch(error => console.log('ServiceWorker registration failed: ', error));
+            } else {
+                console.warn('Service Worker not registered. App must be served over HTTP/HTTPS or localhost for Service Workers to work.');
+            }
         });
     }
 });
