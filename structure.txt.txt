@@ -1,0 +1,21 @@
+/MyPersonalDiary/
+|
+├── index.html              # Main application HTML file (the entry point)
+|
+├── style.css               # All application styles and UI rules
+|
+├── script.js               # Core application logic and event handling
+|
+├── sw.js                   # The Service Worker for offline functionality and PWA features
+|
+├── manifest.json           # PWA manifest for installation and app metadata
+|
+└── /images/                # Directory for all image assets and icons
+    |
+    ├── logo.ico            # Favicon in ICO format for older browsers
+    ├── logo.svg            # Scalable Vector Graphic logo (primary icon)
+    ├── logo16.png          # 16x16 PNG icon
+    ├── logo32.png          # 32x32 PNG icon
+    ├── logo64.png          # 64x64 PNG icon
+    ├── logo256.png         # 256x256 PNG icon (used for PWA and apple-touch-icon)
+    └── logo512.png         # 512x512 PNG icon (larger PWA icon)
