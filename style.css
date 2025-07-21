@@ -565,8 +565,37 @@ button:disabled {
     font-size: 0.85rem;
 }
 
+
 .toast i {
     font-size: 1em; /* Icon size relative to toast text */
+}
+
+/* Style for toasts that have an action button */
+.toast-with-action {
+    justify-content: space-between; /* Pushes message and button apart */
+    align-items: center;
+    animation: slideUpToast 0.1s ease-out forwards; /* No fade out */
+}
+
+.toast-with-action p {
+    margin: 0; /* Remove default paragraph margin */
+}
+
+.toast-action-button {
+    background-color: var(--accent-color);
+    color: var(--primary-bg);
+    border: none;
+    border-radius: var(--border-radius-sm);
+    padding: 6px 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-left: 15px; /* Space between message and button */
+    flex-shrink: 0; /* Prevent button from shrinking */
+}
+
+.toast-action-button:hover {
+    background-color: var(--accent-hover);
 }
 
 .toast.success { border-left-color: var(--success-color); }

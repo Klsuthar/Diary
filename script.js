@@ -1276,15 +1276,73 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeForm();
     slideToPanel(0, false);
 
+    // --- PWA Service Worker Registration & Update Logic ---
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => console.log('ServiceWorker registration successful with scope: ', registration.scope))
-                    .catch(error => console.log('ServiceWorker registration failed: ', error));
-            } else {
-                console.warn('Service Worker not registered. App must be served over HTTP/HTTPS or localhost for Service Workers to work.');
-            }
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+
+                    // Logic to handle service worker updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        console.log('New service worker found. Installing...');
+
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // A new service worker is installed and waiting.
+                                // Prompt the user to reload to get the latest version.
+                                console.log('New service worker installed. Ready to activate.');
+                                showToastWithAction('A new version is available!', 'Reload', () => {
+                                    newWorker.postMessage({ action: 'skipWaiting' });
+                                    window.location.reload();
+                                });
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error('ServiceWorker registration failed: ', error);
+                });
         });
+
+        // Listen for the 'controllerchange' event. This fires when the service worker controlling the page changes.
+        // This is the final step after the new worker has taken over. We reload the page to ensure all content is served by the new worker.
+        let refreshing;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (refreshing) return;
+            console.log('Controller has changed. Reloading the page...');
+            window.location.reload();
+            refreshing = true;
+        });
+    }
+
+    // --- Toast Notification with Action Button ---
+    function showToastWithAction(message, actionText, callback) {
+        if (!toastContainer) return;
+        const toast = document.createElement('div');
+        toast.classList.add('toast', 'info', 'toast-with-action');
+
+        const messageElement = document.createElement('p');
+        messageElement.textContent = message;
+
+        const actionButton = document.createElement('button');
+        actionButton.classList.add('toast-action-button');
+        actionButton.textContent = actionText;
+        actionButton.onclick = () => {
+            callback();
+            toast.remove();
+        };
+
+        toast.appendChild(messageElement);
+        toast.appendChild(actionButton);
+
+        if (toastContainer.firstChild) {
+            toastContainer.insertBefore(toast, toastContainer.firstChild);
+        } else {
+            toastContainer.appendChild(toast);
+        }
+        // This toast should persist until the user interacts with it.
+        // It won't auto-dismiss like the others.
     }
 });

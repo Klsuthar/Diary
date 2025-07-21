@@ -1,13 +1,13 @@
 // sw.js - Service Worker
 
 // --- Cache Configuration ---
-
-// Incremented version to trigger a service worker update
-const APP_SHELL_CACHE_NAME = 'my-personal-diary-static-v5';
-const DYNAMIC_CACHE_NAME = 'my-personal-diary-dynamic-v5';
+const APP_SHELL_CACHE_NAME = 'my-personal-diary-static-v6'; // Incremented version
+const DYNAMIC_CACHE_NAME = 'my-personal-diary-dynamic-v6'; // Incremented version
 
 // Assets that form the core of the application's UI (the "app shell")
+// Includes external resources to ensure the app is fully functional offline after the first visit.
 const APP_SHELL_ASSETS = [
+    '/',
     'index.html',
     'style.css',
     'script.js',
@@ -18,14 +18,16 @@ const APP_SHELL_ASSETS = [
     'images/logo32.png',
     'images/logo64.png',
     'images/logo256.png',
-    'images/logo512.png'
+    'images/logo512.png',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css',
+    'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap'
 ];
 
 // --- Service Worker Lifecycle Events ---
 
 /**
  * Install Event:
- * Caches the core application shell assets. This runs once when the service worker is installed.
+ * Caches the core application shell assets. This runs once when the service worker is installed or updated.
  */
 self.addEventListener('install', event => {
     console.log('[Service Worker] Install');
@@ -51,7 +53,6 @@ self.addEventListener('install', event => {
 /**
  * Activate Event:
  * Cleans up old caches to remove outdated assets and free up storage.
- * This event fires after 'install' and when the new service worker takes control.
  */
 self.addEventListener('activate', event => {
     console.log('[Service Worker] Activate');
@@ -78,88 +79,50 @@ self.addEventListener('activate', event => {
 
 /**
  * Fetch Event:
- * Intercepts all network requests made by the application.
- * It applies different caching strategies based on the request type.
+ * Intercepts all network requests made by the application and applies caching strategies.
  */
 self.addEventListener('fetch', event => {
-    // We only care about GET requests for caching.
-    if (event.request.method !== 'GET') {
+    const { request } = event;
+
+    // For navigation requests (e.g., loading the HTML page), use a "Network Falling Back to Cache" strategy.
+    // This ensures users get the latest version of the app if they are online,
+    // but still allows the app to load from the cache if they are offline.
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
+                .catch(() => {
+                    // If the network request fails (e.g., user is offline), serve the main index.html from the cache.
+                    console.log('[Service Worker] Navigation fetch failed. Serving offline fallback from cache.');
+                    return caches.match('index.html');
+                })
+        );
         return;
     }
 
-    const url = new URL(event.request.url);
-
-    // Strategy 1: Stale-While-Revalidate for external assets (fonts, icons)
-    // This provides both speed (from cache) and freshness (background update).
-    if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com' || url.hostname === 'cdnjs.cloudflare.com') {
-        event.respondWith(staleWhileRevalidate(event.request));
-    }
-    // Strategy 2: Cache First for our local App Shell assets
-    // These were pre-cached on install, so we can serve them directly from the cache.
-    else if (APP_SHELL_ASSETS.includes(url.pathname.substring(1)) || url.pathname === '/') {
-         event.respondWith(caches.match(event.request, { ignoreSearch: true }));
-    }
-    // Strategy 3: Network First, Fallback to Cache for other requests
-    // (This example doesn't have other requests, but it's a good default)
-    else {
-        event.respondWith(networkFirstFallbackToCache(event.request));
-    }
-});
-
-
-// --- Caching Strategy Implementations ---
-
-/**
- * Stale-While-Revalidate Strategy:
- * 1. Responds with the cached version immediately if available (stale).
- * 2. In the background, fetches a fresh version from the network and updates the cache (revalidate).
- * 3. If not in cache, fetches from the network and caches the response.
- * @param {Request} request The incoming request.
- * @returns {Promise<Response>}
- */
-function staleWhileRevalidate(request) {
-    return caches.open(DYNAMIC_CACHE_NAME).then(cache => {
-        return cache.match(request).then(cachedResponse => {
-            const fetchPromise = fetch(request).then(networkResponse => {
-                // Check if we received a valid response
-                if (networkResponse && networkResponse.status === 200) {
-                    cache.put(request, networkResponse.clone());
+    // For all other requests (CSS, JS, fonts, images), use a "Cache First, Falling Back to Network" strategy.
+    // This is ideal for static assets as it serves them instantly from the cache if available.
+    event.respondWith(
+        caches.match(request)
+            .then(cachedResponse => {
+                if (cachedResponse) {
+                    // If the asset is in the cache, return it immediately.
+                    return cachedResponse;
                 }
-                return networkResponse;
-            }).catch(error => {
-                 console.error('[Service Worker] Fetch failed; returning cached response if available.', request.url, error);
-                 // If network fails, and we have a cached response, this error is gracefully handled.
-                 // If there's no cached response either, the promise will reject, leading to a network error on the page.
-                 // This is expected offline behavior for a resource not in the cache.
-            });
-
-            // Return the cached response immediately if it exists, otherwise wait for the network response.
-            return cachedResponse || fetchPromise;
-        });
-    });
-}
-
-
-/**
- * Network First, Fallback to Cache Strategy:
- * 1. Tries to fetch from the network first to get the most up-to-date content.
- * 2. If the network fails (e.g., offline), it falls back to the cache.
- * @param {Request} request The incoming request.
- * @returns {Promise<Response>}
- */
-function networkFirstFallbackToCache(request) {
-    return caches.open(DYNAMIC_CACHE_NAME).then(cache => {
-        return fetch(request)
-            .then(networkResponse => {
-                // If the fetch is successful, cache the new response for future offline use
-                if (networkResponse && networkResponse.status === 200) {
-                    cache.put(request, networkResponse.clone());
-                }
-                return networkResponse;
+                // If the asset is not in the cache, fetch it from the network.
+                return fetch(request).then(networkResponse => {
+                    // Optional: Add the newly fetched asset to the dynamic cache for future offline use.
+                    if (networkResponse && networkResponse.status === 200) {
+                        return caches.open(DYNAMIC_CACHE_NAME).then(cache => {
+                            cache.put(request, networkResponse.clone());
+                            return networkResponse;
+                        });
+                    }
+                    return networkResponse;
+                });
             })
-            .catch(() => {
-                // If the network fetch fails, try to find a match in the cache
-                return cache.match(request);
-            });
-    });
-}
+            .catch(error => {
+                console.error('[Service Worker] Fetch failed:', error);
+                // Here you could return a fallback asset, like a placeholder image, if needed.
+            })
+    );
+});
