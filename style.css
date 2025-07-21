@@ -3,24 +3,25 @@
     --primary-bg: #0f172a;
     --secondary-bg: #1e293b;
     --tertiary-bg: #334155;
-    --accent-color: #dabe24;
-    --accent-hover: #a8a62f;
-    --text-primary: #e2e8f0;
+    --accent-color: #facc15; /* Brighter yellow for better vibrancy */
+    --accent-hover: #eab308; /* Slightly darker yellow for hover */
+    --text-primary: #f8fafc; /* Slightly brighter for better contrast */
     --text-secondary: #94a3b8;
     --danger-color: #f43f5e;
     --danger-hover: #e11d48;
     --success-color: #22c55e;
     --info-color: #3b82f6;
     --font-family: 'Poppins', sans-serif;
-    --border-radius-sm: 6px;
-    --border-radius-md: 10px;
-    --box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    --input-padding-y: 10px;
-    --input-padding-x: 14px;
-    --button-padding-y: 10px;
-    --button-padding-x: 16px;
-    --top-bar-height: 56px;
-    --bottom-nav-height: 60px;
+    --border-radius-sm: 8px;  /* Increased for a softer look */
+    --border-radius-md: 12px; /* Increased for a softer look */
+    --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --input-padding-y: 12px; /* Increased padding */
+    --input-padding-x: 16px; /* Increased padding */
+    --button-padding-y: 12px;
+    --button-padding-x: 18px;
+    --top-bar-height: 60px;   /* Slightly taller */
+    --bottom-nav-height: 64px; /* Slightly taller */
+    --transition-speed: 0.2s;
 }
 
 *,
@@ -41,7 +42,7 @@ body {
     margin: 0;
     display: flex;
     min-height: 100vh;
-    font-size: 0.95rem;
+    font-size: 1rem; /* Base font size increased slightly */
     line-height: 1.6;
     overflow: hidden;
     -webkit-font-smoothing: antialiased;
@@ -60,7 +61,7 @@ body {
 .top-bar {
     background-color: var(--secondary-bg);
     color: var(--text-primary);
-    padding: 0 10px;
+    padding: 0 12px;
     height: var(--top-bar-height);
     display: flex;
     align-items: center;
@@ -71,6 +72,7 @@ body {
     left: 0;
     right: 0;
     z-index: 100;
+    border-bottom: 1px solid var(--tertiary-bg); /* Subtle border */
 }
 
 .logo-container {
@@ -85,7 +87,7 @@ body {
 .top-bar .date-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px; /* Increased gap */
     flex-grow: 1;
     justify-content: center;
     position: relative;
@@ -93,35 +95,40 @@ body {
 }
 
 .top-bar #currentDateDisplay {
-    font-size: 0.85rem;
+    font-size: 0.9rem; /* Adjusted font size */
     font-weight: 500;
     text-align: center;
-    padding: 8px 10px;
+    padding: 8px 12px;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-speed) ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 130px;
+    min-width: 140px; /* Adjusted width */
 }
 
 .top-bar #currentDateDisplay:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--tertiary-bg);
 }
 
 .date-display-icon {
     margin-left: 8px;
     font-size: 0.9em;
     color: var(--text-secondary);
+    transition: color var(--transition-speed) ease;
 }
+.top-bar #currentDateDisplay:hover .date-display-icon {
+    color: var(--text-primary);
+}
+
 
 .top-bar #date {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
     width: auto;
-    min-width: 130px;
+    min-width: 140px;
     max-width: 200px;
     top: 0;
     height: 100%;
@@ -142,80 +149,99 @@ body {
     cursor: pointer;
     font-size: 1.1rem;
     line-height: 1;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition: color var(--transition-speed) ease, background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
+    width: 42px; /* Increased size */
+    height: 42px; /* Increased size */
     flex-shrink: 0;
-    z-index: 2; /* Ensure buttons are above date input */
+    z-index: 2;
     position: relative;
 }
 
 .top-bar .date-control-btn:hover,
 .top-bar .top-action-btn:hover {
     color: var(--text-primary);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--tertiary-bg);
+    transform: scale(1.05);
 }
 
 .top-bar .date-control-btn:active,
 .top-bar .top-action-btn:active {
     background-color: rgba(255, 255, 255, 0.15);
+    transform: scale(0.98);
 }
 
 .top-bar .top-actions {
     display: flex;
     align-items: center;
-    gap: 6px; /* Gap between direct children like download, save, menu container */
+    gap: 8px; /* Increased gap */
 }
 
 
 /* --- Dropdown Menu Styles --- */
 .dropdown-container {
     position: relative;
-    display: inline-block; /* Or flex if needed */
+    display: inline-block;
 }
 
 .dropdown-content {
-    display: none; /* Hidden by default, JS will toggle */
+    display: none;
     position: absolute;
     right: 0;
-    top: calc(100% + 5px); /* Position below the menu button */
-    background-color: var(--tertiary-bg);
-    min-width: 200px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3);
-    border-radius: var(--border-radius-sm);
-    z-index: 101; /* Above top-bar content but below modals if any */
-    padding: 5px 0;
-    overflow: hidden; /* Ensures border-radius applies to children */
+    top: calc(100% + 8px); /* Increased distance */
+    background-color: var(--secondary-bg); /* Darker than tertiary for pop */
+    min-width: 220px; /* Wider */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-md);
+    z-index: 101;
+    padding: 8px 0; /* Vertical padding */
+    overflow: hidden;
+    border: 1px solid var(--tertiary-bg);
+    animation: fadeInDropdown 0.15s ease-out forwards;
+}
+
+@keyframes fadeInDropdown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .dropdown-item {
     color: var(--text-primary);
-    padding: 10px 15px;
+    padding: 12px 18px;
     text-decoration: none;
-    display: flex; /* Changed to flex for icon alignment */
-    align-items: center; /* Vertically align icon and text */
-    gap: 10px; /* Space between icon and text */
-    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
     background-color: transparent;
     border: none;
     width: 100%;
     text-align: left;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-speed) ease;
 }
 
 .dropdown-item i {
-    font-size: 1em; /* Icon size relative to text */
-    color: var(--text-secondary); /* Softer icon color */
-    width: 18px; /* Fixed width for icon alignment */
+    font-size: 1em;
+    color: var(--text-secondary);
+    width: 20px;
     text-align: center;
+    transition: color var(--transition-speed) ease;
 }
 
 .dropdown-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--tertiary-bg);
+}
+.dropdown-item:hover i {
+    color: var(--accent-color);
 }
 
 
@@ -239,7 +265,6 @@ body {
 #tabPanelsSlider {
     display: flex;
     height: 100%;
-    /* transition: transform 0.35s ease-in-out; */ /* JS will manage this for instant vs animated */
 }
 
 .tab-panel {
@@ -247,9 +272,8 @@ body {
     flex-shrink: 0;
     overflow-y: auto;
     height: 100%;
-    padding: 15px 15px 30px; /* Added more bottom padding for scroll room */
+    padding: 20px 20px 40px; /* Increased padding */
     background-color: var(--primary-bg);
-    /* -webkit-overflow-scrolling: touch; */ /* For smoother scrolling on iOS, if needed */
 }
 
 /* --- Bottom Navigation --- */
@@ -259,12 +283,13 @@ body {
     align-items: center;
     background-color: var(--secondary-bg);
     height: var(--bottom-nav-height);
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -2px rgba(0, 0, 0, 0.1);
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 100;
+    border-top: 1px solid var(--tertiary-bg);
 }
 
 .bottom-nav-button {
@@ -273,25 +298,26 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 6px 0;
+    padding: 8px 0;
     color: var(--text-secondary);
     background-color: transparent;
     border: none;
     cursor: pointer;
-    transition: color 0.2s ease;
+    transition: color var(--transition-speed) ease;
     text-align: center;
-    position: relative; /* For the dot indicator */
+    position: relative;
 }
 
 .bottom-nav-button i {
-    font-size: 1.4rem;
-    margin-bottom: 3px;
-    transition: transform 0.2s ease-out;
+    font-size: 1.6rem; /* Larger icons */
+    margin-bottom: 4px;
+    transition: transform var(--transition-speed) ease-out, color var(--transition-speed) ease-out;
 }
 
 .bottom-nav-button span {
-    font-size: 0.65rem;
+    font-size: 0.7rem; /* Slightly larger text */
     display: block;
+    font-weight: 500;
 }
 
 .bottom-nav-button.active {
@@ -299,7 +325,7 @@ body {
 }
 
 .bottom-nav-button.active i {
-    transform: scale(1.1);
+    transform: translateY(-2px) scale(1.1);
 }
 
 .bottom-nav-button:hover:not(.active) {
@@ -310,19 +336,19 @@ body {
 .bottom-nav-button.has-empty-indicator::after {
     content: '';
     position: absolute;
-    top: 6px; 
-    right: 10px; 
+    top: 8px;
+    right: calc(50% - 24px); /* Position relative to center */
     width: 8px;
     height: 8px;
     background-color: var(--danger-color);
     border-radius: 50%;
-    box-shadow: 0 0 2px rgba(0,0,0,0.5);
-    z-index: 5; 
+    border: 1px solid var(--primary-bg);
+    box-shadow: 0 0 3px rgba(0,0,0,0.5);
+    z-index: 5;
 }
-/* Adjust right position for smaller screens if needed */
 @media (max-width: 360px) {
     .bottom-nav-button.has-empty-indicator::after {
-        right: 8px; /* Closer for very small screens */
+        right: calc(50% - 20px);
     }
 }
 
@@ -330,43 +356,43 @@ body {
 /* --- General Form Elements (Mobile Optimized) --- */
 label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     font-weight: 500;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    font-size: 0.9rem;
 }
 
 input[type="text"],
 input[type="number"],
 textarea,
-select 
+select
 {
     width: 100%;
     padding: var(--input-padding-y) var(--input-padding-x);
     border: 1px solid var(--tertiary-bg);
     border-radius: var(--border-radius-sm);
     box-sizing: border-box;
-    font-size: 0.95rem;
+    font-size: 1rem;
     font-family: var(--font-family);
-    background-color: var(--primary-bg);
+    background-color: var(--secondary-bg); /* Changed for better contrast */
     color: var(--text-primary);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 textarea:focus,
-select:focus 
+select:focus
 {
     outline: none;
     border-color: var(--accent-color);
-    box-shadow: 0 0 0 2px rgba(218, 190, 36, 0.25);
+    box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.2); /* Yellow glow */
 }
 
 input::placeholder,
 textarea::placeholder {
     color: var(--text-secondary);
-    opacity: 0.7;
+    opacity: 0.6;
 }
 
 select {
@@ -376,8 +402,8 @@ select {
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
     background-repeat: no-repeat;
     background-position: right var(--input-padding-x) center;
-    background-size: .65em auto;
-    padding-right: calc(var(--input-padding-x) * 2 + 1em); 
+    background-size: .7em auto;
+    padding-right: calc(var(--input-padding-x) * 2 + 1em);
 }
 
 
@@ -393,102 +419,111 @@ input[type="number"]::-webkit-inner-spin-button {
 
 textarea {
     resize: vertical;
-    min-height: 90px;
+    min-height: 120px;
 }
 
 fieldset {
-    border: 1px solid var(--tertiary-bg);
+    border: none; /* Removed border */
     border-radius: var(--border-radius-md);
-    padding: 15px;
-    margin-bottom: 20px;
-    background-color: transparent; /* Ensure fieldset itself is transparent if tab panel has bg */
+    padding: 20px; /* Increased padding */
+    margin-bottom: 24px;
+    background-color: var(--secondary-bg); /* Fieldsets get the secondary bg */
+    box-shadow: var(--box-shadow);
 }
 
 fieldset:last-of-type {
-    margin-bottom: 0; /* Remove bottom margin for the last fieldset in a tab */
+    margin-bottom: 0;
 }
 
 legend {
     font-weight: 600;
     color: var(--accent-color);
-    padding: 0 8px;
-    font-size: 1rem;
+    padding: 0 4px;
+    font-size: 1.1rem;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    margin-bottom: 10px; /* Space below legend */
 }
 
 .icon-legend {
-    font-size: 0.85em;
-    opacity: 0.8;
+    font-size: 0.9em;
+    opacity: 0.9;
 }
 
 .slider-container {
-    margin-bottom: 15px; /* Spacing for sliders */
+    margin-bottom: 20px;
 }
 
 .slider-container label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
 }
 
-.slider-container label span { /* The value display part of the label */
-    font-weight: 500;
+.slider-container label span {
+    font-weight: 600; /* Bolder value */
     color: var(--accent-color);
-    font-size: 0.9rem;
+    font-size: 0.95rem;
 }
 
 input[type="range"] {
     width: 100%;
-    margin-top: 0; /* Remove default top margin if any */
+    margin-top: 0;
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
     cursor: pointer;
-    height: 18px; /* Height of the clickable area for the thumb */
+    height: 20px;
 }
 
 /* Track */
 input[type="range"]::-webkit-slider-runnable-track {
     background: var(--tertiary-bg);
-    height: 6px;
-    border-radius: 3px;
+    height: 8px;
+    border-radius: 4px;
 }
 input[type="range"]::-moz-range-track {
     background: var(--tertiary-bg);
-    height: 6px;
-    border-radius: 3px;
+    height: 8px;
+    border-radius: 4px;
 }
 
 /* Thumb */
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    margin-top: -7px; /* (Track height - Thumb height) / 2 ... but fine-tuned: (6px - 20px)/2 = -7px */
+    margin-top: -6px; /* (8px - 20px)/2 */
     background-color: var(--accent-color);
     height: 20px;
     width: 20px;
     border-radius: 50%;
-    border: 2px solid var(--secondary-bg); /* Border to make it pop from track */
-    transition: background-color 0.2s ease;
+    border: 3px solid var(--secondary-bg);
+    transition: transform var(--transition-speed) ease;
 }
 input[type="range"]::-moz-range-thumb {
     background-color: var(--accent-color);
-    height: 18px; /* Slightly smaller for Moz consistency if needed */
-    width: 18px;
+    height: 20px;
+    width: 20px;
     border-radius: 50%;
-    border: 2px solid var(--secondary-bg);
-    transition: background-color 0.2s ease;
+    border: 3px solid var(--secondary-bg);
+    transition: transform var(--transition-speed) ease;
+}
+input[type="range"]:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+}
+input[type="range"]:active::-moz-range-thumb {
+    transform: scale(1.15);
 }
 
+
 #summaryCounts {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     text-align: right;
-    margin-top: 4px;
-    margin-bottom: 8px; /* Space below counts before next element */
+    margin-top: 8px;
+    margin-bottom: 8px;
 }
 
 /* Datalist - usually unstyled directly, browser handles rendering */
@@ -496,7 +531,7 @@ datalist {}
 datalist option {}
 
 
-/* Generic Buttons (those not specifically .date-control-btn, .bottom-nav-button, .top-action-btn) */
+/* Generic Buttons */
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     display: inline-flex;
     align-items: center;
@@ -506,68 +541,93 @@ button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) {
     border: none;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     font-family: var(--font-family);
-    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
     box-shadow: var(--box-shadow);
-    /* Add default colors or specific classes for styling */
 }
 
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 7px 10px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
 }
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn):active:not(:disabled) {
-    transform: translateY(0px); /* Reset transform */
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.15); /* Pressed effect */
+    transform: translateY(0px);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
 }
 button:not(.date-control-btn):not(.bottom-nav-button):not(.top-action-btn) i {
-    font-size: 1em; /* Make icon size relative to button's font size */
-    transition: none; /* Icons generally don't need transition here unless specified */
+    font-size: 1em;
 }
 
 
 button:disabled {
     cursor: not-allowed;
-    opacity: 0.7;
+    opacity: 0.6;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 
 /* --- Toast Notifications --- */
 #toast-container {
     position: fixed;
-    bottom: calc(var(--bottom-nav-height) + 10px);
+    bottom: calc(var(--bottom-nav-height) + 15px);
     left: 15px;
     right: 15px;
     z-index: 1000;
     display: flex;
-    flex-direction: column-reverse; /* New toasts appear above old ones */
-    align-items: center; /* Center toasts horizontally */
-    gap: 10px;
+    flex-direction: column-reverse;
+    align-items: center;
+    gap: 12px;
 }
 
 .toast {
-    background-color: var(--secondary-bg);
+    background-color: var(--tertiary-bg); /* Darker for more contrast */
     color: var(--text-primary);
-    padding: 10px 15px;
-    border-radius: var(--border-radius-sm);
-    box-shadow: var(--box-shadow);
-    border-left: 4px solid var(--accent-color); /* Default border color */
+    padding: 12px 18px;
+    border-radius: var(--border-radius-md); /* Softer radius */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    border-left: 5px solid var(--accent-color);
     width: 100%;
-    max-width: 320px; /* Max width for toasts on larger screens */
+    max-width: 350px;
     opacity: 0;
     transform: translateY(20px);
-    animation: slideUpToast 0.1s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards; /* 3s total visible time */
-    display: flex; /* For icon and text alignment */
+    animation: slideUpToast 0.2s ease-out forwards, fadeOutToastGeneral 0.3s ease-in 2.6s forwards;
+    display: flex;
     align-items: center;
-    gap: 10px; /* Space between icon and text */
-    font-size: 0.85rem;
+    gap: 12px;
+    font-size: 0.9rem;
 }
 
-
 .toast i {
-    font-size: 1em; /* Icon size relative to toast text */
+    font-size: 1.1em;
+}
+
+.toast.success { border-left-color: var(--success-color); }
+.toast.success i { color: var(--success-color); }
+.toast.error   { border-left-color: var(--danger-color); }
+.toast.error i   { color: var(--danger-color); }
+.toast.info    { border-left-color: var(--info-color); }
+.toast.info i    { color: var(--info-color); }
+
+
+@keyframes slideUpToast {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOutToastGeneral {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(10px);
+    }
 }
 
 /* Style for toasts that have an action button */
@@ -586,10 +646,10 @@ button:disabled {
     color: var(--primary-bg);
     border: none;
     border-radius: var(--border-radius-sm);
-    padding: 6px 12px;
+    padding: 8px 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--transition-speed) ease;
     margin-left: 15px; /* Space between message and button */
     flex-shrink: 0; /* Prevent button from shrinking */
 }
@@ -598,57 +658,30 @@ button:disabled {
     background-color: var(--accent-hover);
 }
 
-.toast.success { border-left-color: var(--success-color); }
-.toast.success i { color: var(--success-color); }
-.toast.error   { border-left-color: var(--danger-color); }
-.toast.error i   { color: var(--danger-color); }
-.toast.info    { border-left-color: var(--info-color); }
-.toast.info i    { color: var(--info-color); }
-
-
-@keyframes slideUpToast {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeOutToastGeneral { /* Renamed for clarity */
-    from {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(10px); /* Slightly move up on fade out */
-    }
-}
-
 /* --- History Tab Styles --- */
 #tab-history {
-    padding-bottom: 15px; /* Extra padding at the bottom of the scrollable area */
+    padding-bottom: 15px;
 }
 
 #historyListContainer {
     display: flex;
     flex-direction: column;
-    gap: 10px; /* Space between history items */
+    gap: 12px;
 }
 
 .history-item {
     background-color: var(--secondary-bg);
-    padding: 12px 10px 12px 15px; /* T R B L */
-    border-radius: var(--border-radius-sm);
+    padding: 16px;
+    border-radius: var(--border-radius-md);
     box-shadow: var(--box-shadow);
-    /* display: flex; REMOVED - using internal flex for main-content */
-    flex-direction: column; /* For main content and JSON view stacking */
+    flex-direction: column;
     cursor: pointer;
-    transition: background-color 0.2s ease, border-left-color 0.2s ease;
-    border-left: 3px solid transparent; /* Placeholder for selected state */
-    user-select: none; /* Prevent text selection on click/tap */
-    position: relative; /* For potential absolute positioned children if any */
+    transition: background-color var(--transition-speed) ease, border-left-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+    border-left: 4px solid transparent;
+    user-select: none;
+    position: relative;
 }
-.history-item-main-content { /* NEW: Wrapper for top part of history item */
+.history-item-main-content {
     display: flex;
     align-items: center;
     width: 100%;
@@ -656,53 +689,53 @@ button:disabled {
 
 
 .history-item:hover:not(.selected) {
-    background-color: var(--tertiary-bg); /* Hover for non-selected items */
+    background-color: var(--tertiary-bg);
+    transform: translateY(-2px);
 }
 
 .history-item.selected {
-    background-color: #2c3a4f; /* Slightly different bg for selected */
+    background-color: #2c3a4f;
     border-left-color: var(--accent-color);
 }
 
 /* Checkbox Styling for History Items */
 .history-item-checkbox-container {
-    margin-right: 12px;
-    display: none; /* Hidden by default, shown in multi-select mode */
-    align-items: center; /* Vertically center checkbox */
+    margin-right: 15px;
+    display: none;
+    align-items: center;
 }
 .history-item.multi-select-active .history-item-checkbox-container {
-    display: flex; /* Show checkbox in multi-select mode */
+    display: flex;
 }
 .history-item-checkbox {
-    width: 20px;
-    height: 20px;
-    accent-color: var(--accent-color); /* Color for the checkbox itself */
+    width: 22px;
+    height: 22px;
+    accent-color: var(--accent-color);
     cursor: pointer;
 }
 
 
 .history-item-details {
-    flex-grow: 1; /* Takes available space */
-    margin-right: 10px; /* Space before action buttons */
-    overflow: hidden; /* For text ellipsis */
+    flex-grow: 1;
+    margin-right: 10px;
+    overflow: hidden;
 }
 
 .history-item-date {
     font-weight: 600;
     color: var(--text-primary);
-    font-size: 0.95rem;
-    margin-bottom: 3px;
+    font-size: 1rem;
+    margin-bottom: 4px;
 }
 
 .history-item-preview {
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 150px; /* Initial max-width, adjust with media queries */
+    max-width: 150px;
 }
-/* Responsive preview width */
 @media (min-width: 380px) { .history-item-preview { max-width: 170px; } }
 @media (min-width: 420px) { .history-item-preview { max-width: 210px; } }
 @media (min-width: 480px) { .history-item-preview { max-width: 250px; } }
@@ -711,29 +744,31 @@ button:disabled {
 .history-item-actions {
     display: flex;
     gap: 8px;
-    flex-shrink: 0; /* Prevent shrinking */
-    margin-left: auto; /* Push actions to the right */
+    flex-shrink: 0;
+    margin-left: auto;
 }
-/* Hide individual actions when item is part of multi-select UI */
 .history-item.multi-select-active .history-item-actions {
     display: none;
 }
 
 
 .history-item-actions button {
-    background: none;
+    background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 1.1rem;
-    padding: 5px; /* Clickable area */
+    font-size: 1.2rem;
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
-    transition: color 0.2s ease;
-    line-height: 1; /* Ensure icon is centered */
+    transition: color var(--transition-speed) ease, background-color var(--transition-speed) ease;
+    line-height: 1;
 }
 .history-item-actions button:hover {
-    color: var(--text-primary); /* General hover */
+    background-color: var(--primary-bg);
 }
-.history-item-actions button.action-edit:hover { /* Specific hover colors */
+.history-item-actions button.action-edit:hover {
     color: var(--info-color);
 }
 .history-item-actions button.action-export:hover {
@@ -745,69 +780,71 @@ button:disabled {
 
 /* Styles for JSON expand/collapse */
 .history-item-expand-json {
-    background: none;
+    background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 1.1rem; /* Consistent with other action buttons */
-    padding: 5px;
+    font-size: 1.2rem;
+    padding: 8px;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
     cursor: pointer;
-    transition: color 0.2s ease, transform 0.2s ease;
+    transition: color var(--transition-speed) ease, transform var(--transition-speed) ease, background-color var(--transition-speed) ease;
     line-height: 1;
-    margin-left: 0; /* Adjusted from 8px, spacing handled by main-content gap */
-    order: -1; /* Place it at the beginning of the flex row if needed, or manage with flex order if inside details */
-    margin-right: 8px; /* Space between expand and checkbox */
+    order: -1;
+    margin-right: 8px;
 }
 .history-item-expand-json:hover {
     color: var(--accent-color);
+    background-color: var(--primary-bg);
 }
-.history-item-expand-json.expanded i { /* When expanded, rotate icon */
+.history-item-expand-json.expanded i {
     transform: rotate(90deg);
 }
 
 .history-item-json-view {
-    display: none; /* Hidden by default */
-    width: 100%; /* Full width */
-    background-color: var(--primary-bg); /* Slightly different bg for contrast */
+    display: none;
+    width: 100%;
+    background-color: var(--primary-bg);
     border: 1px solid var(--tertiary-bg);
     border-radius: var(--border-radius-sm);
-    padding: 10px;
-    margin-top: 10px; /* Space below the main item content */
+    padding: 12px;
+    margin-top: 12px;
     box-sizing: border-box;
-    max-height: 300px; /* Prevent it from becoming too tall */
-    overflow: auto; /* Scroll if content exceeds max-height */
-    font-family: 'Courier New', Courier, monospace; /* Monospaced font for JSON */
-    font-size: 0.8rem;
+    max-height: 300px;
+    overflow: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85rem;
     color: var(--text-primary);
-    white-space: pre-wrap; /* Wrap long lines but preserve formatting */
-    word-break: break-all; /* Break long strings if necessary */
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 
 /* Top Bar Multi-Select Info and Button Styling */
 .multi-select-info {
     color: var(--text-primary);
-    font-size: 0.85rem;
-    margin-right: auto; /* Pushes subsequent buttons to the right */
-    padding-left: 5px; /* Some spacing */
-    display: none; /* Hidden by default */
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-right: auto;
+    padding-left: 5px;
+    display: none;
 }
 
 /* When in multi-select mode */
 .top-bar.multi-select-mode .date-controls {
-    display: none !important; /* Hide date controls */
+    display: none !important;
 }
 
-/* Hide regular top actions that are NOT part of multi-select controls */
 .top-bar.multi-select-mode .top-actions .top-action-btn:not(#multiSelectCount):not(#exportSelectedButton):not(#deleteSelectedButton):not(#cancelMultiSelectButton):not(#menuButton),
 .top-bar.multi-select-mode .top-actions .dropdown-container:not(:has(#multiSelectCount):not(:has(#exportSelectedButton)):not(:has(#deleteSelectedButton)):not(:has(#cancelMultiSelectButton))) {
     display: none !important;
 }
 
-/* Specifically hide download, save buttons (and the new menu button if it's not a multi-select action container) */
 .top-bar.multi-select-mode .top-actions #downloadButton,
 .top-bar.multi-select-mode .top-actions #saveFormButton,
-.top-bar.multi-select-mode .top-actions #menuButton, /* Hide 3-dot menu in multi-select */
-.top-bar.multi-select-mode .top-actions .dropdown-container { /* Hide the entire dropdown container */
+.top-bar.multi-select-mode .top-actions #menuButton,
+.top-bar.multi-select-mode .top-actions .dropdown-container {
     display: none !important;
 }
 
@@ -817,24 +854,25 @@ button:disabled {
 .top-bar.multi-select-mode .top-actions #exportSelectedButton,
 .top-bar.multi-select-mode .top-actions #deleteSelectedButton,
 .top-bar.multi-select-mode .top-actions #cancelMultiSelectButton {
-    display: flex !important; /* Ensure they are flex items for alignment */
+    display: flex !important;
 }
 
 .no-history-message {
-    padding: 20px;
+    padding: 40px 20px;
     text-align: center;
     color: var(--text-secondary);
+    font-size: 1rem;
 }
 
 /* --- Media Queries for Responsiveness --- */
-@media (min-width: 400px) { /* Example breakpoint */
+@media (min-width: 400px) {
     .top-bar #currentDateDisplay {
-        font-size: 0.9rem;
+        font-size: 1rem;
     }
     .bottom-nav-button i {
-        font-size: 1.5rem;
+        font-size: 1.7rem;
     }
     .bottom-nav-button span {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
     }
 }
